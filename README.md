@@ -13,10 +13,12 @@ simulation.
 
 ## Viewing the graph
 
-Open the HTML file in a browser. It will attempt to load `graph7.json`
+Open the HTML file in a browser. It will attempt to load `jsDependencies.json`
 automatically when the files are served from the same directory (e.g. using
-`python -m http.server`). If the JSON file is unavailable, the viewer falls back
-to a small built-in demo graph so the UI still renders.
+`python -m http.server`). You can override the filename by appending
+`?load=yourFile.json` (or `?graph=yourFile.json`) to the URL when serving it.
+If the JSON file is unavailable, the viewer falls back to a small built-in demo
+graph so the UI still renders.
 
 You can also use the **Load graph.json** button in the header to supply any
 compatible graph JSON file manually.

@@ -472,17 +472,20 @@ window.addEventListener('DOMContentLoaded', () => {
   ]};
 
   async function tryAutoLoad(){
+    const params = new URLSearchParams(window.location.search);
+    const autoTarget = params.get('load') || params.get('graph') || 'jsDependencies.json';
+
     if(isFileProtocol){
       setStatus('Local file mode — use “Load graph.json” to open your data.');
       loadGraph(demo);
       return;
     }
     try {
-      const resp = await fetch('graph7.json', { cache: 'no-cache' });
-      if(!resp.ok) throw new Error(`Missing graph7.json (${resp.status})`);
+      const resp = await fetch(autoTarget, { cache: 'no-cache' });
+      if(!resp.ok) throw new Error(`Missing ${autoTarget} (${resp.status})`);
       const data = await resp.json();
       loadGraph(data);
-      setStatus('Loaded graph7.json');
+      setStatus(`Loaded ${autoTarget}`);
     } catch(err) {
       console.warn('Falling back to demo graph', err);
       setStatus('Demo graph loaded — use “Load graph.json” to open your data.');
