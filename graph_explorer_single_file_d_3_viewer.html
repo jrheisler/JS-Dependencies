@@ -170,6 +170,7 @@
       <div class="stat" id="insights">
         <div class="k">Pure leaves</div><div class="v mono" id="pureLeaves">0</div>
         <div class="k">Side-effect files</div><div class="v mono" id="sideFx">0</div>
+        <div class="k">Unused &amp; attached</div><div class="v mono" id="unusedAttached">0</div>
         <div class="k">Max degree</div><div class="v mono" id="maxDeg">0</div>
       </div>
     </div>
@@ -293,6 +294,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setText('xCount', 0);
     setText('pureLeaves', 0);
     setText('sideFx', 0);
+    setText('unusedAttached', 0);
     setText('maxDeg', 0);
     setDisplay('selNone','block');
     setDisplay('sel','none');
@@ -347,6 +349,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Insights
     setText('pureLeaves', filtered.nodes.filter(n=> (n.inDeg||0)+(n.outDeg||0)===1 && (n.hasSideEffects===false || n.state==='unused')).length);
     setText('sideFx', filtered.nodes.filter(n=> n.state==='side_effect_only' || n.hasSideEffects===true).length);
+    setText('unusedAttached', filtered.nodes.filter(n=> n.state==='unused' && ((n.inDeg||0)+(n.outDeg||0))>0).length);
     setText('maxDeg', filtered.nodes.reduce((m,n)=>Math.max(m,(n.inDeg||0)+(n.outDeg||0)),0));
 
     // JOINs
