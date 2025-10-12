@@ -153,6 +153,13 @@ void main(List<String> args) async {
   final externCount = nodes.where((n) => n.type == 'external').length;
   final maxDeg = nodes.fold<int>(0, (m, n) => (n.inDeg + n.outDeg) > m ? (n.inDeg + n.outDeg) : m);
   stderr.writeln('[stats] nodes=$total edges=${relEdges.length} used=$used unused=$unused externals=$externCount maxDeg=$maxDeg');
+
+  final viewerPath = _join(cwd, 'graph_explorer_single_file_d_3_viewer.html');
+  if (await File(viewerPath).exists()) {
+    final viewerRel = _rel(viewerPath, cwd);
+    stderr.writeln('[info] View the graph by serving $viewerRel (auto-loads jsDependencies.json).');
+    stderr.writeln('[info] Example: python -m http.server 8000  # then visit http://localhost:8000/$viewerRel');
+  }
 }
 
 // -------- models --------
