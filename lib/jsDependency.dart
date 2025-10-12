@@ -156,9 +156,10 @@ void main(List<String> args) async {
 
   final viewerPath = _join(cwd, 'graph_explorer_single_file_d_3_viewer.html');
   if (await File(viewerPath).exists()) {
-    final viewerRel = _rel(viewerPath, cwd);
-    stderr.writeln('[info] View the graph by serving $viewerRel (auto-loads jsDependencies.json).');
-    stderr.writeln('[info] Example: python -m http.server 8000  # then visit http://localhost:8000/$viewerRel');
+    final viewerAbs = _normalize(viewerPath);
+    stderr.writeln('[info] View the graph by serving $viewerAbs (auto-loads jsDependencies.json).');
+    stderr.writeln('[info] Example: python -m http.server 8000  # then visit http://localhost:8000/$viewerAbs');
+    stderr.writeln('[info] With an execution of graph_explorer_single_file_d_3_viewer.html');
   }
 }
 
