@@ -24,6 +24,7 @@
     header { grid-column: 1 / -1; grid-row: 1; display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.02)); border-bottom: 1px solid rgba(255,255,255,.06); }
     header .title { font-weight: 700; letter-spacing:.2px; }
     header .spacer { flex: 1; }
+    header .status { color: var(--muted); font-size: 12px; }
     header .btn { background: var(--panel); border: 1px solid rgba(255,255,255,.08); color: var(--text); padding: 8px 10px; border-radius: 10px; cursor: pointer; transition: .2s; }
     header .btn:hover { border-color: rgba(255,255,255,.2); box-shadow: 0 0 0 2px rgba(124,92,255,.2) inset; }
 
@@ -73,6 +74,7 @@
   <header>
     <div class="title">Graph Explorer</div>
     <div class="spacer"></div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
     <button class="btn" id="openJson">Load graph.json</button>
     <input type="file" id="fileInput" accept="application/json" hidden />
     <button class="btn" id="savePng" title="Export PNG">Export PNG</button>
@@ -184,7 +186,7 @@
 </div>
 
 <script>
-(function(){
+window.addEventListener('DOMContentLoaded', () => {
   // --- State ---
   let graph = { nodes: [], edges: [] };
   let filtered = { nodes: [], edges: [] };
@@ -210,6 +212,11 @@
 
   // --- UI bindings ---
   const $ = (id)=>document.getElementById(id);
+  const statusEl = $('status');
+  const setStatus = (msg)=>{ if(statusEl) statusEl.textContent = msg || ''; };
+  const setText = (id, value)=>{ const el = $(id); if(el) el.textContent = value; };
+  const nodeId = (ref)=> typeof ref === 'object' && ref !== null ? ref.id : ref;
+  const isFileProtocol = window.location.protocol === 'file:';
   const bindSlider = (id, key, outId) => { const el = $(id); const out = $(outId);
     const update = ()=>{ cfg[key] = id==='linkStr'? parseFloat(el.value) : parseInt(el.value,10); out.textContent = el.value; if(key==='charge'){ sim.force('charge').strength(cfg.charge); } if(key==='linkDist'){ sim.force('link').distance(cfg.linkDist); } if(key==='linkStr'){ sim.force('link').strength(cfg.linkStr); } sim.alpha(0.6).restart(); };
     el.addEventListener('input', update); update(); };
@@ -221,7 +228,22 @@
   $('hideExternals').addEventListener('change', e=>{ cfg.hideExternals = e.target.checked; render(); });
   $('hideDynamic').addEventListener('change', e=>{ cfg.hideDynamic = e.target.checked; render(); });
   $('openJson').addEventListener('click', ()=> $('fileInput').click());
-  $('fileInput').addEventListener('change', async (e)=>{ const f = e.target.files[0]; if(!f) return; const text = await f.text(); loadGraph(JSON.parse(text)); });
+  $('fileInput').addEventListener('change', async (e)=>{
+    const input = e.target;
+    const f = input.files[0];
+    if(!f) return;
+    try {
+      const text = await f.text();
+      const parsed = JSON.parse(text);
+      loadGraph(parsed);
+      setStatus(`Loaded ${f.name}`);
+    } catch(err) {
+      console.error('Failed to load graph file', err);
+      setStatus(`Failed to load ${f.name}`);
+    } finally {
+      input.value = '';
+    }
+  });
   $('resetView').addEventListener('click', ()=>{ svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity); });
   $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; paused ? sim.stop() : sim.alpha(0.6).restart(); });
   $('savePng').addEventListener('click', exportPng);
@@ -255,13 +277,20 @@
     // Normalize expected schema
     graph = { nodes: (gjson.nodes||[]).map(n=>({ ...n })), edges: (gjson.edges||gjson.links||[]).map(e=>({ ...e, source: e.source, target: e.target })) };
     computeDegrees();
+    paused = false;
+    $('pause').textContent = 'Pause ⏸';
     render();
   }
 
   function computeDegrees(){
     const id2 = new Map(graph.nodes.map(n=>[n.id,n]));
     graph.nodes.forEach(n=>{ n.inDeg=0; n.outDeg=0; });
-    graph.edges.forEach(e=>{ if(id2.has(e.source)) id2.get(e.source).outDeg++; if(id2.has(e.target)) id2.get(e.target).inDeg++; });
+    graph.edges.forEach(e=>{
+      const src = nodeId(e.source);
+      const tgt = nodeId(e.target);
+      if(id2.has(src)) id2.get(src).outDeg++;
+      if(id2.has(tgt)) id2.get(tgt).inDeg++;
+    });
   }
 
   function applyFilters(){
@@ -274,7 +303,7 @@
     const keep = new Set(nodes.map(n=>n.id));
     const edges = graph.edges.filter(e=>{
       if(cfg.hideDynamic && (e.kind==='dynamic' || e.certainty==='heuristic')) return false;
-      return keep.has(e.source) && keep.has(e.target);
+      return keep.has(nodeId(e.source)) && keep.has(nodeId(e.target));
     });
     filtered = { nodes, edges };
   }
@@ -283,18 +312,18 @@
     applyFilters();
 
     // HUD counts
-    $('#nCount').textContent = filtered.nodes.length;
-    $('#eCount').textContent = filtered.edges.length;
-    $('#uCount').textContent = filtered.nodes.filter(n=>n.state==='used'||n.state==='side_effect_only').length;
-    $('#xCount').textContent = filtered.nodes.filter(n=>n.state==='unused').length;
+    setText('nCount', filtered.nodes.length);
+    setText('eCount', filtered.edges.length);
+    setText('uCount', filtered.nodes.filter(n=>n.state==='used'||n.state==='side_effect_only').length);
+    setText('xCount', filtered.nodes.filter(n=>n.state==='unused').length);
 
     // Insights
-    $('#pureLeaves').textContent = filtered.nodes.filter(n=> (n.inDeg||0)+(n.outDeg||0)===1 && (n.hasSideEffects===false || n.state==='unused')).length;
-    $('#sideFx').textContent = filtered.nodes.filter(n=> n.state==='side_effect_only' || n.hasSideEffects===true).length;
-    $('#maxDeg').textContent = filtered.nodes.reduce((m,n)=>Math.max(m,(n.inDeg||0)+(n.outDeg||0)),0);
+    setText('pureLeaves', filtered.nodes.filter(n=> (n.inDeg||0)+(n.outDeg||0)===1 && (n.hasSideEffects===false || n.state==='unused')).length);
+    setText('sideFx', filtered.nodes.filter(n=> n.state==='side_effect_only' || n.hasSideEffects===true).length);
+    setText('maxDeg', filtered.nodes.reduce((m,n)=>Math.max(m,(n.inDeg||0)+(n.outDeg||0)),0));
 
     // JOINs
-    const links = linkG.selectAll('line').data(filtered.edges, d=>d.id || d.source+'=>'+d.target+':'+(d.kind||''));
+    const links = linkG.selectAll('line').data(filtered.edges, d=>d.id || `${nodeId(d.source)}=>${nodeId(d.target)}:${d.kind||''}`);
     links.exit().remove();
     const linksEnter = links.enter().append('line')
       .attr('class', d=> 'link '+((d.kind==='dynamic'||d.certainty==='heuristic')?'dynamic':''))
@@ -351,7 +380,12 @@
 
     // neighbors list
     const neighIds = new Set();
-    filtered.edges.forEach(e=>{ if(e.source.id===n.id) neighIds.add(e.target.id); if(e.target.id===n.id) neighIds.add(e.source.id); });
+    filtered.edges.forEach(e=>{
+      const src = nodeId(e.source);
+      const tgt = nodeId(e.target);
+      if(src===n.id) neighIds.add(tgt);
+      if(tgt===n.id) neighIds.add(src);
+    });
     const neigh = filtered.nodes.filter(x=> neighIds.has(x.id)).sort((a,b)=> ((b.inDeg+b.outDeg) - (a.inDeg+a.outDeg)) );
     const cont = d3.select('#neighbors');
     const items = cont.selectAll('.item').data(neigh, d=>d.id);
@@ -364,9 +398,18 @@
 
   function highlight(n){
     const focus = new Set([n.id]);
-    filtered.edges.forEach(e=>{ if(e.source.id===n.id) focus.add(e.target.id); if(e.target.id===n.id) focus.add(e.source.id); });
+    filtered.edges.forEach(e=>{
+      const src = nodeId(e.source);
+      const tgt = nodeId(e.target);
+      if(src===n.id) focus.add(tgt);
+      if(tgt===n.id) focus.add(src);
+    });
     d3.selectAll('g.node').attr('opacity', d=> focus.has(d.id)? 1 : .25);
-    d3.selectAll('line.link').attr('opacity', d=> (d.source.id===n.id || d.target.id===n.id)? 1 : (dimLinks? .15 : .25));
+    d3.selectAll('line.link').attr('opacity', d=> {
+      const src = nodeId(d.source);
+      const tgt = nodeId(d.target);
+      return (src===n.id || tgt===n.id)? 1 : (dimLinks? .15 : .25);
+    });
     d3.selectAll('text.label').attr('opacity', d=> focus.has(d.id)? 1 : .15);
   }
 
@@ -406,12 +449,27 @@
     {source:'src/components/Chart.tsx', target:'node_modules/react/index.js', kind:'import'}
   ]};
 
-  // Attempt to eagerly load a sibling graph7.json (matches the crawler output)
-  fetch('graph7.json')
-    .then(resp => resp.ok ? resp.json() : Promise.reject(new Error('Missing graph7.json')))
-    .then(loadGraph)
-    .catch(()=> loadGraph(demo));
-})();
+  async function tryAutoLoad(){
+    if(isFileProtocol){
+      setStatus('Local file mode — use “Load graph.json” to open your data.');
+      loadGraph(demo);
+      return;
+    }
+    try {
+      const resp = await fetch('graph7.json', { cache: 'no-cache' });
+      if(!resp.ok) throw new Error(`Missing graph7.json (${resp.status})`);
+      const data = await resp.json();
+      loadGraph(data);
+      setStatus('Loaded graph7.json');
+    } catch(err) {
+      console.warn('Falling back to demo graph', err);
+      setStatus('Demo graph loaded — use “Load graph.json” to open your data.');
+      loadGraph(demo);
+    }
+  }
+
+  tryAutoLoad();
+});
 </script>
 </body>
 </html>
