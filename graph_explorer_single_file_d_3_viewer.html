@@ -273,7 +273,27 @@ window.addEventListener('DOMContentLoaded', () => {
   function fmt(x){ return x==null? '—' : x; }
   function isExternal(d){ return d.type==='external' || (d.package && d.package.includes('node_modules')); }
 
+  function clearGraph(){
+    sim.stop();
+    graph = { nodes: [], edges: [] };
+    filtered = { nodes: [], edges: [] };
+    linkG.selectAll('*').remove();
+    nodeG.selectAll('*').remove();
+    labelG.selectAll('*').remove();
+    setText('nCount', 0);
+    setText('eCount', 0);
+    setText('uCount', 0);
+    setText('xCount', 0);
+    setText('pureLeaves', 0);
+    setText('sideFx', 0);
+    setText('maxDeg', 0);
+    $('#selNone').style.display='block';
+    $('#sel').style.display='none';
+    $('neighbors').innerHTML = '';
+  }
+
   function loadGraph(gjson){
+    clearGraph();
     // Normalize expected schema
     graph = { nodes: (gjson.nodes||[]).map(n=>({ ...n })), edges: (gjson.edges||gjson.links||[]).map(e=>({ ...e, source: e.source, target: e.target })) };
     computeDegrees();
