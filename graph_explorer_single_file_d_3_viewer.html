@@ -215,6 +215,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const statusEl = $('status');
   const setStatus = (msg)=>{ if(statusEl) statusEl.textContent = msg || ''; };
   const setText = (id, value)=>{ const el = $(id); if(el) el.textContent = value; };
+  const setDisplay = (id, value)=>{ const el = $(id); if(el) el.style.display = value; };
+  const setHTML = (id, value)=>{ const el = $(id); if(el) el.innerHTML = value; };
   const nodeId = (ref)=> typeof ref === 'object' && ref !== null ? ref.id : ref;
   const isFileProtocol = window.location.protocol === 'file:';
   const bindSlider = (id, key, outId) => { const el = $(id); const out = $(outId);
@@ -287,9 +289,9 @@ window.addEventListener('DOMContentLoaded', () => {
     setText('pureLeaves', 0);
     setText('sideFx', 0);
     setText('maxDeg', 0);
-    $('#selNone').style.display='block';
-    $('#sel').style.display='none';
-    $('neighbors').innerHTML = '';
+    setDisplay('selNone','block');
+    setDisplay('sel','none');
+    setHTML('neighbors','');
   }
 
   function loadGraph(gjson){
@@ -389,8 +391,8 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function selectNode(n){
-    $('#selNone').style.display='none';
-    $('#sel').style.display='block';
+    setDisplay('selNone','none');
+    setDisplay('sel','block');
     $('#selId').textContent = n.id || '';
     $('#selType').textContent = n.type || 'file';
     $('#selState').textContent = n.state || 'unknown';
