@@ -405,7 +405,12 @@
     {source:'src/main.ts', target:'src/components/Chart.tsx', kind:'import'},
     {source:'src/components/Chart.tsx', target:'node_modules/react/index.js', kind:'import'}
   ]};
-  loadGraph(demo);
+
+  // Attempt to eagerly load a sibling graph7.json (matches the crawler output)
+  fetch('graph7.json')
+    .then(resp => resp.ok ? resp.json() : Promise.reject(new Error('Missing graph7.json')))
+    .then(loadGraph)
+    .catch(()=> loadGraph(demo));
 })();
 </script>
 </body>
