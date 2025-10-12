@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Graph Explorer — Used/Unused Module Map</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <style>
+    :root {
+      --bg: #0b0d12;        /* dark slate */
+      --panel: #121622;     /* panel ink */
+      --muted: #8a93a5;     /* muted text */
+      --text: #e8ecf1;      /* primary text */
+      --accent: #7c5cff;    /* purple */
+      --accent2: #1dd1a1;   /* teal */
+      --danger: #ff5c7a;    /* pink/red */
+      --warning: #f3b33d;   /* amber */
+      --grid: rgba(255,255,255,.03);
+      --chip: #1a2030;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
+    #app { display: grid; grid-template-columns: 320px 1fr 360px; grid-template-rows: 48px 1fr; height: 100%; }
+    header { grid-column: 1 / -1; grid-row: 1; display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.02)); border-bottom: 1px solid rgba(255,255,255,.06); }
+    header .title { font-weight: 700; letter-spacing:.2px; }
+    header .spacer { flex: 1; }
+    header .btn { background: var(--panel); border: 1px solid rgba(255,255,255,.08); color: var(--text); padding: 8px 10px; border-radius: 10px; cursor: pointer; transition: .2s; }
+    header .btn:hover { border-color: rgba(255,255,255,.2); box-shadow: 0 0 0 2px rgba(124,92,255,.2) inset; }
+
+    aside#left { grid-column: 1; grid-row: 2; border-right: 1px solid rgba(255,255,255,.06); background: var(--panel); display: flex; flex-direction: column; gap: 12px; padding: 12px; overflow: auto; }
+    section#canvas { position: relative; grid-column: 2; grid-row: 2; overflow: hidden; background-image: radial-gradient(circle at 25px 25px, var(--grid) 1px, transparent 0), radial-gradient(circle at 25px 25px, var(--grid) 1px, transparent 0); background-size: 50px 50px; }
+    aside#right { grid-column: 3; grid-row: 2; border-left: 1px solid rgba(255,255,255,.06); background: var(--panel); display: flex; flex-direction: column; padding: 12px; gap: 12px; overflow: auto; }
+
+    .group { background: #0f1320; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px; }
+    .group h3 { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
+    input[type="text"], select { width: 100%; background: #0d1220; border: 1px solid rgba(255,255,255,.08); color: var(--text); padding: 8px 10px; border-radius: 10px; outline: none; }
+    label { display: flex; align-items:center; gap: 8px; color: var(--muted); font-size: 12px; margin: 6px 0; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .row > * { flex: 1; }
+    .pill { display: inline-flex; align-items:center; gap:6px; padding: 4px 8px; border-radius: 999px; background: var(--chip); color: var(--text); font-size: 12px; }
+
+    /* Graph elements */
+    svg { width: 100%; height: 100%; display: block; }
+    .link { stroke: rgba(255,255,255,.18); stroke-width: 1.2; }
+    .link.dynamic { stroke-dasharray: 3 3; opacity: .8; }
+    .node circle { stroke: rgba(255,255,255,.6); stroke-width: .6; }
+    .node.used circle { fill: var(--accent2); }
+    .node.unused circle { fill: #273049; }
+    .node.side_effect_only circle { fill: var(--warning); }
+    .node.external circle { fill: #3b2f5a; }
+    .label { pointer-events: none; font-size: 10px; fill: #d6def0; text-shadow: 0 1px 0 #000; opacity: .85; }
+    .halo { filter: drop-shadow(0 0 6px rgba(124,92,255,.55)); }
+
+    .legend { position: absolute; left: 12px; bottom: 12px; background: rgba(12,14,19,.85); border: 1px solid rgba(255,255,255,.06); padding: 8px 10px; border-radius: 10px; font-size: 12px; display: flex; gap: 10px; }
+    .legend .key { display:flex; align-items:center; gap:6px; }
+    .legend .dot { width: 10px; height: 10px; border-radius: 50%; display:inline-block; }
+
+    .stat { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 13px; }
+    .stat .k { color: var(--muted); }
+    .stat .v { color: var(--text); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .hr { height: 1px; background: rgba(255,255,255,.06); margin: 6px 0; }
+
+    .list { display: grid; gap: 6px; max-height: 200px; overflow: auto; }
+    .list .item { background: #0d1220; padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,.06); cursor: pointer; }
+    .list .item:hover { border-color: rgba(255,255,255,.2); }
+
+    .kbd { background: #111526; border: 1px solid rgba(255,255,255,.15); border-bottom-color: rgba(0,0,0,.3); padding: 2px 6px; border-radius: 6px; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="title">Graph Explorer</div>
+    <div class="spacer"></div>
+    <button class="btn" id="openJson">Load graph.json</button>
+    <input type="file" id="fileInput" accept="application/json" hidden />
+    <button class="btn" id="savePng" title="Export PNG">Export PNG</button>
+    <button class="btn" id="resetView" title="Reset view">Reset View</button>
+    <button class="btn" id="pause" title="Pause/Resume physics">Pause ⏸</button>
+  </header>
+
+  <aside id="left">
+    <div class="group">
+      <h3>Search</h3>
+      <input type="text" id="search" placeholder="Find node by name/path (Enter to select)" />
+      <div style="margin-top:8px; color:var(--muted); font-size:12px;">Shortcuts: <span class="kbd">Ctrl/Cmd+F</span> focus search</div>
+    </div>
+
+    <div class="group">
+      <h3>Filters</h3>
+      <label><input type="checkbox" id="showUnusedOnly" /> Show unused only</label>
+      <label><input type="checkbox" id="hideExternals" /> Hide externals (node_modules)</label>
+      <label><input type="checkbox" id="hideDynamic" /> Hide dynamic edges</label>
+      <div class="row">
+        <div>
+          <label for="minDegree">Min degree</label>
+          <input type="range" id="minDegree" min="0" max="20" value="0" />
+        </div>
+        <div style="width:40px; text-align:center;" class="mono" id="minDegreeVal">0</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Physics</h3>
+      <div class="row">
+        <div>
+          <label for="charge">Charge</label>
+          <input type="range" id="charge" min="-4000" max="0" value="-800" />
+        </div>
+        <div style="width:60px; text-align:center;" class="mono" id="chargeVal">-800</div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="linkDist">Link distance</label>
+          <input type="range" id="linkDist" min="20" max="260" value="90" />
+        </div>
+        <div style="width:60px; text-align:center;" class="mono" id="linkDistVal">90</div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="linkStr">Link strength</label>
+          <input type="range" id="linkStr" min="0" max="1" step="0.01" value="0.07" />
+        </div>
+        <div style="width:60px; text-align:center;" class="mono" id="linkStrVal">0.07</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Legend</h3>
+      <div class="stat">
+        <div class="k">Used</div><div class="v"><span class="pill"><span class="dot" style="background: var(--accent2);"></span> reachable</span></div>
+        <div class="k">Unused</div><div class="v"><span class="pill"><span class="dot" style="background: #273049;"></span> not reached</span></div>
+        <div class="k">Side-effect</div><div class="v"><span class="pill"><span class="dot" style="background: var(--warning);"></span> side-effect only</span></div>
+        <div class="k">External</div><div class="v"><span class="pill"><span class="dot" style="background: #3b2f5a;"></span> node_modules</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <section id="canvas">
+    <svg id="svg"></svg>
+    <div class="legend" id="hud">Nodes: <span id="nCount" class="mono">0</span> · Edges: <span id="eCount" class="mono">0</span> · Used: <span id="uCount" class="mono">0</span> · Unused: <span id="xCount" class="mono">0</span></div>
+  </section>
+
+  <aside id="right">
+    <div class="group">
+      <h3>Selection</h3>
+      <div id="selNone" style="color:var(--muted);">Click a node to see details.</div>
+      <div id="sel" style="display:none;">
+        <div class="stat">
+          <div class="k">Id</div><div class="v mono" id="selId"></div>
+          <div class="k">Type</div><div class="v" id="selType"></div>
+          <div class="k">State</div><div class="v" id="selState"></div>
+          <div class="k">Package</div><div class="v" id="selPkg"></div>
+          <div class="k">LOC</div><div class="v mono" id="selLoc"></div>
+          <div class="k">Degree</div><div class="v mono" id="selDeg"></div>
+        </div>
+        <div class="hr"></div>
+        <div>
+          <div style="color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;">Neighbors</div>
+          <div class="list" id="neighbors"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Insights</h3>
+      <div class="stat" id="insights">
+        <div class="k">Pure leaves</div><div class="v mono" id="pureLeaves">0</div>
+        <div class="k">Side-effect files</div><div class="v mono" id="sideFx">0</div>
+        <div class="k">Max degree</div><div class="v mono" id="maxDeg">0</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Help</h3>
+      <div style="color:var(--muted); font-size:13px; line-height:1.5;">
+        • Drag nodes to pin them. Double‑click to unpin.<br>
+        • Scroll to zoom. Right‑drag to pan (or use trackpad).<br>
+        • <span class="kbd">H</span> toggle labels, <span class="kbd">L</span> lighten links, <span class="kbd">Space</span> pause/resume physics.
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function(){
+  // --- State ---
+  let graph = { nodes: [], edges: [] };
+  let filtered = { nodes: [], edges: [] };
+  let showLabels = true; let dimLinks = false; let paused = false;
+  const cfg = { charge: -800, linkDist: 90, linkStr: 0.07, minDegree: 0, showUnusedOnly: false, hideExternals: false, hideDynamic: false };
+
+  // --- DOM ---
+  const svg = d3.select('#svg');
+  const g = svg.append('g');
+  const linkG = g.append('g').attr('class','links');
+  const nodeG = g.append('g').attr('class','nodes');
+  const labelG = g.append('g').attr('class','labels');
+
+  const zoom = d3.zoom().scaleExtent([0.1, 4]).on('zoom', (e)=>{ g.attr('transform', e.transform); });
+  svg.call(zoom);
+
+  // --- Sim ---
+  const sim = d3.forceSimulation()
+    .force('charge', d3.forceManyBody().strength(cfg.charge).theta(0.9))
+    .force('link', d3.forceLink().id(d=>d.id).distance(cfg.linkDist).strength(cfg.linkStr))
+    .force('center', d3.forceCenter())
+    .force('collision', d3.forceCollide().radius(d=>sizeFor(d)+6));
+
+  // --- UI bindings ---
+  const $ = (id)=>document.getElementById(id);
+  const bindSlider = (id, key, outId) => { const el = $(id); const out = $(outId);
+    const update = ()=>{ cfg[key] = id==='linkStr'? parseFloat(el.value) : parseInt(el.value,10); out.textContent = el.value; if(key==='charge'){ sim.force('charge').strength(cfg.charge); } if(key==='linkDist'){ sim.force('link').distance(cfg.linkDist); } if(key==='linkStr'){ sim.force('link').strength(cfg.linkStr); } sim.alpha(0.6).restart(); };
+    el.addEventListener('input', update); update(); };
+  bindSlider('charge','charge','chargeVal');
+  bindSlider('linkDist','linkDist','linkDistVal');
+  bindSlider('linkStr','linkStr','linkStrVal');
+  $('minDegree').addEventListener('input', e=>{ cfg.minDegree = parseInt(e.target.value,10); $('minDegreeVal').textContent = cfg.minDegree; render(); });
+  $('showUnusedOnly').addEventListener('change', e=>{ cfg.showUnusedOnly = e.target.checked; render(); });
+  $('hideExternals').addEventListener('change', e=>{ cfg.hideExternals = e.target.checked; render(); });
+  $('hideDynamic').addEventListener('change', e=>{ cfg.hideDynamic = e.target.checked; render(); });
+  $('openJson').addEventListener('click', ()=> $('fileInput').click());
+  $('fileInput').addEventListener('change', async (e)=>{ const f = e.target.files[0]; if(!f) return; const text = await f.text(); loadGraph(JSON.parse(text)); });
+  $('resetView').addEventListener('click', ()=>{ svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity); });
+  $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; paused ? sim.stop() : sim.alpha(0.6).restart(); });
+  $('savePng').addEventListener('click', exportPng);
+
+  $('search').addEventListener('keydown', (e)=>{
+    if(e.key==='Enter'){
+      const q = e.target.value.trim().toLowerCase();
+      if(!q) return;
+      const hit = filtered.nodes.find(n => n.id.toLowerCase().includes(q));
+      if(hit){ selectNode(hit); focusOn(hit); highlight(hit); }
+    }
+  });
+  window.addEventListener('keydown', (e)=>{
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='f'){ e.preventDefault(); $('search').focus(); $('search').select(); }
+    if(e.key.toLowerCase()==='h'){ showLabels = !showLabels; labelG.style('display', showLabels? null : 'none'); }
+    if(e.key.toLowerCase()==='l'){ dimLinks = !dimLinks; d3.selectAll('.link').attr('opacity', dimLinks? .25 : 1); }
+    if(e.code==='Space'){ e.preventDefault(); $('pause').click(); }
+  });
+
+  // --- Helpers ---
+  function sizeFor(d){
+    // Prefer degree if available; fallback to 6-10 range
+    const deg = (d.inDeg || 0) + (d.outDeg || 0);
+    return 4 + Math.min(24, Math.sqrt(deg)*3 + (d.sizeLOC? Math.min(16, Math.log2(d.sizeLOC+1)) : 0));
+  }
+  function stateClass(d){ return (d.state||'unused').replace(/[^a-z_]/g,'_'); }
+  function fmt(x){ return x==null? '—' : x; }
+  function isExternal(d){ return d.type==='external' || (d.package && d.package.includes('node_modules')); }
+
+  function loadGraph(gjson){
+    // Normalize expected schema
+    graph = { nodes: (gjson.nodes||[]).map(n=>({ ...n })), edges: (gjson.edges||gjson.links||[]).map(e=>({ ...e, source: e.source, target: e.target })) };
+    computeDegrees();
+    render();
+  }
+
+  function computeDegrees(){
+    const id2 = new Map(graph.nodes.map(n=>[n.id,n]));
+    graph.nodes.forEach(n=>{ n.inDeg=0; n.outDeg=0; });
+    graph.edges.forEach(e=>{ if(id2.has(e.source)) id2.get(e.source).outDeg++; if(id2.has(e.target)) id2.get(e.target).inDeg++; });
+  }
+
+  function applyFilters(){
+    const nodes = graph.nodes.filter(n=>{
+      if(cfg.showUnusedOnly && n.state !== 'unused') return false;
+      if(cfg.hideExternals && isExternal(n)) return false;
+      if(cfg.minDegree>0 && ((n.inDeg||0)+(n.outDeg||0)) < cfg.minDegree) return false;
+      return true;
+    });
+    const keep = new Set(nodes.map(n=>n.id));
+    const edges = graph.edges.filter(e=>{
+      if(cfg.hideDynamic && (e.kind==='dynamic' || e.certainty==='heuristic')) return false;
+      return keep.has(e.source) && keep.has(e.target);
+    });
+    filtered = { nodes, edges };
+  }
+
+  function render(){
+    applyFilters();
+
+    // HUD counts
+    $('#nCount').textContent = filtered.nodes.length;
+    $('#eCount').textContent = filtered.edges.length;
+    $('#uCount').textContent = filtered.nodes.filter(n=>n.state==='used'||n.state==='side_effect_only').length;
+    $('#xCount').textContent = filtered.nodes.filter(n=>n.state==='unused').length;
+
+    // Insights
+    $('#pureLeaves').textContent = filtered.nodes.filter(n=> (n.inDeg||0)+(n.outDeg||0)===1 && (n.hasSideEffects===false || n.state==='unused')).length;
+    $('#sideFx').textContent = filtered.nodes.filter(n=> n.state==='side_effect_only' || n.hasSideEffects===true).length;
+    $('#maxDeg').textContent = filtered.nodes.reduce((m,n)=>Math.max(m,(n.inDeg||0)+(n.outDeg||0)),0);
+
+    // JOINs
+    const links = linkG.selectAll('line').data(filtered.edges, d=>d.id || d.source+'=>'+d.target+':'+(d.kind||''));
+    links.exit().remove();
+    const linksEnter = links.enter().append('line')
+      .attr('class', d=> 'link '+((d.kind==='dynamic'||d.certainty==='heuristic')?'dynamic':''))
+      .attr('opacity', dimLinks? .25 : 1);
+    const linksSel = linksEnter.merge(links);
+
+    const nodes = nodeG.selectAll('g.node').data(filtered.nodes, d=>d.id);
+    nodes.exit().remove();
+    const nodesEnter = nodes.enter().append('g').attr('class', d=>`node ${stateClass(d)} ${isExternal(d)?'external':''}`)
+      .call(d3.drag()
+        .on('start', (e,d)=>{ if(!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+        .on('drag', (e,d)=>{ d.fx = e.x; d.fy = e.y; })
+        .on('end', (e,d)=>{ if(!e.active) sim.alphaTarget(0); }))
+      .on('click', (e,d)=> selectNode(d))
+      .on('dblclick', (e,d)=>{ d.fx = null; d.fy = null; })
+    ;
+
+    nodesEnter.append('circle').attr('r', d=> sizeFor(d)).attr('class','halo');
+    const nodesSel = nodesEnter.merge(nodes);
+
+    const labels = labelG.selectAll('text').data(filtered.nodes, d=>d.id);
+    labels.exit().remove();
+    const labelsEnter = labels.enter().append('text').attr('class','label').text(d=> labelFor(d));
+    const labelsSel = labelsEnter.merge(labels);
+    labelG.style('display', showLabels? null : 'none');
+
+    // Sim data
+    sim.nodes(filtered.nodes).on('tick', ticked);
+    sim.force('link').links(filtered.edges);
+    if(!paused) sim.alpha(0.8).restart();
+
+    function ticked(){
+      linksSel.attr('x1', d=>d.source.x).attr('y1', d=>d.source.y).attr('x2', d=>d.target.x).attr('y2', d=>d.target.y);
+      nodesSel.attr('transform', d=>`translate(${d.x},${d.y})`);
+      labelsSel.attr('x', d=>d.x + sizeFor(d)+4).attr('y', d=>d.y+4);
+    }
+  }
+
+  function labelFor(d){
+    const id = d.id || '';
+    // Shorten common path prefixes
+    return id.replace(/^.*(?=src\/|lib\/|app\/)/,'').replace(/^\/?/,'');
+  }
+
+  function selectNode(n){
+    $('#selNone').style.display='none';
+    $('#sel').style.display='block';
+    $('#selId').textContent = n.id || '';
+    $('#selType').textContent = n.type || 'file';
+    $('#selState').textContent = n.state || 'unknown';
+    $('#selPkg').textContent = n.package || '—';
+    $('#selLoc').textContent = fmt(n.sizeLOC);
+    $('#selDeg').textContent = (n.inDeg||0)+(n.outDeg||0);
+
+    // neighbors list
+    const neighIds = new Set();
+    filtered.edges.forEach(e=>{ if(e.source.id===n.id) neighIds.add(e.target.id); if(e.target.id===n.id) neighIds.add(e.source.id); });
+    const neigh = filtered.nodes.filter(x=> neighIds.has(x.id)).sort((a,b)=> ((b.inDeg+b.outDeg) - (a.inDeg+a.outDeg)) );
+    const cont = d3.select('#neighbors');
+    const items = cont.selectAll('.item').data(neigh, d=>d.id);
+    items.exit().remove();
+    const enter = items.enter().append('div').attr('class','item').text(d=> labelFor(d)).on('click', (_,d)=>{ selectNode(d); focusOn(d); highlight(d); });
+    enter.merge(items);
+
+    highlight(n);
+  }
+
+  function highlight(n){
+    const focus = new Set([n.id]);
+    filtered.edges.forEach(e=>{ if(e.source.id===n.id) focus.add(e.target.id); if(e.target.id===n.id) focus.add(e.source.id); });
+    d3.selectAll('g.node').attr('opacity', d=> focus.has(d.id)? 1 : .25);
+    d3.selectAll('line.link').attr('opacity', d=> (d.source.id===n.id || d.target.id===n.id)? 1 : (dimLinks? .15 : .25));
+    d3.selectAll('text.label').attr('opacity', d=> focus.has(d.id)? 1 : .15);
+  }
+
+  function focusOn(n){
+    const t = d3.zoomTransform(svg.node());
+    const scale = t.k;
+    const x = (n.x*scale*-1) + (svg.node().clientWidth/2);
+    const y = (n.y*scale*-1) + (svg.node().clientHeight/2);
+    svg.transition().duration(350).call(zoom.translateTo, n.x, n.y);
+  }
+
+  async function exportPng(){
+    // Convert SVG to PNG via canvas
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg.node());
+    const blob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+
+    const img = new Image();
+    const w = svg.node().clientWidth, h = svg.node().clientHeight;
+    const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    img.onload = () => { ctx.fillStyle = getComputedStyle(document.body).backgroundColor; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0); URL.revokeObjectURL(url); const a = document.createElement('a'); a.download = 'graph.png'; a.href = canvas.toDataURL('image/png'); a.click(); };
+    img.src = url;
+  }
+
+  // Demo placeholder: minimal tiny graph so the page shows something if no file is loaded
+  const demo = { nodes:[
+    {id:'src/main.ts', state:'used', type:'file', sizeLOC: 120},
+    {id:'src/util/math.ts', state:'used', type:'file', sizeLOC: 60},
+    {id:'src/components/Chart.tsx', state:'used', type:'file', sizeLOC: 200},
+    {id:'src/legacy/oldHelper.js', state:'unused', type:'file', sizeLOC: 40},
+    {id:'node_modules/react/index.js', state:'used', type:'external' }
+  ], edges:[
+    {source:'src/main.ts', target:'src/util/math.ts', kind:'import'},
+    {source:'src/main.ts', target:'src/components/Chart.tsx', kind:'import'},
+    {source:'src/components/Chart.tsx', target:'node_modules/react/index.js', kind:'import'}
+  ]};
+  loadGraph(demo);
+})();
+</script>
+</body>
+</html>
