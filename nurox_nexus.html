@@ -101,7 +101,7 @@
     <div class="status" id="status" role="status" aria-live="polite"></div>
     <button class="btn" id="openJson">Load graph.json</button>
     <input type="file" id="fileInput" accept="application/json" hidden />
-    <button class="btn" id="savePng" title="Export PNG">Export PNG</button>
+    <button class="btn" id="exportSbom" title="Download SBOM CSV">SBOM CSV</button>
     <button class="btn" id="resetView" title="Reset view">Reset View</button>
     <button class="btn" id="toggleSidebar" data-variant="ghost" aria-expanded="true" aria-controls="sidebar" title="Toggle sidebar">Hide Sidebar ◀</button>
     <button class="btn" id="pause" title="Pause/Resume physics">Pause ⏸</button>
@@ -292,7 +292,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   $('resetView').addEventListener('click', ()=>{ svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity); });
   $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; paused ? sim.stop() : sim.alpha(0.6).restart(); });
-  $('savePng').addEventListener('click', exportPng);
+  $('exportSbom').addEventListener('click', exportSbom);
   const toggleSidebarBtn = $('toggleSidebar');
   const sidebarLatch = $('sidebarLatch');
   const sidebarEl = $('sidebar');
@@ -636,19 +636,53 @@ window.addEventListener('DOMContentLoaded', () => {
     svg.transition().duration(350).call(zoom.translateTo, n.x, n.y);
   }
 
-  async function exportPng(){
-    // Convert SVG to PNG via canvas
-    const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svg.node());
-    const blob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
+  function exportSbom(){
+    const nodes = filtered.nodes.length ? filtered.nodes : graph.nodes;
+    if(!nodes.length){
+      setStatus('No graph data to export');
+      return;
+    }
 
-    const img = new Image();
-    const w = svg.node().clientWidth, h = svg.node().clientHeight;
-    const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext('2d');
-    img.onload = () => { ctx.fillStyle = getComputedStyle(document.body).backgroundColor; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0); URL.revokeObjectURL(url); const a = document.createElement('a'); a.download = 'graph.png'; a.href = canvas.toDataURL('image/png'); a.click(); };
-    img.src = url;
+    const headers = ['id','state','type','package','sizeLOC','hasSideEffects','external','inDegree','outDegree','degree'];
+    const escape = (value) => {
+      const v = value == null ? '' : String(value);
+      if(/[",\n]/.test(v)){
+        return '"' + v.replace(/"/g,'""') + '"';
+      }
+      return v;
+    };
+
+    const rows = [headers.join(',')];
+    rows.push(...nodes.map(n => {
+      const inDeg = n.inDeg || 0;
+      const outDeg = n.outDeg || 0;
+      const degree = inDeg + outDeg;
+      const external = isExternal(n);
+      const values = [
+        n.id || '',
+        n.state || '',
+        n.type || '',
+        n.package || '',
+        n.sizeLOC ?? '',
+        n.hasSideEffects ?? '',
+        external,
+        inDeg,
+        outDeg,
+        degree
+      ];
+      return values.map(escape).join(',');
+    }));
+
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'graph-sbom.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setStatus('SBOM CSV exported');
   }
 
   // Demo placeholder: minimal tiny graph so the page shows something if no file is loaded
