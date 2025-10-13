@@ -109,7 +109,7 @@
     </div>
 
     <div class="group">
-      <h3>Filters</h3>
+      <h3>Filter</h3>
       <label><input type="checkbox" id="showUnusedOnly" /> Show unused only</label>
       <label><input type="checkbox" id="hideExternals" /> Hide externals (node_modules)</label>
       <label><input type="checkbox" id="hideDynamic" /> Hide dynamic edges</label>
@@ -122,40 +122,6 @@
       </div>
     </div>
 
-    <div class="group">
-      <h3>Physics</h3>
-      <div class="row">
-        <div>
-          <label for="charge">Charge</label>
-          <input type="range" id="charge" min="-4000" max="0" value="-800" />
-        </div>
-        <div style="width:60px; text-align:center;" class="mono" id="chargeVal">-800</div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="linkDist">Link distance</label>
-          <input type="range" id="linkDist" min="20" max="260" value="90" />
-        </div>
-        <div style="width:60px; text-align:center;" class="mono" id="linkDistVal">90</div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="linkStr">Link strength</label>
-          <input type="range" id="linkStr" min="0" max="1" step="0.01" value="0.07" />
-        </div>
-        <div style="width:60px; text-align:center;" class="mono" id="linkStrVal">0.07</div>
-      </div>
-    </div>
-
-    <div class="group">
-      <h3>Legend</h3>
-      <div class="stat">
-        <div class="k">Used</div><div class="v"><span class="pill"><span class="dot" style="background: var(--accent2);"></span> reachable</span></div>
-        <div class="k">Unused</div><div class="v"><span class="pill"><span class="dot" style="background: #273049;"></span> not reached</span></div>
-        <div class="k">Side-effect</div><div class="v"><span class="pill"><span class="dot" style="background: var(--warning);"></span> side-effect only</span></div>
-        <div class="k">External</div><div class="v"><span class="pill"><span class="dot" style="background: #3b2f5a;"></span> node_modules</span></div>
-      </div>
-    </div>
     <div class="group">
       <h3>Selection</h3>
       <div id="selNone" style="color:var(--muted);">Click a node to see details.</div>
@@ -183,6 +149,41 @@
         <div class="k">Side-effect files</div><div class="v mono" id="sideFx">0</div>
         <div class="k">Unused &amp; attached</div><div class="v mono" id="unusedAttached">0</div>
         <div class="k">Max degree</div><div class="v mono" id="maxDeg">0</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Legend</h3>
+      <div class="stat">
+        <div class="k">Used</div><div class="v"><span class="pill"><span class="dot" style="background: var(--accent2);"></span> reachable</span></div>
+        <div class="k">Unused</div><div class="v"><span class="pill"><span class="dot" style="background: #273049;"></span> not reached</span></div>
+        <div class="k">Side-effect</div><div class="v"><span class="pill"><span class="dot" style="background: var(--warning);"></span> side-effect only</span></div>
+        <div class="k">External</div><div class="v"><span class="pill"><span class="dot" style="background: #3b2f5a;"></span> node_modules</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Physics</h3>
+      <div class="row">
+        <div>
+          <label for="charge">Charge</label>
+          <input type="range" id="charge" min="-4000" max="0" value="-800" />
+        </div>
+        <div style="width:60px; text-align:center;" class="mono" id="chargeVal">-800</div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="linkDist">Link distance</label>
+          <input type="range" id="linkDist" min="20" max="260" value="90" />
+        </div>
+        <div style="width:60px; text-align:center;" class="mono" id="linkDistVal">90</div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="linkStr">Link strength</label>
+          <input type="range" id="linkStr" min="0" max="1" step="0.01" value="0.07" />
+        </div>
+        <div style="width:60px; text-align:center;" class="mono" id="linkStrVal">0.07</div>
       </div>
     </div>
 
