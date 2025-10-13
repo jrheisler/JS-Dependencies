@@ -136,6 +136,15 @@ void main(List<String> args) async {
   };
   await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
 
+  // Stats (mirrors javaDependency.dart)
+  final total = nodes.length;
+  final used = nodes.where((n) => n.state == 'used' || n.state == 'side_effect_only').length;
+  final unused = nodes.where((n) => n.state == 'unused').length;
+  final externCount = nodes.where((n) => n.type == 'external').length;
+  final maxDeg = nodes.fold<int>(0, (m, n) => (n.inDeg + n.outDeg) > m ? (n.inDeg + n.outDeg) : m);
+  stderr.writeln('[info] Wrote: ${_rel(outPath, cwd)}');
+  stderr.writeln('[stats] nodes=$total edges=${relEdges.length} used=$used unused=$unused externals=$externCount maxDeg=$maxDeg');
+
 }
 
 // -------- models --------
@@ -149,12 +158,14 @@ class _Node {
   int inDeg = 0;
   int outDeg = 0;
   final String? absPath;
+  String lang = 'js';
 
   _Node({required this.id, required this.type, required this.state, this.sizeLOC, this.packageName, this.hasSideEffects, required this.absPath});
   Map<String, dynamic> toJson() => {
     'id': id,
     'type': type,
     'state': state,
+    'lang': lang,
     if (sizeLOC != null) 'sizeLOC': sizeLOC,
     if (packageName != null) 'package': packageName,
     if (hasSideEffects != null) 'hasSideEffects': hasSideEffects,
@@ -341,7 +352,7 @@ Set<String> _reach(List<String> entries, List<_Edge> edges) {
     final outs = gOut[x] ?? const [];
     for (final y in outs) stack.add(y);
   }
-  return seen.map((s) => s.startsWith('.') ? s : s).toSet();
+  return seen;
 }
 
 Set<String> _sideEffectOnlyTargets(Map<String, _FileFacts> facts, String cwd) {
