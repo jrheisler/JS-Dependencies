@@ -312,15 +312,20 @@ Future<String?> _readModulePath(String cwd) async {
 // ---------------- resolution ----------------
 String? _resolveImportToLocalDir(String cwd, String? modulePath, String importPath) {
   // If we have a module path, only import paths starting with "<modulePath>/" are local.
-  if (modulePath != null && importPath.startsWith(modulePath + '/')) {
-    final suffix = importPath.substring(modulePath.length + 1);
-    final targetDir = _join(cwd, suffix.replaceAll('/', _sep));
-    final dir = Directory(targetDir);
-    if (dir.existsSync()) {
-      return _normalize(dir.path);
+  if (modulePath != null) {
+    if (importPath == modulePath) {
+      return _normalize(cwd);
     }
-    // If not found directly, fall back to null (treat as external).
-    return null;
+    if (importPath.startsWith(modulePath + '/')) {
+      final suffix = importPath.substring(modulePath.length + 1);
+      final targetDir = _join(cwd, suffix.replaceAll('/', _sep));
+      final dir = Directory(targetDir);
+      if (dir.existsSync()) {
+        return _normalize(dir.path);
+      }
+      // If not found directly, fall back to null (treat as external).
+      return null;
+    }
   }
   // Heuristic fallback: no module path, try direct directory from repo root
   // e.g., import "pkg/sub" -> cwd/pkg/sub
