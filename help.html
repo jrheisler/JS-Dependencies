@@ -9,7 +9,11 @@
       --bg:#0b0d12; --panel:#121622; --ink:#0f1320; --muted:#8a93a5; --text:#e8ecf1;
       --accent:#7c5cff; --accent2:#1dd1a1; --warning:#f3b33d; --external:#3b2f5a; --border:rgba(255,255,255,.08);
     }
-    *{box-sizing:border-box}
+    *{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--accent) rgba(255,255,255,.08)}
+    *::-webkit-scrollbar{width:12px;height:12px}
+    *::-webkit-scrollbar-track{background:rgba(9,11,18,.65);border-radius:999px}
+    *::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(124,92,255,.85),rgba(29,209,161,.85));border-radius:999px;border:2px solid rgba(9,11,18,.65);box-shadow:0 2px 6px rgba(0,0,0,.35) inset}
+    *::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(124,92,255,1),rgba(29,209,161,1))}
     html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     a{color:var(--accent)}

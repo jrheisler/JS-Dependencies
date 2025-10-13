@@ -20,7 +20,11 @@
       --chip: #1a2030;
       --sidebar-width: 320px;
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--accent) rgba(255,255,255,.08); }
+    *::-webkit-scrollbar { width: 12px; height: 12px; }
+    *::-webkit-scrollbar-track { background: rgba(9,11,18,.65); border-radius: 999px; }
+    *::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(124,92,255,.85), rgba(29,209,161,.85)); border-radius: 999px; border: 2px solid rgba(9,11,18,.65); box-shadow: 0 2px 6px rgba(0,0,0,.35) inset; }
+    *::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgba(124,92,255,1), rgba(29,209,161,1)); }
     html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
     #app { display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 48px 1fr; height: 100%; transition: grid-template-columns .25s ease; }
     body.sidebar-collapsed #app { grid-template-columns: 0 1fr; }
