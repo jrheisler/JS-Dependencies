@@ -13,6 +13,8 @@
     html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     a{color:var(--accent)}
+    .back-link{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(124,92,255,.12);color:var(--accent);text-decoration:none;font-weight:600;transition:background .2s ease,color .2s ease}
+    .back-link:hover{background:rgba(124,92,255,.24)}
     .wrap{display:grid;grid-template-columns: 280px 1fr; gap: 20px; min-height:100%}
     header{grid-column:1/-1;position:sticky;top:0;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0));backdrop-filter:saturate(120%) blur(4px);border-bottom:1px solid var(--border);z-index:5}
     header .inner{display:flex;align-items:center;gap:12px;padding:14px 16px}
@@ -59,6 +61,7 @@
   <div class="wrap">
     <header>
       <div class="inner">
+        <a class="back-link" href="nurox_nexus.html">← Back to Graph</a>
         <div class="logo">Nurox Nexus</div>
         <div class="badge">Help & User Guide</div>
         <div style="flex:1"></div>
