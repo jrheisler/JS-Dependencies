@@ -18,10 +18,12 @@
       --warning: #f3b33d;   /* amber */
       --grid: rgba(255,255,255,.03);
       --chip: #1a2030;
+      --sidebar-width: 320px;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
-    #app { display: grid; grid-template-columns: 320px 1fr 360px; grid-template-rows: 48px 1fr; height: 100%; }
+    #app { display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 48px 1fr; height: 100%; transition: grid-template-columns .25s ease; }
+    body.sidebar-collapsed #app { grid-template-columns: 0 1fr; }
     header { grid-column: 1 / -1; grid-row: 1; display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.02)); border-bottom: 1px solid rgba(255,255,255,.06); }
     header .title { font-weight: 700; letter-spacing:.2px; }
     header .spacer { flex: 1; }
@@ -29,9 +31,11 @@
     header .btn { background: var(--panel); border: 1px solid rgba(255,255,255,.08); color: var(--text); padding: 8px 10px; border-radius: 10px; cursor: pointer; transition: .2s; }
     header .btn:hover { border-color: rgba(255,255,255,.2); box-shadow: 0 0 0 2px rgba(124,92,255,.2) inset; }
 
-    aside#left { grid-column: 1; grid-row: 2; border-right: 1px solid rgba(255,255,255,.06); background: var(--panel); display: flex; flex-direction: column; gap: 12px; padding: 12px; overflow: auto; }
+    aside#sidebar { grid-column: 1; grid-row: 2; border-right: 1px solid rgba(255,255,255,.06); background: var(--panel); display: flex; flex-direction: column; gap: 12px; padding: 12px; overflow: auto; transition: transform .25s ease, opacity .25s ease; }
+    body.sidebar-collapsed aside#sidebar { transform: translateX(calc(-1 * var(--sidebar-width))); opacity: 0; pointer-events: none; }
     section#canvas { position: relative; grid-column: 2; grid-row: 2; overflow: hidden; background-image: radial-gradient(circle at 25px 25px, var(--grid) 1px, transparent 0), radial-gradient(circle at 25px 25px, var(--grid) 1px, transparent 0); background-size: 50px 50px; }
-    aside#right { grid-column: 3; grid-row: 2; border-left: 1px solid rgba(255,255,255,.06); background: var(--panel); display: flex; flex-direction: column; padding: 12px; gap: 12px; overflow: auto; }
+    header .btn[data-variant="ghost"] { background: transparent; border-color: rgba(255,255,255,.12); }
+    header .btn[data-variant="ghost"]:hover { background: rgba(255,255,255,.06); }
 
     .group { background: #0f1320; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px; }
     .group h3 { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
@@ -89,10 +93,11 @@
     <input type="file" id="fileInput" accept="application/json" hidden />
     <button class="btn" id="savePng" title="Export PNG">Export PNG</button>
     <button class="btn" id="resetView" title="Reset view">Reset View</button>
+    <button class="btn" id="toggleSidebar" data-variant="ghost" aria-expanded="true" aria-controls="sidebar" title="Toggle sidebar">Hide Sidebar ◀</button>
     <button class="btn" id="pause" title="Pause/Resume physics">Pause ⏸</button>
   </header>
 
-  <aside id="left">
+  <aside id="sidebar" aria-hidden="false">
     <div class="group">
       <h3>Search</h3>
       <input type="text" id="search" placeholder="Find node by name/path (Enter to select)" />
@@ -147,14 +152,6 @@
         <div class="k">External</div><div class="v"><span class="pill"><span class="dot" style="background: #3b2f5a;"></span> node_modules</span></div>
       </div>
     </div>
-  </aside>
-
-  <section id="canvas">
-    <svg id="svg"></svg>
-    <div class="legend" id="hud">Nodes: <span id="nCount" class="mono">0</span> · Edges: <span id="eCount" class="mono">0</span> · Used: <span id="uCount" class="mono">0</span> · Unused: <span id="xCount" class="mono">0</span></div>
-  </section>
-
-  <aside id="right">
     <div class="group">
       <h3>Selection</h3>
       <div id="selNone" style="color:var(--muted);">Click a node to see details.</div>
@@ -195,6 +192,12 @@
       </div>
     </div>
   </aside>
+
+  <section id="canvas">
+    <svg id="svg"></svg>
+    <div class="legend" id="hud">Nodes: <span id="nCount" class="mono">0</span> · Edges: <span id="eCount" class="mono">0</span> · Used: <span id="uCount" class="mono">0</span> · Unused: <span id="xCount" class="mono">0</span></div>
+  </section>
+
 </div>
 
 <div class="modal-overlay" id="helpModal" hidden aria-hidden="true" role="dialog" aria-modal="true">
@@ -274,6 +277,25 @@ window.addEventListener('DOMContentLoaded', () => {
   $('resetView').addEventListener('click', ()=>{ svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity); });
   $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; paused ? sim.stop() : sim.alpha(0.6).restart(); });
   $('savePng').addEventListener('click', exportPng);
+  const toggleSidebarBtn = $('toggleSidebar');
+  const sidebarEl = $('sidebar');
+  const updateSidebarState = () => {
+    const collapsed = document.body.classList.contains('sidebar-collapsed');
+    if(toggleSidebarBtn){
+      toggleSidebarBtn.textContent = collapsed ? 'Show Sidebar ▶' : 'Hide Sidebar ◀';
+      toggleSidebarBtn.setAttribute('aria-expanded', (!collapsed).toString());
+    }
+    if(sidebarEl){
+      sidebarEl.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
+    }
+  };
+  if(toggleSidebarBtn){
+    toggleSidebarBtn.addEventListener('click', ()=>{
+      document.body.classList.toggle('sidebar-collapsed');
+      updateSidebarState();
+    });
+    updateSidebarState();
+  }
 
   const helpModal = $('helpModal');
   const helpFrame = $('helpFrame');
