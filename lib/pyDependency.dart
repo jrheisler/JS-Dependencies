@@ -577,7 +577,7 @@ List<String> _extractIniBlock(String s, String headerName) {
   final lines = s.split('\n');
   final out = <String>[];
   var inBlock = false;
-  final headerRe = RegExp('^\\s*\\[${RegExp.escape(headerName)}\\]\\s*$');
+  final headerRe = RegExp('^\\s*\\[${RegExp.escape(headerName)}\\]\\s*\u0024');
   for (final line in lines) {
     if (headerRe.hasMatch(line)) {
       inBlock = true; continue;
