@@ -308,6 +308,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Normalize expected schema
     graph = { nodes: (gjson.nodes||[]).map(n=>({ ...n })), edges: (gjson.edges||gjson.links||[]).map(e=>({ ...e, source: e.source, target: e.target })) };
     computeDegrees();
+    inferUsageStates();
     paused = false;
     $('pause').textContent = 'Pause ⏸';
     render();
@@ -321,6 +322,71 @@ window.addEventListener('DOMContentLoaded', () => {
       const tgt = nodeId(e.target);
       if(id2.has(src)) id2.get(src).outDeg++;
       if(id2.has(tgt)) id2.get(tgt).inDeg++;
+    });
+  }
+
+  function inferUsageStates(){
+    const fileNodes = graph.nodes.filter(n=> (n.type||'file') === 'file');
+    const hasFileUsage = fileNodes.some(n=> n.state && n.state !== 'unused');
+    if(hasFileUsage || fileNodes.length === 0) return;
+
+    const id2 = new Map(graph.nodes.map(n=>[n.id, n]));
+    const adjacency = new Map();
+    graph.edges.forEach(e=>{
+      const src = nodeId(e.source);
+      const tgt = nodeId(e.target);
+      if(!id2.has(src) || !id2.has(tgt)) return;
+      if(!adjacency.has(src)) adjacency.set(src, new Set());
+      adjacency.get(src).add(tgt);
+    });
+
+    const seeds = new Set();
+    fileNodes.forEach(n=>{ if(n.hasSideEffects) seeds.add(n.id); });
+    graph.edges.forEach(e=>{
+      if(e.kind === 'side_effect'){
+        const tgt = nodeId(e.target);
+        if(id2.has(tgt)) seeds.add(tgt);
+      }
+    });
+
+    if(seeds.size === 0){
+      fileNodes.forEach(n=>{
+        const inDeg = n.inDeg || 0;
+        const outDeg = n.outDeg || 0;
+        if(inDeg === 0 && outDeg > 0) seeds.add(n.id);
+      });
+    }
+
+    const used = new Set();
+    const queue = Array.from(seeds);
+    while(queue.length){
+      const id = queue.shift();
+      if(used.has(id)) continue;
+      used.add(id);
+      const next = adjacency.get(id);
+      if(!next) continue;
+      next.forEach(nid=>{
+        if(!id2.has(nid)) return;
+        const neighbor = id2.get(nid);
+        if((neighbor.type||'file') === 'file' && !used.has(nid)) queue.push(nid);
+      });
+    }
+
+    graph.nodes.forEach(n=>{
+      if((n.type||'file') !== 'file') return;
+      if(used.has(n.id)){
+        const fanOut = adjacency.get(n.id);
+        const hasFanOut = fanOut && fanOut.size > 0;
+        if(n.hasSideEffects && (n.inDeg||0)===0 && !hasFanOut){
+          n.state = 'side_effect_only';
+        } else {
+          n.state = 'used';
+        }
+      } else if(n.hasSideEffects){
+        n.state = 'side_effect_only';
+      } else {
+        n.state = 'unused';
+      }
     });
   }
 
