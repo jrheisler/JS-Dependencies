@@ -68,6 +68,15 @@
     .list .item:hover { border-color: rgba(255,255,255,.2); }
 
     .kbd { background: #111526; border: 1px solid rgba(255,255,255,.15); border-bottom-color: rgba(0,0,0,.3); padding: 2px 6px; border-radius: 6px; font-size: 12px; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(3,5,12,0.88); display: flex; align-items: center; justify-content: center; padding: 4vh 4vw; z-index: 1000; }
+    .modal-overlay[hidden] { display: none; }
+    .modal-shell { position: relative; width: min(1100px, 92vw); height: min(900px, 90vh); background: var(--panel); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; box-shadow: 0 12px 48px rgba(0,0,0,.45); overflow: hidden; display: flex; flex-direction: column; }
+    .modal-shell iframe { flex: 1; border: none; background: #fff; color-scheme: light; }
+    .modal-close { position: absolute; top: 10px; right: 12px; background: rgba(9,11,18,0.8); border: 1px solid rgba(255,255,255,.2); color: var(--text); border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; transition: .2s; font-size: 16px; }
+    .modal-close:hover { border-color: rgba(255,255,255,.5); box-shadow: 0 0 0 2px rgba(124,92,255,.25) inset; }
+    .modal-header { padding: 14px 44px 12px 18px; font-weight: 600; letter-spacing: .4px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(15,18,30,.85); }
+    .modal-shell iframe { border-radius: 0 0 16px 16px; }
   </style>
 </head>
 <body>
@@ -182,10 +191,18 @@
         • Drag nodes to pin them. Double‑click to unpin.<br>
         • Scroll to zoom. Right‑drag to pan (or use trackpad).<br>
         • <span class="kbd">H</span> toggle labels, <span class="kbd">L</span> lighten links, <span class="kbd">Space</span> pause/resume physics.<br>
-        • Need more detail? Visit the <a href="help.html" style="color:var(--accent);">full help guide</a>.
+        • Need more detail? Visit the <a href="help.html" id="helpLink" style="color:var(--accent);">full help guide</a>.
       </div>
     </div>
   </aside>
+</div>
+
+<div class="modal-overlay" id="helpModal" hidden aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-shell">
+    <div class="modal-header">Help &amp; Documentation</div>
+    <button class="modal-close" id="helpClose" aria-label="Close help">✕</button>
+    <iframe id="helpFrame" title="Help documentation"></iframe>
+  </div>
 </div>
 
 <script>
@@ -257,6 +274,55 @@ window.addEventListener('DOMContentLoaded', () => {
   $('resetView').addEventListener('click', ()=>{ svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity); });
   $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; paused ? sim.stop() : sim.alpha(0.6).restart(); });
   $('savePng').addEventListener('click', exportPng);
+
+  const helpModal = $('helpModal');
+  const helpFrame = $('helpFrame');
+  const helpLink = $('helpLink');
+  const helpClose = $('helpClose');
+  let lastFocusedEl = null;
+  const openHelp = () => {
+    if(!helpModal) return;
+    if(helpModal.hasAttribute('hidden')){
+      lastFocusedEl = document.activeElement;
+      helpModal.removeAttribute('hidden');
+      helpModal.setAttribute('aria-hidden', 'false');
+      if(helpFrame && !helpFrame.getAttribute('src')){
+        helpFrame.setAttribute('src', 'help.html');
+      }
+      if(helpClose){
+        helpClose.focus();
+      }
+    }
+  };
+  const closeHelp = () => {
+    if(!helpModal) return;
+    if(!helpModal.hasAttribute('hidden')){
+      helpModal.setAttribute('hidden', '');
+      helpModal.setAttribute('aria-hidden', 'true');
+      if(lastFocusedEl && typeof lastFocusedEl.focus === 'function'){
+        lastFocusedEl.focus();
+      }
+    }
+  };
+  if(helpLink){
+    helpLink.addEventListener('click', (e)=>{
+      e.preventDefault();
+      openHelp();
+    });
+  }
+  if(helpClose){
+    helpClose.addEventListener('click', closeHelp);
+  }
+  if(helpModal){
+    helpModal.addEventListener('click', (e)=>{
+      if(e.target === helpModal){
+        closeHelp();
+      }
+    });
+  }
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){ closeHelp(); }
+  });
 
   $('search').addEventListener('keydown', (e)=>{
     if(e.key==='Enter'){
