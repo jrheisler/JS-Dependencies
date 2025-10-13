@@ -197,6 +197,42 @@
         </ul>
       </section>
 
+      <section id="logic">
+        <h2>Dependency Logic Explained</h2>
+        <p>The <strong>Nurox Dependency Analyzer</strong> scans every source file in your project and builds a visual map of how your code connects. This section explains how file states—<em>used</em>, <em>unused</em>, and <em>side-effect only</em>—are determined.</p>
+
+        <h3>1. Adding Files as Nodes</h3>
+        <p>Every project file becomes a <strong>node</strong> in the graph. Each file starts out marked as <strong>unused</strong>. External packages such as those inside <code>node_modules</code> are added separately and immediately marked <strong>used</strong>, since they come from outside your source tree.</p>
+
+        <h3>2. Tracking Connections</h3>
+        <p>Whenever one file imports or exports from another, Nurox records that link as an <strong>edge</strong> between them. These edges describe relationships but do not by themselves change a node’s state. A file can have incoming or outgoing links and still remain “unused.”</p>
+
+        <h3>3. Finding Entry Points</h3>
+        <p>Nurox identifies <strong>entry nodes</strong>—the starting points of your application—by reading fields such as <code>main</code>, <code>module</code>, or <code>exports</code> in <code>package.json</code>. If none are declared, it looks for common patterns like <code>index.js</code> or <code>src/main.ts</code>.</p>
+
+        <h3>4. Determining What’s Used</h3>
+        <p>From those entry nodes, the analyzer performs a <strong>reachability search</strong> (depth-first traversal). It walks every outgoing edge and marks reachable files as <strong>used</strong>. Files imported solely for execution side effects are marked <strong>side-effect only</strong>.</p>
+
+        <h3>5. Unused but Linked Files</h3>
+        <p>Some files may still have connections yet stay marked “unused.” This happens when they are imported by other files that are themselves <em>not</em> reachable from an entry point. In that case, the node remains outside the reachability set and keeps its “unused” state.</p>
+
+        <div class="hr"></div>
+
+        <h3>Summary</h3>
+        <table>
+          <thead><tr><th>Concept</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Nodes</strong></td><td>Project files and external packages.</td></tr>
+            <tr><td><strong>Edges</strong></td><td>Import/export relationships between files.</td></tr>
+            <tr><td><strong>Used</strong></td><td>Files reachable from an entry point.</td></tr>
+            <tr><td><strong>Unused</strong></td><td>Files not reachable from any entry point.</td></tr>
+            <tr><td><strong>Side-effect only</strong></td><td>Files imported for runtime effects only.</td></tr>
+          </tbody>
+        </table>
+
+        <p>This reachability-based model ensures the graph reflects <strong>real execution paths</strong>, not just surface-level references—helping you identify truly unused code with confidence.</p>
+      </section>
+
       <section id="export">
         <h2>Export & Persistence</h2>
         <ul>
