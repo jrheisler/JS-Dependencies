@@ -145,6 +145,12 @@
           <span class="pill"><span class="dot" style="background:var(--warning)"></span> Side‑effect only</span>
           <span class="pill"><span class="dot" style="background:var(--external)"></span> External</span>
         </p>
+        <ul>
+          <li><strong>Green nodes</strong> (<code>var(--accent2)</code>) highlight modules that are actively used elsewhere in the codebase.</li>
+          <li><strong>Slate-blue nodes</strong> (<code>#273049</code>) mark modules that nothing depends on, so they are currently unused.</li>
+          <li><strong>Gold nodes</strong> (<code>var(--warning)</code>) represent files that are imported strictly for their side effects.</li>
+          <li><strong>Purple-gray nodes</strong> (<code>var(--external)</code>) denote external dependencies such as packages from <code>node_modules</code>.</li>
+        </ul>
       </section>
 
       <section id="canvas">
