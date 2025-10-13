@@ -43,20 +43,11 @@ List<String> _split(String p) => p.split(_sep);
 
 void main(List<String> args) async {
   final cwd = _normalize(_abs('.'));
-  stderr.writeln('[info] Scanning: $cwd');
-
   final files = await _collectSourceFiles(cwd);
-  stderr.writeln('[info] Source files: ${files.length}');
 
   final pkg = await _readPackageJson(cwd);
   final entriesAbs = _discoverEntries(cwd, pkg, files);
   final entriesRel = entriesAbs.map((e) => _rel(e, cwd)).toList();
-
-  if (entriesRel.isEmpty) {
-    stderr.writeln('[warn] No entry points found. Using heuristic fallbacks (src/main.* or index.* if present).');
-  } else {
-    stderr.writeln('[info] Entries: ${entriesRel.join(', ')}');
-  }
 
   // Parse imports
   final factsByPath = <String, _FileFacts>{};
@@ -144,23 +135,7 @@ void main(List<String> args) async {
     'edges': relEdges.map((e) => e.toJson()).toList(),
   };
   await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
-  stderr.writeln('[info] Wrote: ${_rel(outPath, cwd)}');
 
-  // Stats
-  final total = nodes.length;
-  final used = nodes.where((n) => n.state == 'used' || n.state == 'side_effect_only').length;
-  final unused = nodes.where((n) => n.state == 'unused').length;
-  final externCount = nodes.where((n) => n.type == 'external').length;
-  final maxDeg = nodes.fold<int>(0, (m, n) => (n.inDeg + n.outDeg) > m ? (n.inDeg + n.outDeg) : m);
-  stderr.writeln('[stats] nodes=$total edges=${relEdges.length} used=$used unused=$unused externals=$externCount maxDeg=$maxDeg');
-
-  final viewerPath = _join(cwd, 'graph_explorer_single_file_d_3_viewer.html');
-  if (await File(viewerPath).exists()) {
-    final viewerAbs = _normalize(viewerPath);
-    stderr.writeln('[info] View the graph by serving $viewerAbs (auto-loads jsDependencies.json).');
-    stderr.writeln('[info] Example: python -m http.server 8000  # then visit http://localhost:8000/$viewerAbs');
-    stderr.writeln('[info] With an execution of graph_explorer_single_file_d_3_viewer.html');
-  }
 }
 
 // -------- models --------
