@@ -538,10 +538,12 @@ Future<Set<String>> _discoverConsoleScriptsEntries(String cwd, Map<String, Strin
     final s = await setup.readAsString();
     // [options.entry_points] console_scripts
     final block = _extractIniBlock(s, 'options.entry_points');
-    final console = _extractIniBlock(block.join('\n'), 'console_scripts');
-    for (final line in console) {
+    final consoleLines = _extractIniOptionValues(block, 'console_scripts');
+    for (final raw in consoleLines) {
+      final line = raw.split('#').first.trim();
+      if (line.isEmpty) continue;
       // name = module:func
-      final m = RegExp(r'^\s*[A-Za-z0-9_\-]+\s*=\s*([A-Za-z0-9_\.\-]+)\s*:\s*[A-Za-z0-9_\.\-]+')
+      final m = RegExp(r'^[A-Za-z0-9_\-]+\s*=\s*([A-Za-z0-9_\.\-]+)\s*:\s*[A-Za-z0-9_\.\-]+')
           .firstMatch(line);
       if (m != null) {
         final mod = m.group(1)!;
@@ -575,14 +577,40 @@ List<String> _extractIniBlock(String s, String headerName) {
   final lines = s.split('\n');
   final out = <String>[];
   var inBlock = false;
+  final headerRe = RegExp('^\\s*\\[${RegExp.escape(headerName)}\\]\\s*$');
   for (final line in lines) {
-    if (RegExp('^\\s*\\[$headerName\\]\\s*\$').hasMatch(line)) {
+    if (headerRe.hasMatch(line)) {
       inBlock = true; continue;
     }
     if (inBlock && RegExp(r'^\s*\[').hasMatch(line)) break;
     if (inBlock) out.add(line);
   }
   return out;
+}
+
+List<String> _extractIniOptionValues(List<String> blockLines, String optionName) {
+  final values = <String>[];
+  final optionRe = RegExp('^\\s*${RegExp.escape(optionName)}\\s*=');
+  var capturing = false;
+  for (final line in blockLines) {
+    if (!capturing) {
+      if (optionRe.hasMatch(line)) {
+        capturing = true;
+        final eq = line.indexOf('=');
+        if (eq >= 0) {
+          final rest = line.substring(eq + 1).trim();
+          if (rest.isNotEmpty) values.add(rest);
+        }
+      }
+      continue;
+    }
+
+    final trimmed = line.trimRight();
+    if (trimmed.isEmpty) break;
+    if (!RegExp(r'^\s').hasMatch(line)) break;
+    values.add(trimmed.trim());
+  }
+  return values;
 }
 
 // ---------------- graph utils ----------------
