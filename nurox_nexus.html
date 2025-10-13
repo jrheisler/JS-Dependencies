@@ -26,7 +26,7 @@
     *::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(124,92,255,.85), rgba(29,209,161,.85)); border-radius: 999px; border: 2px solid rgba(9,11,18,.65); box-shadow: 0 2px 6px rgba(0,0,0,.35) inset; }
     *::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgba(124,92,255,1), rgba(29,209,161,1)); }
     html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
-    #app { display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 48px 1fr; height: 100%; transition: grid-template-columns .25s ease; }
+    #app { position: relative; display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 48px 1fr; height: 100%; transition: grid-template-columns .25s ease; }
     body.sidebar-collapsed #app { grid-template-columns: 0 1fr; }
     header { grid-column: 1 / -1; grid-row: 1; display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.02)); border-bottom: 1px solid rgba(255,255,255,.06); }
     header .title { font-weight: 700; letter-spacing:.2px; }
@@ -40,6 +40,12 @@
     section#canvas { position: relative; grid-column: 2; grid-row: 2; overflow: hidden; background-image: radial-gradient(circle at 25px 25px, var(--grid) 1px, transparent 0), radial-gradient(circle at 25px 25px, var(--grid) 1px, transparent 0); background-size: 50px 50px; }
     header .btn[data-variant="ghost"] { background: transparent; border-color: rgba(255,255,255,.12); }
     header .btn[data-variant="ghost"]:hover { background: rgba(255,255,255,.06); }
+
+    .sidebar-latch { position: absolute; top: 60px; left: calc(var(--sidebar-width) - 18px); transform: translateX(-50%); display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); background: rgba(9,11,18,.85); color: var(--text); cursor: pointer; z-index: 20; transition: left .25s ease, background .2s ease, border-color .2s ease; box-shadow: 0 8px 18px rgba(0,0,0,.35); }
+    .sidebar-latch:hover { background: rgba(15,18,30,.95); border-color: rgba(255,255,255,.25); }
+    .sidebar-latch .icon { font-size: 12px; }
+    .sidebar-latch .label { font-size: 12px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; }
+    body.sidebar-collapsed .sidebar-latch { left: 16px; }
 
     .group { background: #0f1320; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px; }
     .group h3 { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
@@ -100,6 +106,11 @@
     <button class="btn" id="toggleSidebar" data-variant="ghost" aria-expanded="true" aria-controls="sidebar" title="Toggle sidebar">Hide Sidebar ◀</button>
     <button class="btn" id="pause" title="Pause/Resume physics">Pause ⏸</button>
   </header>
+
+  <button class="sidebar-latch" id="sidebarLatch" type="button" aria-controls="sidebar" aria-expanded="true" title="Collapse sidebar">
+    <span class="icon" aria-hidden="true">◀</span>
+    <span class="label">Collapse</span>
+  </button>
 
   <aside id="sidebar" aria-hidden="false">
     <div class="group">
@@ -283,6 +294,7 @@ window.addEventListener('DOMContentLoaded', () => {
   $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; paused ? sim.stop() : sim.alpha(0.6).restart(); });
   $('savePng').addEventListener('click', exportPng);
   const toggleSidebarBtn = $('toggleSidebar');
+  const sidebarLatch = $('sidebarLatch');
   const sidebarEl = $('sidebar');
   const updateSidebarState = () => {
     const collapsed = document.body.classList.contains('sidebar-collapsed');
@@ -290,17 +302,29 @@ window.addEventListener('DOMContentLoaded', () => {
       toggleSidebarBtn.textContent = collapsed ? 'Show Sidebar ▶' : 'Hide Sidebar ◀';
       toggleSidebarBtn.setAttribute('aria-expanded', (!collapsed).toString());
     }
+    if(sidebarLatch){
+      const icon = sidebarLatch.querySelector('.icon');
+      const label = sidebarLatch.querySelector('.label');
+      sidebarLatch.setAttribute('aria-expanded', (!collapsed).toString());
+      sidebarLatch.setAttribute('title', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+      if(icon){ icon.textContent = collapsed ? '▶' : '◀'; }
+      if(label){ label.textContent = collapsed ? 'Expand' : 'Collapse'; }
+    }
     if(sidebarEl){
       sidebarEl.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
     }
   };
-  if(toggleSidebarBtn){
-    toggleSidebarBtn.addEventListener('click', ()=>{
-      document.body.classList.toggle('sidebar-collapsed');
-      updateSidebarState();
-    });
+  const toggleSidebar = () => {
+    document.body.classList.toggle('sidebar-collapsed');
     updateSidebarState();
+  };
+  if(toggleSidebarBtn){
+    toggleSidebarBtn.addEventListener('click', toggleSidebar);
   }
+  if(sidebarLatch){
+    sidebarLatch.addEventListener('click', toggleSidebar);
+  }
+  updateSidebarState();
 
   const helpModal = $('helpModal');
   const helpFrame = $('helpFrame');
