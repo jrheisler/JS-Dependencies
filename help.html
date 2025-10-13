@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Nurox Nexus — Help & User Guide</title>
+  <style>
+    :root{
+      --bg:#0b0d12; --panel:#121622; --ink:#0f1320; --muted:#8a93a5; --text:#e8ecf1;
+      --accent:#7c5cff; --accent2:#1dd1a1; --warning:#f3b33d; --external:#3b2f5a; --border:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    a{color:var(--accent)}
+    .wrap{display:grid;grid-template-columns: 280px 1fr; gap: 20px; min-height:100%}
+    header{grid-column:1/-1;position:sticky;top:0;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0));backdrop-filter:saturate(120%) blur(4px);border-bottom:1px solid var(--border);z-index:5}
+    header .inner{display:flex;align-items:center;gap:12px;padding:14px 16px}
+    .logo{font-weight:800;letter-spacing:.2px}
+    .badge{padding:2px 8px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.04);font-size:12px;color:var(--muted)}
+
+    nav{position:sticky; top:64px; align-self:start; padding:16px; margin:16px; background:var(--panel); border:1px solid var(--border); border-radius:14px}
+    nav h3{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted)}
+    nav a{display:block; padding:6px 8px; border-radius:8px; color:var(--text); text-decoration:none}
+    nav a:hover{background:#0f1320}
+    nav .small{font-size:12px;color:var(--muted);margin-top:6px}
+
+    main{padding:24px 24px 64px}
+    section{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px 18px 10px; margin:16px 0}
+    h1{font-size:28px;margin:16px 0}
+    h2{font-size:18px;margin:10px 0 6px}
+    h3{font-size:14px;margin:8px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+    p{margin:8px 0}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .kbd{background:#111526;border:1px solid rgba(255,255,255,.18);padding:2px 6px;border-radius:6px;font-size:12px}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;background:#1a2030}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .hr{height:1px;background:var(--border);margin:10px 0}
+    ul{margin:6px 0 6px 18px}
+    li{margin:4px 0}
+
+    table{width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left}
+    thead th{background:#0f1320;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.12em}
+
+    footer{grid-column:1/-1;color:var(--muted);padding:16px 24px}
+
+    /* Print */
+    @media print{
+      body{background:#fff;color:#111}
+      section{background:#fff;border-color:#ccc}
+      nav{display:none}
+      header{position:static;background:#fff;border-color:#ccc}
+      a{color:#000}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="inner">
+        <div class="logo">Nurox Nexus</div>
+        <div class="badge">Help & User Guide</div>
+        <div style="flex:1"></div>
+        <div class="badge">v1.0</div>
+      </div>
+    </header>
+
+    <nav>
+      <h3>Contents</h3>
+      <a href="#overview">Overview</a>
+      <a href="#layout">Layout & Navigation</a>
+      <a href="#header">Header Controls</a>
+      <a href="#left">Left Sidebar</a>
+      <a href="#canvas">Central Visualization</a>
+      <a href="#right">Right Sidebar</a>
+      <a href="#interaction">Interaction & Highlighting</a>
+      <a href="#data">Data Handling & Filtering</a>
+      <a href="#export">Export & Persistence</a>
+      <a href="#shortcuts">Keyboard Shortcuts</a>
+      <a href="#troubleshooting">Troubleshooting</a>
+      <a href="#contact">Contact</a>
+      <div class="small">Press <span class="kbd">Ctrl/Cmd+F</span> to search this page.</div>
+    </nav>
+
+    <main>
+      <section id="overview">
+        <h1>Overview</h1>
+        <p><strong>Nurox Nexus</strong> is an interactive visualization tool for exploring codebase dependencies. It turns a JSON dataset—typically produced by the Nurox Dependency Analyzer—into a live, force-directed graph that reveals relationships between modules, files, and packages.</p>
+        <p>The interface uses a full‑screen, three‑column layout in dark mode for optimal contrast and readability.</p>
+      </section>
+
+      <section id="layout">
+        <h2>Layout & Navigation</h2>
+        <ul>
+          <li><strong>Left Sidebar</strong> — Search, Filters, Physics controls, and Legend.</li>
+          <li><strong>Center Canvas</strong> — Interactive graph with live HUD overlay.</li>
+          <li><strong>Right Sidebar</strong> — Node details, insights, and help tips.</li>
+          <li><strong>Shared Header</strong> — Global controls and status messaging.</li>
+        </ul>
+      </section>
+
+      <section id="header">
+        <h2>Header Controls</h2>
+        <table>
+          <thead><tr><th>Control</th><th>Function</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Title / Status</strong></td><td>Branding plus live announcements for load outcomes.</td></tr>
+            <tr><td><strong>Load graph</strong></td><td>Open a local JSON graph file.</td></tr>
+            <tr><td><strong>Export PNG</strong></td><td>Save the current view as an image.</td></tr>
+            <tr><td><strong>Reset View</strong></td><td>Restore initial zoom and pan.</td></tr>
+            <tr><td><strong>Pause / Resume</strong></td><td>Toggle physics simulation; label updates to reflect state.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="left">
+        <h2>Left Sidebar</h2>
+        <h3>Search</h3>
+        <ul>
+          <li>Type to find a node by name or path.</li>
+          <li>Press <span class="kbd">Enter</span> to jump to the first match and center the view.</li>
+          <li>Shortcut: <span class="kbd">Ctrl/Cmd+F</span> focuses the search field.</li>
+        </ul>
+        <h3>Filters</h3>
+        <ul>
+          <li><strong>Show unused only</strong> — Display only modules not referenced by others.</li>
+          <li><strong>Hide externals</strong> — Exclude packages from <code>node_modules</code>.</li>
+          <li><strong>Hide dynamic edges</strong> — Remove dynamic/heuristic edges.</li>
+          <li><strong>Minimum degree</strong> — Slider with live count to prune low‑degree nodes.</li>
+        </ul>
+        <h3>Physics Controls</h3>
+        <ul>
+          <li><strong>Charge</strong> — Node repulsion strength.</li>
+          <li><strong>Link distance</strong> — Ideal spacing of connected nodes.</li>
+          <li><strong>Link strength</strong> — Spring stiffness of edges.</li>
+        </ul>
+        <h3>Legend</h3>
+        <p>
+          <span class="pill"><span class="dot" style="background:var(--accent2)"></span> Used</span>
+          <span class="pill"><span class="dot" style="background:#273049"></span> Unused</span>
+          <span class="pill"><span class="dot" style="background:var(--warning)"></span> Side‑effect only</span>
+          <span class="pill"><span class="dot" style="background:var(--external)"></span> External</span>
+        </p>
+      </section>
+
+      <section id="canvas">
+        <h2>Central Visualization</h2>
+        <ul>
+          <li><strong>D3.js</strong> force‑directed graph with zoom and pan.</li>
+          <li>Drag a node to pin; <strong>double‑click</strong> to unpin.</li>
+          <li>Nodes display colored halos by state; dynamic edges are dashed.</li>
+          <li><strong>HUD</strong> shows live counts of nodes, edges, used and unused—updated post‑filtering.</li>
+        </ul>
+      </section>
+
+      <section id="right">
+        <h2>Right Sidebar</h2>
+        <h3>Selection</h3>
+        <p>Shows details for the selected node: ID, type, state, package, LOC, and degree. Neighbor list is sorted by degree; clicking a neighbor jumps focus to it.</p>
+        <h3>Insights</h3>
+        <ul>
+          <li><strong>Pure Leaves</strong> — Nodes with one connection.</li>
+          <li><strong>Side‑effect Files</strong> — Imported for effects only.</li>
+          <li><strong>Maximum Degree</strong> — Highest node connectivity.</li>
+        </ul>
+        <h3>Help</h3>
+        <p>Tips and reminders for common actions and shortcuts.</p>
+      </section>
+
+      <section id="interaction">
+        <h2>Interaction & Highlighting</h2>
+        <ul>
+          <li>Selecting a node dims unrelated nodes/links; neighbors stay fully visible.</li>
+          <li>
+            Optional <em>Dim Links</em> mode de‑emphasizes background edges.
+          </li>
+          <li>The camera smoothly centers on the focused node using the current zoom transform.</li>
+        </ul>
+      </section>
+
+      <section id="data">
+        <h2>Data Handling & Filtering</h2>
+        <ul>
+          <li>JSON datasets are normalized; degrees are computed before rendering.</li>
+          <li>Filters applied: unused only, hide externals, hide dynamic edges, minimum degree.</li>
+          <li>State resets clear previous visualization and sidebar metrics when reloading.</li>
+        </ul>
+      </section>
+
+      <section id="export">
+        <h2>Export & Persistence</h2>
+        <ul>
+          <li><strong>Export PNG</strong> serializes the SVG, paints to a canvas, and downloads <code>graph.png</code>.</li>
+          <li><strong>Auto‑load</strong> attempts URL param (e.g., <code>?load=graph.json</code>) or defaults to <code>jsDependencies.json</code>.</li>
+          <li>If none are available, a built‑in <em>demo dataset</em> is rendered with a status notice.</li>
+        </ul>
+      </section>
+
+      <section id="shortcuts">
+        <h2>Keyboard Shortcuts</h2>
+        <table>
+          <thead><tr><th>Key</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><span class="kbd">Ctrl/Cmd + F</span></td><td>Focus search field</td></tr>
+            <tr><td><span class="kbd">H</span></td><td>Toggle labels</td></tr>
+            <tr><td><span class="kbd">L</span></td><td>Dim / restore link brightness</td></tr>
+            <tr><td><span class="kbd">Space</span></td><td>Pause / resume physics</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>Troubleshooting</h2>
+        <table>
+          <thead><tr><th>Issue</th><th>Possible Cause</th><th>Solution</th></tr></thead>
+          <tbody>
+            <tr><td>Graph fails to load</td><td>Invalid or missing JSON</td><td>Verify structure and reload manually.</td></tr>
+            <tr><td>Graph appears empty</td><td>Filters hide all nodes</td><td>Reset filters and reload the data.</td></tr>
+            <tr><td>Exported PNG is blank</td><td>Browser SVG rendering hiccup</td><td>Refresh the page and retry export.</td></tr>
+            <tr><td>Simulation doesn’t move</td><td>Physics paused</td><td>Click <em>Resume ▶</em> in the header.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="contact">
+        <h2>Contact & Attribution</h2>
+        <p><strong>Developer:</strong> Nurox Technologies</p>
+        <p><strong>Product:</strong> Nurox Nexus — Dependency Visualization Suite</p>
+        <p><strong>Support:</strong> <a href="mailto:support@nurox.dev">support@nurox.dev</a></p>
+      </section>
+
+      <footer>
+        © <span id="y"></span> Nurox Technologies — All rights reserved.
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // dynamic year
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
