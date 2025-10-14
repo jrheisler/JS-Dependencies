@@ -450,9 +450,33 @@ Future<_Pubspec?> _readPubspec(String cwd) async {
   final f = File(_join(cwd, 'pubspec.yaml'));
   if (!await f.exists()) return null;
   try {
-    final s = await f.readAsString();
-    final m = RegExp(r'^\s*name\s*:\s*([A-Za-z0-9_\-]+)\s*$', multiLine: true).firstMatch(s);
-    if (m != null) return _Pubspec(m.group(1)!);
+    final lines = await f.readAsLines();
+    for (var raw in lines) {
+      var line = raw.trim();
+      if (line.isEmpty || line.startsWith('#')) continue;
+      final comment = line.indexOf('#');
+      if (comment >= 0) {
+        line = line.substring(0, comment).trim();
+        if (line.isEmpty) continue;
+      }
+      final colon = line.indexOf(':');
+      if (colon <= 0) continue;
+      final key = line.substring(0, colon).trim();
+      if (key != 'name') continue;
+      var value = line.substring(colon + 1).trim();
+      if (value.isEmpty) continue;
+      if ((value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))) {
+        if (value.length <= 2) continue;
+        value = value.substring(1, value.length - 1).trim();
+      }
+      final hash = value.indexOf('#');
+      if (hash >= 0) {
+        value = value.substring(0, hash).trim();
+      }
+      if (value.isEmpty) continue;
+      return _Pubspec(value);
+    }
   } catch (_) {}
   return null;
 }
