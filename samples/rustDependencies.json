@@ -1,0 +1,2823 @@
+{
+  "nodes": [
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\build.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 90,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\examples\\ipc.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 81,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\build.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 29,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\context_send.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 67,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\lib.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 276,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 24,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\filetype.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 165,
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\fuse\\cs.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 892,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\fuse\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 199,
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\local_file.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 340,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\item_data_provider.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 68,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 13,
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\pasteboard_context.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 425,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\paste_observer.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 165,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\paste_task.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 594,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 50,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\serv_files.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 249,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\windows.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1280,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\build.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 56,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\examples\\dsl.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 9,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\examples\\key.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 15,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\examples\\keyboard.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 13,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\examples\\mouse.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 43,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\examples\\timer.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 17,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\dsl.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 169,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\lib.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 517,
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\linux\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 3,
+      "inDeg": 1,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\linux\\nix_impl.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 358,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\linux\\xdo.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 382,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\macos\\keycodes.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 117,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\macos\\macos_impl.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 748,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\macos\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 3,
+      "inDeg": 1,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\win\\keycodes.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 82,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\win\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 3,
+      "inDeg": 1,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\win\\win_impl.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 430,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\portable\\build.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 20,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\portable\\src\\bin_reader.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 130,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\portable\\src\\main.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 216,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\portable\\src\\ui.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 202,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\lib.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 30,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\setup\\driver.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 190,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\setup\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 90,
+      "inDeg": 1,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\setup\\port.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 117,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\setup\\printer.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 152,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\setup\\setup.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 81,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\build.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 260,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\benchmark.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 313,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\capture_mag.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 107,
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\ffplay.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 51,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\list.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 13,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\record-screen.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 132,
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\screenshot.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 119,
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\android\\ffi.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 437,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\android\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 2,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\android.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 162,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\aom.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 517,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\camera.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 257,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\codec.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1093,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\convert.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 226,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\dxgi.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 220,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\hwcodec.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 727,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\linux.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 104,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mediacodec.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 159,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 496,
+      "inDeg": 1,
+      "outDeg": 8
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\quartz.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 124,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\record.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 398,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\vpx.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 21,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\vpxcodec.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 530,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\vram.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 376,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\wayland.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 87,
+      "inDeg": 1,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\x11.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 113,
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\dxgi\\gdi.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 201,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\dxgi\\mag.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 602,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\dxgi\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 802,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\lib.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 19,
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\capturer.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 101,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\config.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 66,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\display.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 72,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\ffi.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 207,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\frame.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 59,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 14,
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\wayland\\capturable.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 53,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\wayland\\pipewire.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 834,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\wayland\\remote_desktop_portal.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 298,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\wayland\\request_portal.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 39,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\wayland\\screencast_portal.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 98,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\wayland.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 5,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\capturer.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 98,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\display.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 63,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\ffi.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 241,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\iter.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 120,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 9,
+      "inDeg": 1,
+      "outDeg": 5
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\server.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 134,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\virtual_display\\dylib\\build.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 28,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\virtual_display\\dylib\\examples\\idd_controller.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 177,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\virtual_display\\dylib\\src\\lib.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 170,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\virtual_display\\dylib\\src\\win10\\idd.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 205,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\virtual_display\\dylib\\src\\win10\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 7,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\virtual_display\\examples\\virtual_display_1.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 96,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\virtual_display\\src\\lib.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 173,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\auth_2fa.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 184,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\cli.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 181,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\client\\file_trait.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 174,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\client\\helper.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 34,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\client\\io_loop.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 2367,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\client\\screenshot.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 88,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\client.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 3947,
+      "inDeg": 1,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\clipboard.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 832,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\clipboard_file.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 417,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\common.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 2026,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\core_main.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 754,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\custom_server.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 214,
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\flutter.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 2127,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\flutter_ffi.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 2455,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\hbbs_http\\account.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 314,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\hbbs_http\\downloader.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 256,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\hbbs_http\\http_client.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 69,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\hbbs_http\\record_upload.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 196,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\hbbs_http\\sync.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 292,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\hbbs_http.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 36,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ipc.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1367,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\kcp_stream.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 141,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\keyboard.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1145,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lan.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 321,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\ar.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\be.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\bg.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\ca.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\cn.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\cs.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\da.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\de.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\el.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\en.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 262,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\eo.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\es.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\et.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\eu.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\fa.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\fr.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\ge.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\he.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\hr.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\hu.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\id.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\it.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\ja.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\ko.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\kz.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\lt.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\lv.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\nb.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\nl.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\pl.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\ptbr.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\pt_PT.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\ro.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\ru.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\sc.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\sk.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\sl.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\sq.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\sr.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\sv.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\ta.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\template.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\th.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\tr.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\tw.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\uk.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang\\vi.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 725,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 240,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 68,
+      "inDeg": 0,
+      "outDeg": 18
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\main.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 103,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\naming.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 26,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\platform\\delegate.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 246,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\platform\\gtk_sudo.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 727,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\platform\\linux.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1478,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\platform\\linux_desktop_manager.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 678,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\platform\\macos.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1004,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\platform\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 221,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\platform\\windows.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 3492,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\platform\\win_device.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 419,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\callback_ext.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 41,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\callback_msg.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 389,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\config.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 325,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\desc.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 86,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\errno.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 40,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\ipc.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 209,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\manager.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 552,
+      "inDeg": 1,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 166,
+      "inDeg": 0,
+      "outDeg": 7
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\native.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 37,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\native_handlers\\macros.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 25,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\native_handlers\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 111,
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\native_handlers\\session.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 201,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\native_handlers\\ui.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 133,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\plog.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 30,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\plugins.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 607,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\port_forward.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 213,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\privacy_mode\\win_exclude_from_capture.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 8,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\privacy_mode\\win_input.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 249,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\privacy_mode\\win_mag.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 53,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\privacy_mode\\win_topmost_window.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 333,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\privacy_mode\\win_virtual_display.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 530,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\privacy_mode.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 364,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\rendezvous_mediator.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 819,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\audio_service.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 488,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\clipboard_service.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 259,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\connection.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 4839,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\dbus.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 85,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\display_service.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 431,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\input_service.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1761,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\portable_service.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 924,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\printer_service.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 146,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\rdp_input.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 260,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\service.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 317,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\terminal_service.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1012,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\uinput.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1033,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\video_qos.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 529,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\video_service.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1269,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\wayland.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 302,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 698,
+      "inDeg": 2,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\service.rs",
+      "type": "file",
+      "state": "used",
+      "lang": "rust",
+      "sizeLOC": 9,
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\tray.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 245,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ui\\cm.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 153,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ui\\remote.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 820,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ui.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 704,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ui_cm_interface.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1042,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ui_interface.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1388,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ui_session_interface.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 1822,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\updater.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 235,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\virtual_display_manager.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 843,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\client.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 243,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\linux.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 417,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\macos.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 299,
+      "inDeg": 1,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\mod.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 35,
+      "inDeg": 1,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\server.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 158,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\windows.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 209,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\win_linux.rs",
+      "type": "file",
+      "state": "unused",
+      "lang": "rust",
+      "sizeLOC": 163,
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:objc",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:serde_derive",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:serde",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:repng",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:scrap",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 5,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:docopt",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:quest",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:webm",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:block",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:cfg_if",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:winapi",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "crate:chrono",
+      "type": "external",
+      "state": "used",
+      "lang": "rust",
+      "inDeg": 1,
+      "outDeg": 0
+    }
+  ],
+  "edges": [
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\fuse\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\fuse\\cs.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\fuse\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\filetype.rs",
+      "kind": "use",
+      "certainty": "heuristic"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\item_data_provider.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\paste_observer.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\macos\\paste_task.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\clipboard\\src\\platform\\unix\\filetype.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\win\\mod.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\macos\\mod.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\linux\\mod.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\lib.rs",
+      "target": "crate:objc",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\lib.rs",
+      "target": "crate:serde_derive",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\lib.rs",
+      "target": "crate:serde",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\linux\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\linux\\nix_impl.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\linux\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\linux\\xdo.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\macos\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\macos\\macos_impl.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\win\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\enigo\\src\\win\\win_impl.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\portable\\src\\main.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\portable\\src\\ui.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\setup\\mod.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\setup\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\setup\\driver.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\setup\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\remote_printer\\src\\setup\\port.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\capture_mag.rs",
+      "target": "crate:repng",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\capture_mag.rs",
+      "target": "crate:scrap",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\ffplay.rs",
+      "target": "crate:scrap",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\list.rs",
+      "target": "crate:scrap",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\record-screen.rs",
+      "target": "crate:docopt",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\record-screen.rs",
+      "target": "crate:quest",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\record-screen.rs",
+      "target": "crate:repng",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\record-screen.rs",
+      "target": "crate:scrap",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\record-screen.rs",
+      "target": "crate:serde",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\record-screen.rs",
+      "target": "crate:webm",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\screenshot.rs",
+      "target": "crate:repng",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\examples\\screenshot.rs",
+      "target": "crate:scrap",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\quartz.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\linux.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\wayland.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\x11.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\x11.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\dxgi.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\android.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\vpx.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\wayland.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\mod.rs",
+      "kind": "use",
+      "certainty": "heuristic"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\common\\mod.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\lib.rs",
+      "target": "crate:block",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\lib.rs",
+      "target": "crate:cfg_if",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\lib.rs",
+      "target": "crate:winapi",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\capturer.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\config.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\display.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\quartz\\frame.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\capturer.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\display.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\ffi.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\iter.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\libs\\scrap\\src\\x11\\server.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\client.rs",
+      "target": "crate:chrono",
+      "kind": "extern",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\keyboard.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\client.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lan.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\rendezvous_mediator.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\auth_2fa.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\clipboard.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\custom_server.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lang.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\port_forward.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\tray.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\mod.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\updater.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ui_cm_interface.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ui_interface.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ui_session_interface.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\hbbs_http.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\lib.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\kcp_stream.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\naming.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\custom_server.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\manager.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\ipc.rs",
+      "kind": "use",
+      "certainty": "heuristic"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\callback_ext.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\callback_msg.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\config.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\errno.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\manager.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\plog.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\plugins.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\native_handlers\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\native_handlers\\macros.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\native_handlers\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\plugin\\native_handlers\\session.rs",
+      "kind": "use",
+      "certainty": "heuristic"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\audio_service.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\service.rs",
+      "kind": "use",
+      "certainty": "heuristic"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\printer_service.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\service.rs",
+      "kind": "use",
+      "certainty": "heuristic"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server\\video_service.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\service.rs",
+      "kind": "use",
+      "certainty": "heuristic"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\service.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\macos.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\server.rs",
+      "kind": "use",
+      "certainty": "heuristic"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\client.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\server.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\windows.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\linux.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\macos.rs",
+      "kind": "mod",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\mod.rs",
+      "target": "C:\\Users\\jrhei\\Downloads\\rustdesk-master\\rustdesk-master\\src\\whiteboard\\win_linux.rs",
+      "kind": "mod",
+      "certainty": "static"
+    }
+  ]
+}
