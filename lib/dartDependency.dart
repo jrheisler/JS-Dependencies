@@ -273,7 +273,12 @@ _FileFacts _extractFacts(String cwd, String fileAbs, String text) {
   final reExport = RegExp(r'''^\s*export\s+['"]([^'"]+)['"]''');
   final rePart   = RegExp(r'''^\s*part\s+['"]([^'"]+)['"]''');
   // main(): allow void main(), Future<void> main(), or parameterized
-  final reMain = RegExp(r'^\s*(?:Future\s*<\s*void\s*>\s+)?void\s+main\s*\(');
+  // Accept common entry signatures: `void main(...)`, `Future<void> main(...)`,
+  // and their `FutureOr<void>` variants. Some code omits `<void>` (e.g.
+  // `Future main`) so allow a bare Future/FutureOr too. The goal is simply to
+  // detect presence of a `main(` function regardless of modifiers.
+  final reMain = RegExp(
+      r'^\s*(?:void|Future(?:Or)?(?:\s*<\s*void\s*>)?)\s+main\s*\(');
 
   for (var raw in lines) {
     final line = raw.replaceFirst(RegExp(r'//.*$'), '');
