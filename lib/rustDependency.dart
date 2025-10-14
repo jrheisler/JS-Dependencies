@@ -280,10 +280,13 @@ _RustFacts _extractFacts(String cwd, String fileAbs, String text, String pkgName
   final usePaths = <String>[];
   bool hasMain = false;
 
-  final reMod = RegExp(r'^\s*mod\s+([A-Za-z_][A-Za-z0-9_]*)\s*;\s*$');
-  final reExtern = RegExp(r'^\s*extern\s+crate\s+([A-Za-z_][A-Za-z0-9_]*)\s*;\s*$');
+  final reMod =
+      RegExp(r'^\s*(?:pub(?:\([^\)]+\))?\s+)?mod\s+([A-Za-z_][A-Za-z0-9_]*)\s*;\s*$');
+  final reExtern =
+      RegExp(r'^\s*(?:pub\s+)?extern\s+crate\s+([A-Za-z_][A-Za-z0-9_]*)\s*;\s*$');
   // use foo::bar::{a,b}; -> capture `foo::bar` and also flat paths `crate::a::b`, `self::x`, `super::y`
-  final reUse = RegExp(r'^\s*use\s+([^;]+)\s*;\s*$');
+  final reUse =
+      RegExp(r'^\s*(?:pub(?:\([^\)]+\))?\s+)?use\s+([^;]+)\s*;\s*$');
   final reMain = RegExp(r'^\s*fn\s+main\s*\(');
 
   for (var raw in lines) {
