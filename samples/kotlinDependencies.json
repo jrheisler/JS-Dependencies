@@ -1,0 +1,2574 @@
+{
+  "nodes": [
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\BuildParams.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 48,
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\index.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 5,
+      "package": "common.extensions",
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\playgrounds.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 3,
+      "package": "common.extensions",
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\references.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 155,
+      "package": "common.extensions",
+      "inDeg": 0,
+      "outDeg": 7
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\steps.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 22,
+      "package": "common.extensions",
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 109,
+      "package": "common",
+      "inDeg": 0,
+      "outDeg": 10
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\builds\\KotlinMultiplatform.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 15,
+      "package": "documentation.builds",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\builds\\KotlinWithCoroutines.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 38,
+      "package": "documentation.builds",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\builds\\WritersideBuilder.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 50,
+      "package": "documentation.builds",
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\DocumentationProject.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 22,
+      "package": "documentation",
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\vcsRoots\\DocumentationRoots.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 65,
+      "package": "documentation.vcsRoots",
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildJsAssets.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 45,
+      "package": "kotlinlang.builds",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildKotlinGrammar.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 27,
+      "package": "kotlinlang.builds",
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildKotlinSpec.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 26,
+      "package": "kotlinlang.builds",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildReferenceDocs.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 0,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSearchIndex.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 40,
+      "package": "kotlinlang.builds",
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSitePages.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 134,
+      "package": "kotlinlang.builds",
+      "inDeg": 0,
+      "outDeg": 9
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildWebHelpFrontend.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 32,
+      "package": "kotlinlang.builds",
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\FetchBlogNews.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 83,
+      "package": "kotlinlang.builds",
+      "inDeg": 0,
+      "outDeg": 7
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PageViews.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 49,
+      "package": "kotlinlang.builds",
+      "inDeg": 0,
+      "outDeg": 7
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PdfGenerator.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 61,
+      "package": "kotlinlang.builds",
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\SiteProject.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 28,
+      "package": "kotlinlang",
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\vcsRoots\\GrammarGenerator.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 10,
+      "package": "kotlinlang.vcsRoots",
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\vcsRoots\\KotlinSpec.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 10,
+      "package": "kotlinlang.vcsRoots",
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\vcsRoots\\WebHelp.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 17,
+      "package": "kotlinlang.vcsRoots",
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 121,
+      "package": "references",
+      "inDeg": 0,
+      "outDeg": 11
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 52,
+      "package": "references",
+      "inDeg": 0,
+      "outDeg": 22
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\compose\\ComposeMultiplatformCore.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 55,
+      "package": "references.builds.compose",
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kgp\\KotlinGradleAPI.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 25,
+      "package": "references.builds.kgp",
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesBuildApiReference.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 15,
+      "package": "references.builds.kotlinx.coroutines",
+      "inDeg": 0,
+      "outDeg": 5
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesBuildSearchIndex.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 21,
+      "package": "references.builds.kotlinx.coroutines",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesPrepareDokkaTemplates.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 14,
+      "package": "references.builds.kotlinx.coroutines",
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildApiReference.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 33,
+      "package": "references.builds.kotlinx.datetime",
+      "inDeg": 0,
+      "outDeg": 7
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildSearchIndex.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 21,
+      "package": "references.builds.kotlinx.datetime",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimePrepareDokkaTemplates.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 14,
+      "package": "references.builds.kotlinx.datetime",
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildApiReference.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 39,
+      "package": "references.builds.kotlinx.io",
+      "inDeg": 0,
+      "outDeg": 7
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildSearchIndex.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 21,
+      "package": "references.builds.kotlinx.io",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOPrepareDokkaTemplates.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 14,
+      "package": "references.builds.kotlinx.io",
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildApiReference.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 42,
+      "package": "references.builds.kotlinx.metadataJvm",
+      "inDeg": 0,
+      "outDeg": 9
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildSearchIndex.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 21,
+      "package": "references.builds.kotlinx.metadataJvm",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmPrepareDokkaTemplates.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 14,
+      "package": "references.builds.kotlinx.metadataJvm",
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationBuildApiReference.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 24,
+      "package": "references.builds.kotlinx.serialization",
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationBuildSearchIndex.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 21,
+      "package": "references.builds.kotlinx.serialization",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationPrepareDokkaTemplates.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 14,
+      "package": "references.builds.kotlinx.serialization",
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\BuildStdlibApiReference.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 44,
+      "package": "references.builds.stdlib",
+      "inDeg": 0,
+      "outDeg": 8
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\StdlibPrepareDokkaTemplates.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 19,
+      "package": "references.builds.stdlib",
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\extensions.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 16,
+      "package": "references",
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\templates\\PrepareDokkaTemplate.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 42,
+      "package": "references.templates",
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\Kotlin.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 17,
+      "package": "references.vcsRoots",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxCoroutines.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 17,
+      "package": "references.vcsRoots",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxDatetime.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 16,
+      "package": "references.vcsRoots",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxIO.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 16,
+      "package": "references.vcsRoots",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxSerialization.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 16,
+      "package": "references.vcsRoots",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\DockerImageBuilder.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 38,
+      "package": "templates",
+      "inDeg": 0,
+      "outDeg": 5
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\TemplateSearchIndex.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 64,
+      "package": "templates",
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\ApiReferencesTemplateTest.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 69,
+      "package": "tests.buildTypes",
+      "inDeg": 0,
+      "outDeg": 8
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2EProductionTest.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 51,
+      "package": "tests.buildTypes",
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2ETests.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 67,
+      "package": "tests.buildTypes",
+      "inDeg": 0,
+      "outDeg": 7
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\TestsProject.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 8,
+      "package": "tests",
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\vcsRoots\\KotlinLangOrg.kt",
+      "type": "file",
+      "state": "unused",
+      "lang": "kotlin",
+      "sizeLOC": 15,
+      "package": "vcsRoots",
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "mvn:references.builds",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 24,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:common.extensions",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 12,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:jetbrains.buildServer",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 108,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:common.ReferenceProject",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:vcsRoots.KotlinLangVcs",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:templates.scriptDistAnalyze",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:templates.SCRIPT_PATH",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 4,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:templates.TemplateSearchIndex",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 7,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:vcsRoots.KotlinLangOrg",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 5,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:documentation.vcsRoots",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:kotlinlang.builds",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 5,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:documentation.builds",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 5,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:kotlinlang.vcsRoots",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 6,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.SEARCH_INDEX_NAME",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.API_URLS",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:templates.DockerImageBuilder",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "java:java.io",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "java:java.nio",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.DOKKA_TEMPLATES_VERSION",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.API_COMPOSE",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KGP_REFERENCE",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:references.templates",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 7,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:references.vcsRoots",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 6,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_COROUTINES_ID",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_COROUTINES_RELEASE_LABEL",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:references.BuildApiPages",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 5,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:references.dependsOnDokkaTemplate",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 5,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_COROUTINES_TITLE",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_DATETIME_ID",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_DATETIME_RELEASE_LABEL",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:references.scriptBuildHtml",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 4,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:references.scriptDropSnapshot",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_DATETIME_TITLE",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_IO_ID",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_IO_RELEASE_LABEL",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_IO_TITLE",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_METADATA_ID",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_METADATA_RELEASE_TAG",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLIN_RELEASE_LABEL",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_METADATA_TITLE",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_SERIALIZATION_ID",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_SERIALIZATION_RELEASE_LABEL",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_SERIALIZATION_TITLE",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.CORE_API_BUILD_ID",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:references.scriptNoRobots",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.CORE_API_TITLE",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLIN_RELEASE_TAG",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_COROUTINES_RELEASE_TAG",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_DATETIME_RELEASE_TAG",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_IO_RELEASE_TAG",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.KOTLINX_SERIALIZATION_RELEASE_TAG",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "mvn:BuildParams.SEARCH_APP_ID",
+      "type": "external",
+      "state": "used",
+      "lang": "kotlin",
+      "inDeg": 1,
+      "outDeg": 0
+    }
+  ],
+  "edges": [
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\BuildParams.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\BuildParams.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\BuildParams.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\playgrounds.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\references.kt",
+      "target": "mvn:common.ReferenceProject",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\references.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import_wildcard",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\references.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\references.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\references.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\references.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\references.kt",
+      "target": "mvn:vcsRoots.KotlinLangVcs",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\steps.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\steps.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\extensions\\steps.kt",
+      "target": "mvn:templates.scriptDistAnalyze",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "target": "mvn:templates.SCRIPT_PATH",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "target": "mvn:templates.TemplateSearchIndex",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\common\\ReferenceProject.kt",
+      "target": "mvn:vcsRoots.KotlinLangOrg",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\builds\\KotlinMultiplatform.kt",
+      "target": "mvn:documentation.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\builds\\KotlinMultiplatform.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\builds\\KotlinWithCoroutines.kt",
+      "target": "mvn:documentation.vcsRoots",
+      "kind": "import_wildcard",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\builds\\KotlinWithCoroutines.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\builds\\WritersideBuilder.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\builds\\WritersideBuilder.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\builds\\WritersideBuilder.kt",
+      "target": "mvn:kotlinlang.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\DocumentationProject.kt",
+      "target": "mvn:documentation.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\DocumentationProject.kt",
+      "target": "mvn:documentation.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\DocumentationProject.kt",
+      "target": "mvn:documentation.vcsRoots",
+      "kind": "import_wildcard",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\DocumentationProject.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\documentation\\vcsRoots\\DocumentationRoots.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildJsAssets.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildJsAssets.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildKotlinGrammar.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildKotlinGrammar.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildKotlinGrammar.kt",
+      "target": "mvn:kotlinlang.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildKotlinGrammar.kt",
+      "target": "mvn:kotlinlang.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildKotlinSpec.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildKotlinSpec.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSearchIndex.kt",
+      "target": "mvn:BuildParams.SEARCH_INDEX_NAME",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSearchIndex.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSearchIndex.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSearchIndex.kt",
+      "target": "mvn:templates.TemplateSearchIndex",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSitePages.kt",
+      "target": "mvn:BuildParams.API_URLS",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSitePages.kt",
+      "target": "mvn:documentation.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSitePages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSitePages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSitePages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSitePages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSitePages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSitePages.kt",
+      "target": "mvn:templates.DockerImageBuilder",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildSitePages.kt",
+      "target": "mvn:templates.scriptDistAnalyze",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildWebHelpFrontend.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildWebHelpFrontend.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\BuildWebHelpFrontend.kt",
+      "target": "mvn:kotlinlang.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\FetchBlogNews.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\FetchBlogNews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\FetchBlogNews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\FetchBlogNews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\FetchBlogNews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\FetchBlogNews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\FetchBlogNews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PageViews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PageViews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PageViews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PageViews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PageViews.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PageViews.kt",
+      "target": "java:java.io",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PageViews.kt",
+      "target": "java:java.nio",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PdfGenerator.kt",
+      "target": "mvn:documentation.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PdfGenerator.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PdfGenerator.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PdfGenerator.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PdfGenerator.kt",
+      "target": "mvn:templates.DockerImageBuilder",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\builds\\PdfGenerator.kt",
+      "target": "mvn:templates.SCRIPT_PATH",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\SiteProject.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\SiteProject.kt",
+      "target": "mvn:kotlinlang.builds",
+      "kind": "import_wildcard",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\SiteProject.kt",
+      "target": "mvn:kotlinlang.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\SiteProject.kt",
+      "target": "mvn:kotlinlang.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\SiteProject.kt",
+      "target": "mvn:kotlinlang.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\SiteProject.kt",
+      "target": "mvn:templates.DockerImageBuilder",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\vcsRoots\\GrammarGenerator.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\vcsRoots\\KotlinSpec.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\kotlinlang\\vcsRoots\\WebHelp.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:BuildParams.DOKKA_TEMPLATES_VERSION",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:templates.SCRIPT_PATH",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiPages.kt",
+      "target": "mvn:vcsRoots.KotlinLangOrg",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:BuildParams.API_COMPOSE",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:BuildParams.KGP_REFERENCE",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.templates",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\BuildApiReferencesProject.kt",
+      "target": "mvn:references.vcsRoots",
+      "kind": "import_wildcard",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\compose\\ComposeMultiplatformCore.kt",
+      "target": "mvn:common.ReferenceProject",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\compose\\ComposeMultiplatformCore.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\compose\\ComposeMultiplatformCore.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\compose\\ComposeMultiplatformCore.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\compose\\ComposeMultiplatformCore.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\compose\\ComposeMultiplatformCore.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kgp\\KotlinGradleAPI.kt",
+      "target": "mvn:common.ReferenceProject",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kgp\\KotlinGradleAPI.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kgp\\KotlinGradleAPI.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLINX_COROUTINES_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLINX_COROUTINES_RELEASE_LABEL",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesBuildApiReference.kt",
+      "target": "mvn:references.BuildApiPages",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesBuildApiReference.kt",
+      "target": "mvn:references.dependsOnDokkaTemplate",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesBuildApiReference.kt",
+      "target": "mvn:references.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesBuildSearchIndex.kt",
+      "target": "mvn:BuildParams.KOTLINX_COROUTINES_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesBuildSearchIndex.kt",
+      "target": "mvn:templates.TemplateSearchIndex",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesPrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.KOTLINX_COROUTINES_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesPrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.KOTLINX_COROUTINES_TITLE",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesPrepareDokkaTemplates.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\coroutines\\KotlinxCoroutinesPrepareDokkaTemplates.kt",
+      "target": "mvn:references.templates",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLINX_DATETIME_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLINX_DATETIME_RELEASE_LABEL",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildApiReference.kt",
+      "target": "mvn:references.BuildApiPages",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildApiReference.kt",
+      "target": "mvn:references.dependsOnDokkaTemplate",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildApiReference.kt",
+      "target": "mvn:references.scriptBuildHtml",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildApiReference.kt",
+      "target": "mvn:references.scriptDropSnapshot",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildApiReference.kt",
+      "target": "mvn:references.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildSearchIndex.kt",
+      "target": "mvn:BuildParams.KOTLINX_DATETIME_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimeBuildSearchIndex.kt",
+      "target": "mvn:templates.TemplateSearchIndex",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimePrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.KOTLINX_DATETIME_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimePrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.KOTLINX_DATETIME_TITLE",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimePrepareDokkaTemplates.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\datetime\\KotlinxDatetimePrepareDokkaTemplates.kt",
+      "target": "mvn:references.templates",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLINX_IO_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLINX_IO_RELEASE_LABEL",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildApiReference.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildApiReference.kt",
+      "target": "mvn:references.BuildApiPages",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildApiReference.kt",
+      "target": "mvn:references.dependsOnDokkaTemplate",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildApiReference.kt",
+      "target": "mvn:references.scriptBuildHtml",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildApiReference.kt",
+      "target": "mvn:references.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildSearchIndex.kt",
+      "target": "mvn:BuildParams.KOTLINX_IO_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOBuildSearchIndex.kt",
+      "target": "mvn:templates.TemplateSearchIndex",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOPrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.KOTLINX_IO_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOPrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.KOTLINX_IO_TITLE",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOPrepareDokkaTemplates.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\io\\KotlinxIOPrepareDokkaTemplates.kt",
+      "target": "mvn:references.templates",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLINX_METADATA_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLINX_METADATA_RELEASE_TAG",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLIN_RELEASE_LABEL",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildApiReference.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildApiReference.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildApiReference.kt",
+      "target": "mvn:references.BuildApiPages",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildApiReference.kt",
+      "target": "mvn:references.dependsOnDokkaTemplate",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildApiReference.kt",
+      "target": "mvn:references.scriptBuildHtml",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildApiReference.kt",
+      "target": "mvn:references.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildSearchIndex.kt",
+      "target": "mvn:BuildParams.KOTLINX_METADATA_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmBuildSearchIndex.kt",
+      "target": "mvn:templates.TemplateSearchIndex",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmPrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.KOTLINX_METADATA_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmPrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.KOTLINX_METADATA_TITLE",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmPrepareDokkaTemplates.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\metadataJvm\\KotlinxMetadataJvmPrepareDokkaTemplates.kt",
+      "target": "mvn:references.templates",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLINX_SERIALIZATION_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationBuildApiReference.kt",
+      "target": "mvn:BuildParams.KOTLINX_SERIALIZATION_RELEASE_LABEL",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationBuildApiReference.kt",
+      "target": "mvn:references.BuildApiPages",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationBuildApiReference.kt",
+      "target": "mvn:references.dependsOnDokkaTemplate",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationBuildApiReference.kt",
+      "target": "mvn:references.scriptBuildHtml",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationBuildApiReference.kt",
+      "target": "mvn:references.vcsRoots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationBuildSearchIndex.kt",
+      "target": "mvn:BuildParams.KOTLINX_SERIALIZATION_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationBuildSearchIndex.kt",
+      "target": "mvn:templates.TemplateSearchIndex",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationPrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.KOTLINX_SERIALIZATION_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationPrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.KOTLINX_SERIALIZATION_TITLE",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationPrepareDokkaTemplates.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\kotlinx\\serialization\\KotlinxSerializationPrepareDokkaTemplates.kt",
+      "target": "mvn:references.templates",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\BuildStdlibApiReference.kt",
+      "target": "mvn:BuildParams.CORE_API_BUILD_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\BuildStdlibApiReference.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\BuildStdlibApiReference.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\BuildStdlibApiReference.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\BuildStdlibApiReference.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\BuildStdlibApiReference.kt",
+      "target": "mvn:references.scriptNoRobots",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\BuildStdlibApiReference.kt",
+      "target": "mvn:templates.SCRIPT_PATH",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\BuildStdlibApiReference.kt",
+      "target": "mvn:vcsRoots.KotlinLangOrg",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\StdlibPrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.CORE_API_TITLE",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\StdlibPrepareDokkaTemplates.kt",
+      "target": "mvn:BuildParams.SEARCH_INDEX_NAME",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\StdlibPrepareDokkaTemplates.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\builds\\stdlib\\StdlibPrepareDokkaTemplates.kt",
+      "target": "mvn:references.templates",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\extensions.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\extensions.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\extensions.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\templates\\PrepareDokkaTemplate.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\templates\\PrepareDokkaTemplate.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\templates\\PrepareDokkaTemplate.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\templates\\PrepareDokkaTemplate.kt",
+      "target": "mvn:vcsRoots.KotlinLangOrg",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\Kotlin.kt",
+      "target": "mvn:BuildParams.KOTLIN_RELEASE_TAG",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\Kotlin.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxCoroutines.kt",
+      "target": "mvn:BuildParams.KOTLINX_COROUTINES_RELEASE_TAG",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxCoroutines.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxDatetime.kt",
+      "target": "mvn:BuildParams.KOTLINX_DATETIME_RELEASE_TAG",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxDatetime.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxIO.kt",
+      "target": "mvn:BuildParams.KOTLINX_IO_RELEASE_TAG",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxIO.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxSerialization.kt",
+      "target": "mvn:BuildParams.KOTLINX_SERIALIZATION_RELEASE_TAG",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\references\\vcsRoots\\KotlinxSerialization.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\DockerImageBuilder.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\DockerImageBuilder.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\DockerImageBuilder.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\DockerImageBuilder.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\DockerImageBuilder.kt",
+      "target": "mvn:kotlinlang.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\TemplateSearchIndex.kt",
+      "target": "mvn:BuildParams.SEARCH_APP_ID",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\TemplateSearchIndex.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\TemplateSearchIndex.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\TemplateSearchIndex.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\TemplateSearchIndex.kt",
+      "target": "mvn:kotlinlang.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\templates\\TemplateSearchIndex.kt",
+      "target": "mvn:vcsRoots.KotlinLangOrg",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\ApiReferencesTemplateTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\ApiReferencesTemplateTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\ApiReferencesTemplateTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\ApiReferencesTemplateTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\ApiReferencesTemplateTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\ApiReferencesTemplateTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\ApiReferencesTemplateTest.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\ApiReferencesTemplateTest.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2EProductionTest.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2EProductionTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2EProductionTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2EProductionTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2EProductionTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2EProductionTest.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2ETests.kt",
+      "target": "mvn:documentation.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2ETests.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2ETests.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2ETests.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2ETests.kt",
+      "target": "mvn:kotlinlang.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2ETests.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\buildTypes\\E2ETests.kt",
+      "target": "mvn:references.builds",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\tests\\TestsProject.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\vcsRoots\\KotlinLangOrg.kt",
+      "target": "mvn:common.extensions",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\Users\\jrhei\\Downloads\\kotlin-web-site-master\\kotlin-web-site-master\\.teamcity\\vcsRoots\\KotlinLangOrg.kt",
+      "target": "mvn:jetbrains.buildServer",
+      "kind": "import",
+      "certainty": "static"
+    }
+  ]
+}
