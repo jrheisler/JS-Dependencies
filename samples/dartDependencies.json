@@ -1,0 +1,1918 @@
+{
+  "nodes": [
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\common\\command_button.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 75,
+      "inDeg": 1,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\common\\constants.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 135,
+      "inDeg": 2,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\common\\pie_chart_dialog.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 122,
+      "inDeg": 1,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\controllers\\kanban_view_state.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 25,
+      "inDeg": 0,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "type": "file",
+      "state": "used",
+      "lang": "dart",
+      "sizeLOC": 29,
+      "inDeg": 12,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\models\\branches.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 26,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\models\\change_package.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 20,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\models\\commit.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 20,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\models\\epic.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 125,
+      "inDeg": 5,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 86,
+      "inDeg": 8,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\models\\kanban_card.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 131,
+      "inDeg": 9,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\models\\kanban_column.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 35,
+      "inDeg": 5,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\download_file.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 17,
+      "inDeg": 2,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\email.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 23,
+      "inDeg": 1,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\git_hub_commit_details.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 54,
+      "inDeg": 2,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 1269,
+      "inDeg": 4,
+      "outDeg": 7
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 128,
+      "inDeg": 4,
+      "outDeg": 8
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\local_storage_helper.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 46,
+      "inDeg": 6,
+      "outDeg": 2
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\mili.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 8,
+      "inDeg": 3,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 226,
+      "inDeg": 12,
+      "outDeg": 7
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\state_abstract.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 9,
+      "inDeg": 1,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\state_lifecycle_mixin.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 29,
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\services\\state_manager_registry.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 62,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 386,
+      "inDeg": 0,
+      "outDeg": 13
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\calendar_widget.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 81,
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\ci_reports_page.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 0,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\column_management_dialog.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 76,
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\commit_details_dialog.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 89,
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\delete_dialog.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 27,
+      "inDeg": 0,
+      "outDeg": 1
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\epic_edit_screen.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 458,
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\epic_list.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 61,
+      "inDeg": 0,
+      "outDeg": 0
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\file_history_dialog.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 81,
+      "inDeg": 0,
+      "outDeg": 5
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\github_stats_dialog.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 344,
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\git_command_dialog.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 238,
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\git_log.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 232,
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 279,
+      "inDeg": 0,
+      "outDeg": 11
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\grid_view_screen.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 232,
+      "inDeg": 0,
+      "outDeg": 8
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\kanban_board_listview.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 69,
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 600,
+      "inDeg": 0,
+      "outDeg": 11
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 135,
+      "inDeg": 0,
+      "outDeg": 11
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\kanban_column_dialog.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 74,
+      "inDeg": 0,
+      "outDeg": 3
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 832,
+      "inDeg": 0,
+      "outDeg": 29
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\reports.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 1047,
+      "inDeg": 0,
+      "outDeg": 6
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\show_kanban_name_dialog.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 57,
+      "inDeg": 0,
+      "outDeg": 4
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\timeline_data.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 72,
+      "inDeg": 0,
+      "outDeg": 5
+    },
+    {
+      "id": "C:\\source\\cm_2_git\\lib\\views\\tree_view.dart",
+      "type": "file",
+      "state": "unused",
+      "lang": "dart",
+      "sizeLOC": 270,
+      "inDeg": 0,
+      "outDeg": 7
+    },
+    {
+      "id": "pub:flutter",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 33,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:uuid",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:fl_chart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 4,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:cm_2_git",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 26,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:universal_html",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:kanban_card.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:kanban_column.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "dart:convert",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 16,
+      "outDeg": 0
+    },
+    {
+      "id": "dart:html",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:url_launcher",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:http",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 8,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:local_storage_helper.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:intl",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 5,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:git_services.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "dart:ui",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:calendar_widget.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:epic_edit_screen.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:kanban_view.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:table_calendar",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:file_history_dialog.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:git_command_dialog.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:kanban_card_dialog.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:kanban_card_widget.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 3,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:app_frame.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:commit_details_dialog.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:delete_dialog.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:column_management_dialog.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:git_log.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:git_workflow_screen.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:github_stats_dialog.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:grid_view_screen.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "pub:kanban_column_dialog.dart",
+      "type": "external",
+      "state": "used",
+      "lang": "dart",
+      "inDeg": 1,
+      "outDeg": 0
+    }
+  ],
+  "edges": [
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\common\\command_button.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\common\\constants.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\common\\constants.dart",
+      "target": "pub:uuid",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\common\\constants.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\common\\pie_chart_dialog.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\common\\pie_chart_dialog.dart",
+      "target": "pub:fl_chart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\controllers\\kanban_view_state.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\controllers\\kanban_view_state.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\state_abstract.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\models\\epic.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\models\\epic.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\models\\epic.dart",
+      "target": "pub:universal_html",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "target": "pub:kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "target": "pub:kanban_column.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\models\\kanban_column.dart",
+      "target": "pub:kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\download_file.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\download_file.dart",
+      "target": "dart:html",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\email.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\email.dart",
+      "target": "pub:url_launcher",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\git_hub_commit_details.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\git_hub_commit_details.dart",
+      "target": "pub:http",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "target": "dart:html",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "target": "pub:http",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\epic.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_column.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "target": "pub:local_storage_helper.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\local_storage_helper.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\local_storage_helper.dart",
+      "target": "pub:universal_html",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\mili.dart",
+      "target": "pub:intl",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\epic.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "target": "pub:git_services.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "target": "pub:local_storage_helper.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\state_abstract.dart",
+      "target": "dart:ui",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\state_lifecycle_mixin.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\state_lifecycle_mixin.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\state_lifecycle_mixin.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\services\\state_manager_registry.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\epic.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\local_storage_helper.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "pub:calendar_widget.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "pub:epic_edit_screen.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\app_frame.dart",
+      "target": "pub:kanban_view.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\calendar_widget.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\calendar_widget.dart",
+      "target": "pub:table_calendar",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\calendar_widget.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\column_management_dialog.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\column_management_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\column_management_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_column.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\commit_details_dialog.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\commit_details_dialog.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\commit_details_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\commit_details_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\git_hub_commit_details.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\commit_details_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\commit_details_dialog.dart",
+      "target": "pub:file_history_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\delete_dialog.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\epic_edit_screen.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\epic_edit_screen.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\epic_edit_screen.dart",
+      "target": "pub:http",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\epic_edit_screen.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\epic_edit_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\epic.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\epic_edit_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\local_storage_helper.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\file_history_dialog.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\file_history_dialog.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\file_history_dialog.dart",
+      "target": "pub:http",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\file_history_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\common\\constants.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\file_history_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\github_stats_dialog.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\github_stats_dialog.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\github_stats_dialog.dart",
+      "target": "pub:http",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\github_stats_dialog.dart",
+      "target": "pub:fl_chart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_command_dialog.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_command_dialog.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_command_dialog.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_command_dialog.dart",
+      "target": "pub:intl",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_command_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_command_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_log.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_log.dart",
+      "target": "pub:http",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_log.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_log.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\download_file.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\common\\command_button.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_column.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\local_storage_helper.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\git_workflow_screen.dart",
+      "target": "pub:git_command_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\grid_view_screen.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\grid_view_screen.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\grid_view_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\grid_view_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\grid_view_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\local_storage_helper.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\grid_view_screen.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\grid_view_screen.dart",
+      "target": "pub:kanban_card_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\grid_view_screen.dart",
+      "target": "pub:kanban_card_widget.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_board_listview.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_board_listview.dart",
+      "target": "pub:http",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_board_listview.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_board_listview.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_board_listview.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\epic.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_board_listview.dart",
+      "target": "pub:app_frame.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "pub:intl",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\email.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\git_hub_commit_details.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\mili.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_dialog.dart",
+      "target": "pub:commit_details_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "pub:intl",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\local_storage_helper.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\mili.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "pub:delete_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_card_widget.dart",
+      "target": "pub:kanban_card_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_column_dialog.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_column_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_column_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_column.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:intl",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:universal_html",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\common\\constants.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_board.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_column.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\download_file.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\git_services.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\helpers.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\local_storage_helper.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\mili.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:column_management_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:delete_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:git_log.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:git_workflow_screen.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:github_stats_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:grid_view_screen.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:kanban_card_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:kanban_card_widget.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\kanban_view.dart",
+      "target": "pub:kanban_column_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\reports.dart",
+      "target": "pub:fl_chart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\reports.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\reports.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\common\\pie_chart_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\reports.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\reports.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\reports.dart",
+      "target": "pub:kanban_card_widget.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\show_kanban_name_dialog.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\show_kanban_name_dialog.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\show_kanban_name_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\show_kanban_name_dialog.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\timeline_data.dart",
+      "target": "pub:cm_2_git",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\timeline_data.dart",
+      "target": "pub:fl_chart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\timeline_data.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\timeline_data.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\timeline_data.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\models\\kanban_card.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\tree_view.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\tree_view.dart",
+      "target": "pub:flutter",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\tree_view.dart",
+      "target": "pub:http",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\tree_view.dart",
+      "target": "dart:convert",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\tree_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\main.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\tree_view.dart",
+      "target": "C:\\source\\cm_2_git\\lib\\services\\singleton_data.dart",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\cm_2_git\\lib\\views\\tree_view.dart",
+      "target": "pub:file_history_dialog.dart",
+      "kind": "import",
+      "certainty": "static"
+    }
+  ]
+}
