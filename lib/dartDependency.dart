@@ -293,6 +293,14 @@ class _Resolved {
   _Resolved.external(this.extId) : type = 'external', path = null;
 }
 
+bool _isLikelyRelativeImport(String uri) {
+  if (uri.startsWith('./') || uri.startsWith('../')) return true;
+  if (uri.startsWith('/') || uri.startsWith('\\')) return false;
+  if (uri.contains('://')) return false;
+  if (uri.contains(':')) return false;
+  return true;
+}
+
 _Resolved _resolveUri(String cwd, String fromFileAbs, String uri, String? selfPkg) {
   // dart:core, dart:io ...
   if (uri.startsWith('dart:')) {
@@ -315,10 +323,11 @@ _Resolved _resolveUri(String cwd, String fromFileAbs, String uri, String? selfPk
     return _Resolved.external('pub:$pkg');
   }
 
-  // Relative URI: './' or '../'
-  if (uri.startsWith('./') || uri.startsWith('../')) {
+  // Relative URI: './', '../', or bare paths like 'src/foo.dart'
+  if (_isLikelyRelativeImport(uri)) {
     final baseDir = _dir(fromFileAbs);
-    final abs = _normalize(_join(baseDir, uri.replaceAll('/', _sep)));
+    final candidate = uri.replaceAll('/', _sep).replaceAll('\\', _sep);
+    final abs = _normalize(_join(baseDir, candidate));
     if (File(abs).existsSync()) return _Resolved.file(abs);
     return _Resolved.external('pub:unknown'); // fallback (should be rare)
   }
