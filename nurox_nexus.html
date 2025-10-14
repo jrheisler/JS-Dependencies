@@ -129,6 +129,9 @@
       <h3>Search</h3>
       <input type="text" id="search" placeholder="Find node by name/path (Enter to select)" />
       <div style="margin-top:8px; color:var(--muted); font-size:12px;">Shortcuts: <span class="kbd">Ctrl/Cmd+F</span> focus search</div>
+      <div style="margin-top:6px; color:var(--muted); font-size:12px;">
+        Tip: drop a <code>.json</code> anywhere to load
+      </div>
     </div>
 
     <div class="group">
@@ -372,6 +375,25 @@ window.addEventListener('DOMContentLoaded', () => {
       input.value = '';
     }
   });
+  ['dragenter','dragover'].forEach(ev => {
+    window.addEventListener(ev, (e)=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    }, false);
+  });
+  window.addEventListener('drop', async (e)=>{
+    e.preventDefault();
+    const f = e.dataTransfer?.files?.[0];
+    if(!f) return;
+    try{
+      const txt = await f.text();
+      loadGraph(JSON.parse(txt));
+      setStatus(`Loaded ${f.name}`);
+    }catch(err){
+      console.error(err);
+      setStatus(`Failed to load ${f?.name||'drop'}`);
+    }
+  }, false);
   $('resetView').addEventListener('click', ()=>{ svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity); });
   $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; paused ? sim.stop() : sim.alpha(0.6).restart(); });
   $('exportSbom').addEventListener('click', exportSbom);
