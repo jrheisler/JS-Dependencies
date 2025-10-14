@@ -108,6 +108,12 @@
     <button class="btn" id="openJson">Load graph.json</button>
     <input type="file" id="fileInput" accept="application/json" hidden />
     <button class="btn" id="exportSbom" title="Download SBOM CSV">SBOM CSV</button>
+    <select id="colorMode" class="btn" title="Color mode">
+      <option value="state">Color: State</option>
+      <option value="type">Color: Type</option>
+      <option value="degree">Color: Degree</option>
+      <option value="package">Color: Package</option>
+    </select>
     <button class="btn" id="resetView" title="Reset view">Reset View</button>
     <button class="btn" id="toggleSidebar" data-variant="ghost" aria-expanded="true" aria-controls="sidebar" title="Toggle sidebar">Hide Sidebar ◀</button>
     <button class="btn" id="pause" title="Pause/Resume physics">Pause ⏸</button>
@@ -291,6 +297,7 @@ window.addEventListener('DOMContentLoaded', () => {
   function updateHighlights(){
     const nodesSel = nodeG.selectAll('g.node');
     nodesSel.classed('highlighted', d => shouldHighlightNode(d));
+    nodesSel.select('circle').style('fill', d => shouldHighlightNode(d) ? '#ff47d8' : getNodeColor(d));
     const edgesSel = linkG.selectAll('line');
     const highlightEdges = activeHighlight === 'edges';
     edgesSel.classed('highlighted', highlightEdges);
@@ -329,6 +336,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const setText = (id, value)=>{ const el = $(id); if(el) el.textContent = value; };
   const setDisplay = (id, value)=>{ const el = $(id); if(el) el.style.display = value; };
   const setHTML = (id, value)=>{ const el = $(id); if(el) el.innerHTML = value; };
+  const colorModeEl = $('colorMode');
   const nodeId = (ref)=> typeof ref === 'object' && ref !== null ? ref.id : ref;
   const isFileProtocol = window.location.protocol === 'file:';
   const bindSlider = (id, key, outId) => { const el = $(id); const out = $(outId);
@@ -341,6 +349,12 @@ window.addEventListener('DOMContentLoaded', () => {
   $('showUnusedOnly').addEventListener('change', e=>{ cfg.showUnusedOnly = e.target.checked; render(); });
   $('hideExternals').addEventListener('change', e=>{ cfg.hideExternals = e.target.checked; render(); });
   $('hideDynamic').addEventListener('change', e=>{ cfg.hideDynamic = e.target.checked; render(); });
+  if(colorModeEl){
+    colorModeEl.addEventListener('change', ()=> {
+      nodeG.selectAll('g.node').select('circle').style('fill', d => getNodeColor(d));
+      updateHighlights();
+    });
+  }
   $('openJson').addEventListener('click', ()=> $('fileInput').click());
   $('fileInput').addEventListener('change', async (e)=>{
     const input = e.target;
@@ -467,6 +481,37 @@ window.addEventListener('DOMContentLoaded', () => {
   function stateClass(d){ return (d.state||'unused').replace(/[^a-z_]/g,'_'); }
   function fmt(x){ return x==null? '—' : x; }
   function isExternal(d){ return d.type==='external' || (d.package && d.package.includes('node_modules')); }
+  function hashToColor(str){
+    // deterministic soft hues from strings (for packages)
+    let h = 0; for (let i=0;i<str.length;i++) h = (h*31 + str.charCodeAt(i))>>>0;
+    const hue = h % 360;
+    return `hsl(${hue} 60% 55%)`;
+  }
+  function getNodeColor(d){
+    const mode = colorModeEl ? colorModeEl.value : 'state';
+    if(mode === 'type'){
+      return d.type === 'external' ? '#3b2f5a' : (d.state==='unused' ? '#273049' : '#1dd1a1');
+    }
+    if(mode === 'degree'){
+      const deg = (d.inDeg||0)+(d.outDeg||0);
+      // map 0..maxDeg -> LCH-ish ramp via HSL
+      const max = Math.max(1, filtered.nodes.reduce((m,n)=>Math.max(m,(n.inDeg||0)+(n.outDeg||0)),0));
+      const t = Math.min(1, deg/max);
+      const hue = 210 - 210*t;   // blue->red
+      const sat = 60 + 20*t;
+      const light = 35 + 20*t;
+      return `hsl(${hue} ${sat}% ${light}%)`;
+    }
+    if(mode === 'package'){
+      return d.package ? hashToColor(String(d.package)) :
+        (d.type==='external' ? '#3b2f5a' : '#5a667e');
+    }
+    // default: state colors (matches CSS)
+    if(d.type === 'external') return '#3b2f5a';
+    if(d.state === 'side_effect_only') return '#f3b33d';
+    if(d.state === 'unused') return '#273049';
+    return '#1dd1a1';
+  }
 
   function clearGraph(){
     sim.stop();
@@ -624,8 +669,12 @@ window.addEventListener('DOMContentLoaded', () => {
       .on('dblclick', (e,d)=>{ d.fx = null; d.fy = null; })
     ;
 
-    nodesEnter.append('circle').attr('r', d=> sizeFor(d)).attr('class','halo');
+    nodesEnter.append('circle')
+      .attr('r', d=> sizeFor(d))
+      .attr('class','halo')
+      .style('fill', d => getNodeColor(d));
     const nodesSel = nodesEnter.merge(nodes);
+    nodesSel.select('circle').style('fill', d => getNodeColor(d));
 
     const labels = labelG.selectAll('text').data(filtered.nodes, d=>d.id);
     labels.exit().remove();
