@@ -359,7 +359,8 @@ final _declarationReg = RegExp(
   r'^(?:\\s*(?:public|internal|private|protected)\\s+)?(?:data\\s+)?(class|object|interface|enum)\\s+([A-Za-z0-9_]+)',
   multiLine: true,
 );
-final _mainReg = RegExp(r'^\\s*fun\\s+main\\s*\\(', multiLine: true);
+final _mainReg =
+    RegExp(r'^\\s*fun\\s+main\\s*\\([^)]*\\)', multiLine: true);
 
 _KtFacts _extractFacts(String cwd, String absPath, String text) {
   final normalized = _normalize(absPath);
