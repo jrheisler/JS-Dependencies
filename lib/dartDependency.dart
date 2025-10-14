@@ -21,7 +21,9 @@
 // Build:
 //   dart compile exe .\dartDependency.dart -o .\dartDependency.exe
 // Run:
-//   .\dartDependency.exe [entry.dart ...]  # writes dartDependencies.json (optionally seed entries)
+//   .\dartDependency.exe [--debug] [--explain path.dart] [entry.dart ...]
+//     --debug     : emit extra stderr diagnostics (entries, reachable counts, sample unused)
+//     --explain X : show the import path (if any) from an entry to X (relative or absolute)
 
 import 'dart:convert';
 import 'dart:io';
@@ -137,8 +139,54 @@ class _FileFacts {
 }
 
 // ---------------- main ----------------
+class _CliOptions {
+  final bool debug;
+  final List<String> entryArgs;
+  final String? explain;
+  _CliOptions({required this.debug, required this.entryArgs, this.explain});
+}
+
+_CliOptions _parseArgs(List<String> args) {
+  var debug = false;
+  final entryArgs = <String>[];
+  String? explain;
+
+  for (var i = 0; i < args.length; i++) {
+    final arg = args[i];
+    if (arg == '--debug' || arg == '-d') {
+      debug = true;
+      continue;
+    }
+    if (arg.startsWith('--explain=')) {
+      explain = arg.substring('--explain='.length);
+      continue;
+    }
+    if (arg == '--explain' && i + 1 < args.length) {
+      explain = args[++i];
+      continue;
+    }
+    entryArgs.add(arg);
+  }
+
+  return _CliOptions(debug: debug, entryArgs: entryArgs, explain: explain);
+}
+
+String _coerceToRelId(String input, String cwd) {
+  final abs = _normalize(_abs(input));
+  if (File(abs).existsSync()) {
+    return _rel(abs, cwd);
+  }
+  final joined = _normalize(_join(cwd, input.replaceAll('/', _sep)));
+  if (File(joined).existsSync()) {
+    return _rel(joined, cwd);
+  }
+  return input.replaceAll('\\', '/');
+}
+
 void main(List<String> args) async {
   final cwd = _normalize(_abs('.'));
+
+  final cli = _parseArgs(args);
 
   // 1) Discover project info
   final pub = await _readPubspec(cwd); // get self package name if any
@@ -154,9 +202,11 @@ void main(List<String> args) async {
     facts.add(_extractFacts(cwd, f, text));
   }
 
+  final explainTarget = cli.explain == null ? null : _coerceToRelId(cli.explain!, cwd);
+
   // Explicit entry points from CLI args
   final explicitEntries = <String>{};
-  for (final arg in args) {
+  for (final arg in cli.entryArgs) {
     final absArg = _normalize(_abs(arg));
     if (File(absArg).existsSync() && _isWithinRepo(absArg, cwd)) {
       explicitEntries.add(_rel(absArg, cwd));
@@ -225,9 +275,10 @@ void main(List<String> args) async {
 
   // 7) Entry files
   final fileIds = nodes.where((n) => n.type == 'file').map((n) => n.id).toSet();
+  final autoEntries = _discoverEntryFiles(cwd, facts, pub?.name);
   final entrySet = <String>{}
     ..addAll(explicitEntries)
-    ..addAll(_discoverEntryFiles(cwd, facts, pub?.name));
+    ..addAll(autoEntries);
   entrySet.removeWhere((e) => !fileIds.contains(e));
   final entries = entrySet.toList();
 
@@ -252,6 +303,29 @@ void main(List<String> args) async {
   final unused = nodes.where((n) => n.state == 'unused').length;
   final externCount = nodes.where((n) => n.type == 'external').length;
   final maxDeg = nodes.fold<int>(0, (m, n) => (n.inDeg + n.outDeg) > m ? (n.inDeg + n.outDeg) : m);
+  if (cli.debug) {
+    stderr.writeln('[debug] cwd=$cwd');
+    stderr.writeln('[debug] explicitEntries=${(explicitEntries.toList()..sort()).join(', ')}');
+    stderr.writeln('[debug] autoEntries=${(autoEntries..sort()).join(', ')}');
+    stderr.writeln('[debug] finalEntries=${(entries..sort()).join(', ')}');
+    stderr.writeln('[debug] reachableFiles=${usedSet.where(fileIds.contains).length}/${fileIds.length}');
+    final unreachable = fileIds.difference(usedSet);
+    if (unreachable.isNotEmpty) {
+      final preview = unreachable.toList()..sort();
+      final sample = preview.length > 10 ? preview.sublist(0, 10) : preview;
+      stderr.writeln('[debug] sampleUnused=${sample.join(', ')}${preview.length > sample.length ? ' ...' : ''}');
+    }
+  }
+
+  if (explainTarget != null) {
+    final path = _findPath(entries, edges, explainTarget, fileIds);
+    if (path != null) {
+      stderr.writeln('[explain] ${explainTarget} reachable via ${path.join(' -> ')}');
+    } else {
+      stderr.writeln('[explain] $explainTarget is not reachable from current entries');
+    }
+  }
+
   stderr.writeln('[info] Wrote: ${_rel(outPath, cwd)}');
   stderr.writeln('[stats] nodes=$total edges=${edges.length} used=$used unused=$unused externals=$externCount maxDeg=$maxDeg');
 }
@@ -490,6 +564,38 @@ Set<String> _reach(List<String> entries, List<_Edge> edges) {
     for (final y in outs) stack.add(y);
   }
   return seen;
+}
+
+List<String>? _findPath(
+    List<String> entries, List<_Edge> edges, String target, Set<String> fileIds) {
+  if (entries.isEmpty) return null;
+  final queue = <List<String>>[];
+  final seen = <String>{};
+  final gOut = <String, List<String>>{};
+  for (final e in edges) {
+    if (!fileIds.contains(e.target)) continue;
+    gOut.putIfAbsent(e.source, () => []).add(e.target);
+  }
+
+  for (final entry in entries) {
+    queue.add([entry]);
+    seen.add(entry);
+  }
+
+  while (queue.isNotEmpty) {
+    final path = queue.removeAt(0);
+    final node = path.last;
+    if (node == target) return path;
+    final outs = gOut[node];
+    if (outs == null) continue;
+    for (final next in outs) {
+      if (seen.add(next)) {
+        final nextPath = List<String>.from(path)..add(next);
+        queue.add(nextPath);
+      }
+    }
+  }
+  return null;
 }
 
 // ---------------- misc ----------------
