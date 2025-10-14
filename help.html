@@ -69,7 +69,7 @@
         <div class="logo">Nurox Nexus</div>
         <div class="badge">Help & User Guide</div>
         <div style="flex:1"></div>
-        <div class="badge">v1.0</div>
+        <div class="badge">v1.2</div>
       </div>
     </header>
 
@@ -80,10 +80,12 @@
       <a href="#header">Header Controls</a>
       <a href="#left">Left Sidebar</a>
       <a href="#canvas">Central Visualization</a>
+      <a href="#hud">HUD & Highlighting</a>
       <a href="#right">Right Sidebar</a>
-      <a href="#interaction">Interaction & Highlighting</a>
+      <a href="#interaction">Interaction & Pinning</a>
       <a href="#data">Data Handling & Filtering</a>
       <a href="#export">Export & Persistence</a>
+      <a href="#help-modal">Help Modal</a>
       <a href="#shortcuts">Keyboard Shortcuts</a>
       <a href="#troubleshooting">Troubleshooting</a>
       <a href="#contact">Contact</a>
@@ -94,16 +96,16 @@
       <section id="overview">
         <h1>Overview</h1>
         <p><strong>Nurox Nexus</strong> is an interactive visualization tool for exploring codebase dependencies. It turns a JSON dataset—typically produced by the Nurox Dependency Analyzer—into a live, force-directed graph that reveals relationships between modules, files, and packages.</p>
-        <p>The interface uses a full‑screen, three‑column layout in dark mode for optimal contrast and readability.</p>
+        <p>The interface uses a responsive, three‑column layout in dark mode. A collapsible sidebar latch lets you maximise the canvas while keeping controls a click away.</p>
       </section>
 
       <section id="layout">
         <h2>Layout & Navigation</h2>
         <ul>
-          <li><strong>Left Sidebar</strong> — Search, Filters, Physics controls, and Legend.</li>
-          <li><strong>Center Canvas</strong> — Interactive graph with live HUD overlay.</li>
-          <li><strong>Right Sidebar</strong> — Node details, insights, and help tips.</li>
-          <li><strong>Shared Header</strong> — Global controls and status messaging.</li>
+          <li><strong>Left Sidebar</strong> — Search, Filters, Physics controls, and Legend. Collapse or expand it using the header button or floating latch.</li>
+          <li><strong>Center Canvas</strong> — Interactive graph with live HUD overlay and highlighting metrics.</li>
+          <li><strong>Right Sidebar</strong> — Node details, insights, contextual help, and quick documentation access.</li>
+          <li><strong>Shared Header</strong> — Global controls, status messaging, color modes, and export actions.</li>
         </ul>
       </section>
 
@@ -113,10 +115,13 @@
           <thead><tr><th>Control</th><th>Function</th></tr></thead>
           <tbody>
             <tr><td><strong>Title / Status</strong></td><td>Branding plus live announcements for load outcomes.</td></tr>
-            <tr><td><strong>Load graph</strong></td><td>Open a local JSON graph file.</td></tr>
-            <tr><td><strong>Export PNG</strong></td><td>Save the current view as an image.</td></tr>
-            <tr><td><strong>Reset View</strong></td><td>Restore initial zoom and pan.</td></tr>
-            <tr><td><strong>Pause / Resume</strong></td><td>Toggle physics simulation; label updates to reflect state.</td></tr>
+            <tr><td><strong>Load graph</strong></td><td>Open a local JSON graph file or drop a <code>.json</code> anywhere on the page.</td></tr>
+            <tr><td><strong>SBOM CSV</strong></td><td>Export a software bill of materials for the graph. Pair with the <em>Filtered only</em> checkbox to target the current view.</td></tr>
+            <tr><td><strong>Filtered only</strong></td><td>Checkbox that scopes SBOM exports to nodes currently surviving filters.</td></tr>
+            <tr><td><strong>Color mode</strong></td><td>Switch between <em>State</em>, <em>Type</em>, <em>Degree</em>, and <em>Package</em> color palettes.</td></tr>
+            <tr><td><strong>Reset View</strong></td><td>Restore the initial zoom and pan.</td></tr>
+            <tr><td><strong>Hide/Show Sidebar</strong></td><td>Collapse or expand the left sidebar without losing settings.</td></tr>
+            <tr><td><strong>Pause / Resume</strong></td><td>Toggle the physics simulation; the label reflects the active state.</td></tr>
           </tbody>
         </table>
       </section>
@@ -125,9 +130,9 @@
         <h2>Left Sidebar</h2>
         <h3>Search</h3>
         <ul>
-          <li>Type to find a node by name or path.</li>
-          <li>Press <span class="kbd">Enter</span> to jump to the first match and center the view.</li>
-          <li>Shortcut: <span class="kbd">Ctrl/Cmd+F</span> focuses the search field.</li>
+          <li>Type to find a node by name or path with incremental feedback.</li>
+          <li><span class="kbd">Enter</span> jumps to the next match, centering the node and highlighting neighbors.</li>
+          <li>Shortcut: <span class="kbd">Ctrl/Cmd+F</span> focuses the search field instantly.</li>
         </ul>
         <h3>Filters</h3>
         <ul>
@@ -152,8 +157,9 @@
         <ul>
           <li><strong>Green nodes</strong> (<code>var(--accent2)</code>) highlight modules that are actively used elsewhere in the codebase.</li>
           <li><strong>Slate-blue nodes</strong> (<code>#273049</code>) mark modules that nothing depends on, so they are currently unused.</li>
-          <li><strong>Gold nodes</strong> (<code>var(--warning)</code>) represent files that are imported strictly for their side effects.</li>
+          <li><strong>Gold nodes</strong> (<code>var(--warning)</code>) represent files imported strictly for their side effects.</li>
           <li><strong>Purple-gray nodes</strong> (<code>var(--external)</code>) denote external dependencies such as packages from <code>node_modules</code>.</li>
+          <li>Switching to <em>Type</em>, <em>Degree</em>, or <em>Package</em> color modes recolors nodes dynamically based on that perspective.</li>
         </ul>
       </section>
 
@@ -162,8 +168,17 @@
         <ul>
           <li><strong>D3.js</strong> force‑directed graph with zoom and pan.</li>
           <li>Drag a node to pin; <strong>double‑click</strong> to unpin.</li>
-          <li>Nodes display colored halos by state; dynamic edges are dashed.</li>
-          <li><strong>HUD</strong> shows live counts of nodes, edges, used and unused—updated post‑filtering.</li>
+          <li>Nodes update color based on the selected color mode; dynamic edges are dashed.</li>
+          <li>Pin positions persist locally, so custom layouts survive reloads.</li>
+        </ul>
+      </section>
+
+      <section id="hud">
+        <h2>HUD & Highlighting</h2>
+        <ul>
+          <li>The floating HUD shows live counts for nodes, edges, used, and unused after filters are applied.</li>
+          <li>Click any metric pill to spotlight the corresponding nodes or edges directly in the graph.</li>
+          <li>Metric highlights stack with manual selections and respect the current color mode.</li>
         </ul>
       </section>
 
@@ -178,17 +193,16 @@
           <li><strong>Maximum Degree</strong> — Highest node connectivity.</li>
         </ul>
         <h3>Help</h3>
-        <p>Tips and reminders for common actions and shortcuts.</p>
+        <p>Tips and reminders for common actions plus a direct link to the in-app help modal.</p>
       </section>
 
       <section id="interaction">
-        <h2>Interaction & Highlighting</h2>
+        <h2>Interaction & Pinning</h2>
         <ul>
           <li>Selecting a node dims unrelated nodes/links; neighbors stay fully visible.</li>
-          <li>
-            Optional <em>Dim Links</em> mode de‑emphasizes background edges.
-          </li>
+          <li>Optional <em>Dim Links</em> mode de‑emphasizes background edges and works alongside HUD metric highlights.</li>
           <li>The camera smoothly centers on the focused node using the current zoom transform.</li>
+          <li>Dragging a node saves its pinned position in your browser so layouts persist between sessions; double-click to release it.</li>
         </ul>
       </section>
 
@@ -198,6 +212,7 @@
           <li>JSON datasets are normalized; degrees are computed before rendering.</li>
           <li>Filters applied: unused only, hide externals, hide dynamic edges, minimum degree.</li>
           <li>State resets clear previous visualization and sidebar metrics when reloading.</li>
+          <li>Search status messages confirm matches (e.g., “Match 2/5”) while <span class="kbd">Enter</span> cycles through them.</li>
         </ul>
       </section>
 
@@ -240,9 +255,18 @@
       <section id="export">
         <h2>Export & Persistence</h2>
         <ul>
-          <li><strong>Export PNG</strong> serializes the SVG, paints to a canvas, and downloads <code>graph.png</code>.</li>
-          <li><strong>Auto‑load</strong> attempts URL param (e.g., <code>?load=graph.json</code>) or defaults to <code>jsDependencies.json</code>.</li>
-          <li>If none are available, a built‑in <em>demo dataset</em> is rendered with a status notice.</li>
+          <li><strong>SBOM CSV</strong> exports node metadata (state, type, package, LOC, degree). Use <em>Filtered only</em> to scope the export.</li>
+          <li><strong>Auto‑load</strong> attempts URL param (e.g., <code>?load=graph.json</code>) or defaults to <code>jsDependencies.json</code>, falling back to a demo dataset with status messaging.</li>
+          <li>Sidebar collapse state and node pin positions are saved locally to keep your layout intact.</li>
+        </ul>
+      </section>
+
+      <section id="help-modal">
+        <h2>Help Modal</h2>
+        <ul>
+          <li>The right-sidebar help link opens an accessible modal containing this guide without leaving the graph.</li>
+          <li>The modal traps focus, supports <span class="kbd">Esc</span> to close, and returns focus to the originating control.</li>
+          <li>When opened for the first time the help content loads lazily, keeping initial page weight minimal.</li>
         </ul>
       </section>
 
@@ -266,7 +290,7 @@
           <tbody>
             <tr><td>Graph fails to load</td><td>Invalid or missing JSON</td><td>Verify structure and reload manually.</td></tr>
             <tr><td>Graph appears empty</td><td>Filters hide all nodes</td><td>Reset filters and reload the data.</td></tr>
-            <tr><td>Exported PNG is blank</td><td>Browser SVG rendering hiccup</td><td>Refresh the page and retry export.</td></tr>
+            <tr><td>SBOM CSV is empty</td><td>No nodes match current filters</td><td>Disable <em>Filtered only</em> or relax filters, then export again.</td></tr>
             <tr><td>Simulation doesn’t move</td><td>Physics paused</td><td>Click <em>Resume ▶</em> in the header.</td></tr>
           </tbody>
         </table>
