@@ -66,10 +66,16 @@
     .node.external circle { fill: #3b2f5a; }
     .label { pointer-events: none; font-size: 10px; fill: #d6def0; text-shadow: 0 1px 0 #000; opacity: .85; }
     .halo { filter: drop-shadow(0 0 6px rgba(124,92,255,.55)); }
+    .node.highlighted circle { fill: #ff47d8; stroke: rgba(255,255,255,.9); stroke-width: 1.4; filter: drop-shadow(0 0 10px rgba(255,71,216,.55)); }
+    .link.highlighted { stroke: #ffe45c; stroke-width: 2; }
 
     .legend { position: absolute; left: 12px; bottom: 12px; background: rgba(12,14,19,.85); border: 1px solid rgba(255,255,255,.06); padding: 8px 10px; border-radius: 10px; font-size: 12px; display: flex; gap: 10px; }
     .legend .key { display:flex; align-items:center; gap:6px; }
     .legend .dot { width: 10px; height: 10px; border-radius: 50%; display:inline-block; }
+    .legend .metric { background: transparent; border: none; color: var(--text); font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
+    .legend .metric:hover, .legend .metric:focus-visible { background: rgba(124,92,255,.16); color: #fff; outline: none; box-shadow: 0 0 0 1px rgba(124,92,255,.35) inset; }
+    .legend .metric.active { background: linear-gradient(135deg, rgba(255,71,216,.9), rgba(255,226,89,.9)); color: #11131d; box-shadow: 0 0 12px rgba(255,226,120,.45); }
+    .legend .metric-sep { align-self: center; color: rgba(255,255,255,.4); }
 
     .stat { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 13px; }
     .stat .k { color: var(--muted); }
@@ -211,7 +217,15 @@
 
   <section id="canvas">
     <svg id="svg"></svg>
-    <div class="legend" id="hud">Nodes: <span id="nCount" class="mono">0</span> · Edges: <span id="eCount" class="mono">0</span> · Used: <span id="uCount" class="mono">0</span> · Unused: <span id="xCount" class="mono">0</span></div>
+    <div class="legend" id="hud">
+      <button type="button" class="metric" data-highlight="all">Nodes: <span id="nCount" class="mono">0</span></button>
+      <span class="metric-sep" aria-hidden="true">·</span>
+      <button type="button" class="metric" data-highlight="edges">Edges: <span id="eCount" class="mono">0</span></button>
+      <span class="metric-sep" aria-hidden="true">·</span>
+      <button type="button" class="metric" data-highlight="used">Used: <span id="uCount" class="mono">0</span></button>
+      <span class="metric-sep" aria-hidden="true">·</span>
+      <button type="button" class="metric" data-highlight="unused">Unused: <span id="xCount" class="mono">0</span></button>
+    </div>
   </section>
 
 </div>
@@ -230,6 +244,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let graph = { nodes: [], edges: [] };
   let filtered = { nodes: [], edges: [] };
   let showLabels = true; let dimLinks = false; let paused = false;
+  let activeHighlight = null;
   const cfg = { charge: -800, linkDist: 90, linkStr: 0.07, minDegree: 0, showUnusedOnly: false, hideExternals: false, hideDynamic: false };
 
   // --- DOM ---
@@ -238,6 +253,58 @@ window.addEventListener('DOMContentLoaded', () => {
   const linkG = g.append('g').attr('class','links');
   const nodeG = g.append('g').attr('class','nodes');
   const labelG = g.append('g').attr('class','labels');
+
+  const hud = $('hud');
+  const hudButtons = hud ? Array.from(hud.querySelectorAll('[data-highlight]')) : [];
+
+  function shouldHighlightNode(d){
+    if(!activeHighlight) return false;
+    switch(activeHighlight){
+      case 'all':
+        return true;
+      case 'used':
+        return (d.state === 'used' || d.state === 'side_effect_only');
+      case 'unused':
+        return d.state === 'unused';
+      case 'edges':
+        return ((d.inDeg || 0) + (d.outDeg || 0)) > 0;
+      default:
+        return false;
+    }
+  }
+
+  function updateMetricState(){
+    hudButtons.forEach(btn => {
+      const active = activeHighlight === btn.dataset.highlight;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  function updateHighlights(){
+    const nodesSel = nodeG.selectAll('g.node');
+    nodesSel.classed('highlighted', d => shouldHighlightNode(d));
+    const edgesSel = linkG.selectAll('line');
+    const highlightEdges = activeHighlight === 'edges';
+    edgesSel.classed('highlighted', highlightEdges);
+    edgesSel.attr('opacity', highlightEdges ? 1 : (dimLinks ? .25 : 1));
+  }
+
+  function setHighlightFilter(next){
+    const target = next || null;
+    activeHighlight = (target && activeHighlight === target) ? null : target;
+    updateMetricState();
+    updateHighlights();
+  }
+
+  if(hudButtons.length){
+    hudButtons.forEach(btn => {
+      btn.setAttribute('aria-pressed', 'false');
+      btn.addEventListener('click', () => setHighlightFilter(btn.dataset.highlight || null));
+    });
+  }
+
+  updateMetricState();
 
   const zoom = d3.zoom().scaleExtent([0.1, 4]).on('zoom', (e)=>{ g.attr('transform', e.transform); });
   svg.call(zoom);
@@ -386,7 +453,7 @@ window.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('keydown', (e)=>{
     if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='f'){ e.preventDefault(); $('search').focus(); $('search').select(); }
     if(e.key.toLowerCase()==='h'){ showLabels = !showLabels; labelG.style('display', showLabels? null : 'none'); }
-    if(e.key.toLowerCase()==='l'){ dimLinks = !dimLinks; d3.selectAll('.link').attr('opacity', dimLinks? .25 : 1); }
+    if(e.key.toLowerCase()==='l'){ dimLinks = !dimLinks; updateHighlights(); }
     if(e.code==='Space'){ e.preventDefault(); $('pause').click(); }
   });
 
@@ -565,6 +632,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const labelsSel = labelsEnter.merge(labels);
     labelG.style('display', showLabels? null : 'none');
 
+    updateHighlights();
+
     // Sim data
     sim.nodes(filtered.nodes).on('tick', ticked);
     sim.force('link').links(filtered.edges);
@@ -626,6 +695,7 @@ window.addEventListener('DOMContentLoaded', () => {
       return (src===n.id || tgt===n.id)? 1 : (dimLinks? .15 : .25);
     });
     d3.selectAll('text.label').attr('opacity', d=> focus.has(d.id)? 1 : .15);
+    if(activeHighlight) updateHighlights();
   }
 
   function focusOn(n){
