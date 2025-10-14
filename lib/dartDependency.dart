@@ -113,7 +113,7 @@ class _Node {
 class _Edge {
   final String source;   // file id (relative path)
   final String target;   // file id (relative path) OR external id
-  final String kind;     // 'import' | 'export' | 'part'
+  final String kind;     // 'import' | 'export' | 'part' | 'part-of'
   final String certainty; // 'static'
   _Edge({required this.source, required this.target, required this.kind, required this.certainty});
   Map<String, dynamic> toJson() => {
@@ -125,9 +125,10 @@ class _Edge {
 }
 
 class _Directive {
-  final String kind; // import | export | part
-  final String uri;
-  _Directive(this.kind, this.uri);
+  final String kind; // import | export | part | part-of
+  final String reference;
+  final bool isLibraryName;
+  _Directive(this.kind, this.reference, {this.isLibraryName = false});
 }
 
 class _FileFacts {
@@ -135,7 +136,9 @@ class _FileFacts {
   final String relId;
   final List<_Directive> directives;
   final bool hasMain;
-  _FileFacts(this.absPath, this.relId, this.directives, this.hasMain);
+  final String? libraryName;
+  _FileFacts(
+      this.absPath, this.relId, this.directives, this.hasMain, this.libraryName);
 }
 
 // ---------------- main ----------------
@@ -217,10 +220,43 @@ void main(List<String> args) async {
   final edges = <_Edge>[];
   final externals = <String>{};
   final referencedFileAbs = <String, String>{};
+  final libraryByName = <String, List<_FileFacts>>{};
+
+  for (final ff in facts) {
+    final name = ff.libraryName;
+    if (name != null && name.isNotEmpty) {
+      libraryByName.putIfAbsent(name, () => []).add(ff);
+    }
+  }
 
   for (final ff in facts) {
     for (final d in ff.directives) {
-      final resolved = _resolveUri(cwd, ff.absPath, d.uri, pub?.name, localPackages);
+      if (d.kind == 'part-of' && d.isLibraryName) {
+        final targets = libraryByName[d.reference];
+        if (targets != null && targets.isNotEmpty) {
+          for (final libFacts in targets) {
+            edges.add(_Edge(
+              source: ff.relId,
+              target: libFacts.relId,
+              kind: d.kind,
+              certainty: 'static',
+            ));
+          }
+        } else {
+          final extId = 'library:${d.reference}';
+          externals.add(extId);
+          edges.add(_Edge(
+            source: ff.relId,
+            target: extId,
+            kind: d.kind,
+            certainty: 'static',
+          ));
+        }
+        continue;
+      }
+
+      final resolved =
+          _resolveUri(cwd, ff.absPath, d.reference, pub?.name, localPackages);
       if (resolved.type == 'file' && resolved.path != null) {
         final relTarget = _rel(resolved.path!, cwd);
         referencedFileAbs.putIfAbsent(relTarget, () => resolved.path!);
@@ -355,11 +391,15 @@ _FileFacts _extractFacts(String cwd, String fileAbs, String text) {
 
   final directives = <_Directive>[];
   bool hasMain = false;
+  String? libraryName;
 
   // import '...';  export '...';  part '...';
   final reImport = RegExp(r'''^\s*import\s+['"]([^'"]+)['"]''');
   final reExport = RegExp(r'''^\s*export\s+['"]([^'"]+)['"]''');
   final rePart   = RegExp(r'''^\s*part\s+['"]([^'"]+)['"]''');
+  final reLibrary = RegExp(r'''^\s*library\s+([A-Za-z0-9_.]+)\s*;''');
+  final rePartOfUri = RegExp(r'''^\s*part\s+of\s+['"]([^'"]+)['"]''');
+  final rePartOfName = RegExp(r'''^\s*part\s+of\s+([A-Za-z0-9_.]+)\s*;''');
   // main(): allow void main(), Future<void> main(), or parameterized
   // Accept common entry signatures: `void main(...)`, `Future<void> main(...)`,
   // and their `FutureOr<void>` variants. Some code omits `<void>` (e.g.
@@ -380,10 +420,28 @@ _FileFacts _extractFacts(String cwd, String fileAbs, String text) {
     final m3 = rePart.firstMatch(line);
     if (m3 != null) { directives.add(_Directive('part', m3.group(1)!)); continue; }
 
+    final libMatch = reLibrary.firstMatch(line);
+    if (libMatch != null) {
+      libraryName ??= libMatch.group(1)!;
+      continue;
+    }
+
+    final partOfUriMatch = rePartOfUri.firstMatch(line);
+    if (partOfUriMatch != null) {
+      directives.add(_Directive('part-of', partOfUriMatch.group(1)!));
+      continue;
+    }
+
+    final partOfNameMatch = rePartOfName.firstMatch(line);
+    if (partOfNameMatch != null) {
+      directives.add(_Directive('part-of', partOfNameMatch.group(1)!, isLibraryName: true));
+      continue;
+    }
+
     if (!hasMain && reMain.hasMatch(line)) hasMain = true;
   }
 
-  return _FileFacts(fileAbs, _rel(fileAbs, cwd), directives, hasMain);
+  return _FileFacts(fileAbs, _rel(fileAbs, cwd), directives, hasMain, libraryName);
 }
 
 // ---------------- pubspec ----------------
