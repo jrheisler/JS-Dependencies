@@ -21,7 +21,7 @@
 // Build:
 //   dart compile exe .\dartDependency.dart -o .\dartDependency.exe
 // Run:
-//   .\dartDependency.exe   # writes dartDependencies.json
+//   .\dartDependency.exe [entry.dart ...]  # writes dartDependencies.json (optionally seed entries)
 
 import 'dart:convert';
 import 'dart:io';
@@ -154,6 +154,15 @@ void main(List<String> args) async {
     facts.add(_extractFacts(cwd, f, text));
   }
 
+  // Explicit entry points from CLI args
+  final explicitEntries = <String>{};
+  for (final arg in args) {
+    final absArg = _normalize(_abs(arg));
+    if (File(absArg).existsSync() && _isWithinRepo(absArg, cwd)) {
+      explicitEntries.add(_rel(absArg, cwd));
+    }
+  }
+
   // 4) Build edges and externals
   final edges = <_Edge>[];
   final externals = <String>{};
@@ -215,7 +224,20 @@ void main(List<String> args) async {
   _computeDegrees(nodes, edges);
 
   // 7) Entry files
-  final entries = _discoverEntryFiles(cwd, facts);
+  final fileIds = nodes.where((n) => n.type == 'file').map((n) => n.id).toSet();
+  final entrySet = <String>{}..addAll(explicitEntries)..addAll(_discoverEntryFiles(cwd, facts));
+  entrySet.removeWhere((e) => !fileIds.contains(e));
+  if (entrySet.isEmpty) {
+    for (final n in nodes) {
+      if (n.type == 'file' && n.inDeg == 0) entrySet.add(n.id);
+    }
+  }
+  if (entrySet.isEmpty) {
+    for (final n in nodes) {
+      if (n.type == 'file') entrySet.add(n.id);
+    }
+  }
+  final entries = entrySet.toList();
 
   // 8) Reachability
   final usedSet = _reach(entries, edges);
