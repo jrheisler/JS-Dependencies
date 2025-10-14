@@ -225,22 +225,14 @@ void main(List<String> args) async {
 
   // 7) Entry files
   final fileIds = nodes.where((n) => n.type == 'file').map((n) => n.id).toSet();
-  final entrySet = <String>{}..addAll(explicitEntries)..addAll(_discoverEntryFiles(cwd, facts));
+  final entrySet = <String>{}
+    ..addAll(explicitEntries)
+    ..addAll(_discoverEntryFiles(cwd, facts, pub?.name));
   entrySet.removeWhere((e) => !fileIds.contains(e));
-  if (entrySet.isEmpty) {
-    for (final n in nodes) {
-      if (n.type == 'file' && n.inDeg == 0) entrySet.add(n.id);
-    }
-  }
-  if (entrySet.isEmpty) {
-    for (final n in nodes) {
-      if (n.type == 'file') entrySet.add(n.id);
-    }
-  }
   final entries = entrySet.toList();
 
   // 8) Reachability
-  final usedSet = _reach(entries, edges);
+  final usedSet = entries.isEmpty ? <String>{} : _reach(entries, edges);
   for (final n in nodes) {
     if (n.type == 'external') { n.state = 'used'; continue; }
     n.state = usedSet.contains(n.id) ? 'used' : 'unused';
@@ -433,7 +425,8 @@ _Resolved _resolveUri(String cwd, String fromFileAbs, String uri, String? selfPk
 }
 
 // ---------------- entries ----------------
-List<String> _discoverEntryFiles(String cwd, List<_FileFacts> facts) {
+List<String> _discoverEntryFiles(
+    String cwd, List<_FileFacts> facts, String? packageName) {
   final entries = <String>{};
 
   // (a) Any file with `main(...)`
@@ -453,6 +446,20 @@ List<String> _discoverEntryFiles(String cwd, List<_FileFacts> facts) {
   ];
   for (final p in common) {
     if (File(p).existsSync()) entries.add(_rel(p, cwd));
+  }
+
+  // (c) Package library entry (lib/<package>.dart)
+  if (packageName != null && packageName.isNotEmpty) {
+    final normalized = packageName.replaceAll('-', '_');
+    final candidates = [
+      _join(cwd, 'lib${_sep}$normalized.dart'),
+      _join(cwd, 'lib${_sep}$packageName.dart'),
+    ];
+    for (final candidate in candidates) {
+      if (File(candidate).existsSync()) {
+        entries.add(_rel(candidate, cwd));
+      }
+    }
   }
 
   return entries.toList();
