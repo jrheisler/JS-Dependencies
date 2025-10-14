@@ -356,6 +356,7 @@ window.addEventListener('DOMContentLoaded', () => {
   $('hideExternals').addEventListener('change', e=>{ cfg.hideExternals = e.target.checked; render(); });
   $('hideDynamic').addEventListener('change', e=>{ cfg.hideDynamic = e.target.checked; render(); });
   if(colorModeEl){
+    colorModeEl.setAttribute('aria-label','Color mode');
     colorModeEl.addEventListener('change', ()=> {
       nodeG.selectAll('g.node').select('circle').style('fill', d => getNodeColor(d));
       updateHighlights();
@@ -924,7 +925,7 @@ window.addEventListener('DOMContentLoaded', () => {
       setStatus(`Loaded ${autoTarget}`);
     } catch(err) {
       console.warn('Falling back to demo graph', err);
-      setStatus('Demo graph loaded — use “Load graph.json” to open your data.');
+      setStatus('Demo graph loaded — click “Load graph.json” or drop a JSON file onto the canvas.');
       loadGraph(demo);
     }
   }
