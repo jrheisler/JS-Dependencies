@@ -38,9 +38,12 @@ String _normalize(String p) {
 
 String _rel(String target, String from) {
   final T = _normalize(_abs(target));
-  final F = _normalize(_abs(from));
+  var F = _normalize(_abs(from));
+  if (F.endsWith(_sep)) {
+    F = F.substring(0, F.length - 1);
+  }
   if (T == F) return '.';
-  if (T.startsWith(F + _sep)) return T.substring(F.length + 1);
+  if (F.isNotEmpty && T.startsWith(F + _sep)) return T.substring(F.length + 1);
   return T;
 }
 
@@ -214,7 +217,8 @@ Future<void> main(List<String> args) async {
         if (internalTargets.isEmpty) {
           final dirAbs = _resolvePackageDir(cwd, prefix);
           if (dirAbs != null) {
-            final filesInPkg = pkgDirToFiles[_relDir(dirAbs, cwd)] ?? const <String>[];
+            final relDirKey = _relDir(dirAbs, cwd).replaceAll('\\', '/');
+            final filesInPkg = pkgDirToFiles[relDirKey] ?? const <String>[];
             for (final tgtAbs in filesInPkg) {
               internalTargets.add(_rel(tgtAbs, cwd));
             }
@@ -352,9 +356,9 @@ Future<List<String>> _collectKtFiles(String root) async {
 }
 
 // ---------------- parse ----------------
-final _packageReg = RegExp(r'^\\s*package\\s+([A-Za-z0-9_.]+)\\s*$', multiLine: true);
-final _importReg =
-    RegExp(r'^\\s*import\\s+([A-Za-z_][A-Za-z0-9_.]*\\*?)(?:\\s+as\\s+[A-Za-z_][A-Za-z0-9_]*)?\\s*$', multiLine: true);
+final _packageReg = RegExp(r'^\\s*package\\s+([^\\s;]+)', multiLine: true);
+final _importReg = RegExp(r'^\\s*import\\s+([^\\s;]+)', multiLine: true);
+final _importAliasSplit = RegExp(r'\\s+as\\s+', caseSensitive: false);
 final _declarationReg = RegExp(
   r'^(?:\\s*(?:public|internal|private|protected)\\s+)?(?:data\\s+)?(class|object|interface|enum)\\s+([A-Za-z0-9_]+)',
   multiLine: true,
@@ -364,19 +368,25 @@ final _mainReg =
 
 _KtFacts _extractFacts(String cwd, String absPath, String text) {
   final normalized = _normalize(absPath);
-  final noBlock = text.replaceAll(RegExp(r'/\\*[\\s\\S]*?\\*/'), '');
+  final withoutBom = text.replaceFirst('\u{FEFF}', '');
+  final noBlock = withoutBom.replaceAll(RegExp(r'/\\*[\\s\\S]*?\\*/'), '');
   final cleaned = noBlock.replaceAll(RegExp(r'//.*$', multiLine: true), '');
 
   final packageMatch = _packageReg.firstMatch(cleaned);
-  final packageName = packageMatch != null ? packageMatch.group(1) : null;
+  final packageName = packageMatch != null ? packageMatch.group(1)?.trim() : null;
 
   final imports = <_KtImport>[];
   for (final match in _importReg.allMatches(cleaned)) {
-    final raw = match.group(1)!;
-    if (raw.endsWith('.*')) {
-      imports.add(_KtImport(raw, isWildcard: true));
+    var clause = match.group(1)!.trim();
+    final aliasMatch = _importAliasSplit.firstMatch(clause);
+    if (aliasMatch != null) {
+      clause = clause.substring(0, aliasMatch.start).trim();
+    }
+    if (clause.isEmpty) continue;
+    if (clause.endsWith('.*')) {
+      imports.add(_KtImport(clause, isWildcard: true));
     } else {
-      imports.add(_KtImport(raw));
+      imports.add(_KtImport(clause));
     }
   }
 
@@ -458,8 +468,12 @@ String _packageDirForFile(String relFile) {
 
 String _relDir(String absDir, String from) {
   final T = _normalize(absDir);
-  final F = _normalize(_abs(from));
-  if (T.startsWith(F + _sep)) return T.substring(F.length + 1);
+  var F = _normalize(_abs(from));
+  if (F.endsWith(_sep)) {
+    F = F.substring(0, F.length - 1);
+  }
+  if (T == F) return '.';
+  if (F.isNotEmpty && T.startsWith(F + _sep)) return T.substring(F.length + 1);
   return T;
 }
 
