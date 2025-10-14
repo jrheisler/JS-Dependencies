@@ -46,8 +46,14 @@ void main(List<String> args) async {
   final files = await _collectSourceFiles(cwd);
 
   final pkg = await _readPackageJson(cwd);
-  final entriesAbs = _discoverEntries(cwd, pkg, files);
-  final entriesRel = entriesAbs.map((e) => _rel(e, cwd)).toList();
+  final entriesAbsSet = <String>{};
+  for (final arg in args) {
+    final absArg = _normalize(_abs(arg));
+    if (File(absArg).existsSync()) entriesAbsSet.add(absArg);
+  }
+  entriesAbsSet.addAll(_discoverEntries(cwd, pkg, files));
+  final entriesAbs = entriesAbsSet.toList();
+  var entriesRel = entriesAbs.map((e) => _rel(e, cwd)).toList();
 
   // Parse imports
   final factsByPath = <String, _FileFacts>{};
@@ -111,6 +117,20 @@ void main(List<String> args) async {
     final tgt = e.target.startsWith(cwd) ? _rel(e.target, cwd) : e.target;
     return _Edge(source: src, target: tgt, kind: e.kind, certainty: e.certainty);
   }).toList();
+
+  if (entriesRel.isEmpty) {
+    final inCounts = <String, int>{};
+    for (final e in relEdges) {
+      inCounts[e.target] = (inCounts[e.target] ?? 0) + 1;
+    }
+    entriesRel = nodes
+        .where((n) => n.type == 'file' && (inCounts[n.id] ?? 0) == 0)
+        .map((n) => n.id)
+        .toList();
+  }
+  if (entriesRel.isEmpty) {
+    entriesRel = nodes.where((n) => n.type == 'file').map((n) => n.id).toList();
+  }
 
   // Degrees
   _computeDegrees(nodes, relEdges);
