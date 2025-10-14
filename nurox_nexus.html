@@ -108,6 +108,9 @@
     <button class="btn" id="openJson">Load graph.json</button>
     <input type="file" id="fileInput" accept="application/json" hidden />
     <button class="btn" id="exportSbom" title="Download SBOM CSV">SBOM CSV</button>
+    <label class="btn" title="Export only the currently filtered nodes">
+      <input type="checkbox" id="exportFiltered" checked style="margin-right:6px;"> Filtered only
+    </label>
     <select id="colorMode" class="btn" title="Color mode">
       <option value="state">Color: State</option>
       <option value="type">Color: Type</option>
@@ -779,7 +782,8 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function exportSbom(){
-    const nodes = filtered.nodes.length ? filtered.nodes : graph.nodes;
+    const onlyFiltered = !!($('exportFiltered') && $('exportFiltered').checked);
+    const nodes = onlyFiltered ? filtered.nodes : graph.nodes;
     if(!nodes.length){
       setStatus('No graph data to export');
       return;
