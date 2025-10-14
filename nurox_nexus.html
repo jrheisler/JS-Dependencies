@@ -586,6 +586,13 @@ window.addEventListener('DOMContentLoaded', () => {
     return '#1dd1a1';
   }
 
+  const PIN_KEY = 'nurox:nexus:pins';
+  function loadPins(){
+    try{ return JSON.parse(localStorage.getItem(PIN_KEY)||'{}'); }catch{ return {}; }
+  }
+  function savePins(pins){ try{ localStorage.setItem(PIN_KEY, JSON.stringify(pins)); }catch{} }
+  let pins = loadPins();
+
   function clearGraph(){
     sim.stop();
     graph = { nodes: [], edges: [] };
@@ -610,6 +617,14 @@ window.addEventListener('DOMContentLoaded', () => {
     clearGraph();
     // Normalize expected schema
     graph = { nodes: (gjson.nodes||[]).map(n=>({ ...n })), edges: (gjson.edges||gjson.links||[]).map(e=>({ ...e, source: e.source, target: e.target })) };
+    pins = loadPins();
+    graph.nodes.forEach(n => {
+      const p = pins[n.id];
+      if(p && typeof p.x==='number' && typeof p.y==='number'){
+        n.fx = p.x; n.fy = p.y; // pin
+        n.x = p.x; n.y = p.y;
+      }
+    });
     computeDegrees();
     inferUsageStates();
     paused = false;
@@ -737,9 +752,9 @@ window.addEventListener('DOMContentLoaded', () => {
       .call(d3.drag()
         .on('start', (e,d)=>{ if(!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
         .on('drag', (e,d)=>{ d.fx = e.x; d.fy = e.y; })
-        .on('end', (e,d)=>{ if(!e.active) sim.alphaTarget(0); }))
+        .on('end', (e,d)=>{ if(!e.active) sim.alphaTarget(0); pins[d.id] = {x: d.fx ?? d.x, y: d.fy ?? d.y}; savePins(pins); }))
       .on('click', (e,d)=> selectNode(d))
-      .on('dblclick', (e,d)=>{ d.fx = null; d.fy = null; })
+      .on('dblclick', (e,d)=>{ d.fx = null; d.fy = null; delete pins[d.id]; savePins(pins); })
     ;
 
     nodesEnter.append('circle')
