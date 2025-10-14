@@ -482,14 +482,62 @@ window.addEventListener('DOMContentLoaded', () => {
     if(e.key === 'Escape'){ closeHelp(); }
   });
 
-  $('search').addEventListener('keydown', (e)=>{
-    if(e.key==='Enter'){
-      const q = e.target.value.trim().toLowerCase();
-      if(!q) return;
-      const hit = filtered.nodes.find(n => n.id.toLowerCase().includes(q));
-      if(hit){ selectNode(hit); focusOn(hit); highlight(hit); }
+  const searchEl = $('search');
+  let searchTimer = null;
+  let lastQuery = '';
+  let lastHits = [];
+  let lastIndex = -1;
+
+  function runSearch(q){
+    const hay = filtered.nodes;
+    lastHits = hay.filter(n => n.id.toLowerCase().includes(q));
+    lastIndex = -1;
+    if(lastHits.length){
+      nextHit();
+    } else {
+      setStatus(`No matches for "${q}"`);
     }
-  });
+  }
+  function nextHit(){
+    if(!lastHits.length) return;
+    lastIndex = (lastIndex + 1) % lastHits.length;
+    const hit = lastHits[lastIndex];
+    selectNode(hit);
+    focusOn(hit);
+    highlight(hit);
+    setStatus(`Match ${lastIndex+1}/${lastHits.length}: ${hit.id}`);
+  }
+  if(searchEl){
+    searchEl.addEventListener('input', (e)=>{
+      const q = e.target.value.trim().toLowerCase();
+      clearTimeout(searchTimer);
+      if(!q){
+        lastHits = [];
+        lastIndex = -1;
+        lastQuery = '';
+        setStatus('');
+        return;
+      }
+      searchTimer = setTimeout(()=>{
+        if(q && q!==lastQuery){
+          lastQuery=q;
+          runSearch(q);
+        }
+      }, 150);
+    });
+    searchEl.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+        if(searchEl.value.trim()){
+          if(lastHits.length){
+            nextHit();
+          } else {
+            runSearch(searchEl.value.trim().toLowerCase());
+          }
+        }
+      }
+    });
+  }
   window.addEventListener('keydown', (e)=>{
     if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='f'){ e.preventDefault(); $('search').focus(); $('search').select(); }
     if(e.key.toLowerCase()==='h'){ showLabels = !showLabels; labelG.style('display', showLabels? null : 'none'); }
