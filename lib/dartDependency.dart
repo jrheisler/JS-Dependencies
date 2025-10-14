@@ -157,14 +157,17 @@ void main(List<String> args) async {
   // 4) Build edges and externals
   final edges = <_Edge>[];
   final externals = <String>{};
+  final referencedFileAbs = <String, String>{};
 
   for (final ff in facts) {
     for (final d in ff.directives) {
       final resolved = _resolveUri(cwd, ff.absPath, d.uri, pub?.name, localPackages);
       if (resolved.type == 'file' && resolved.path != null) {
+        final relTarget = _rel(resolved.path!, cwd);
+        referencedFileAbs.putIfAbsent(relTarget, () => resolved.path!);
         edges.add(_Edge(
           source: ff.relId,
-          target: _rel(resolved.path!, cwd),
+          target: relTarget,
           kind: d.kind,
           certainty: 'static',
         ));
@@ -182,6 +185,7 @@ void main(List<String> args) async {
 
   // 5) Nodes (files + externals)
   final nodes = <_Node>[];
+  final existingIds = <String>{};
   for (final ff in facts) {
     nodes.add(_Node(
       id: ff.relId,
@@ -190,6 +194,18 @@ void main(List<String> args) async {
       sizeLOC: await _estimateLOC(ff.absPath),
       packageName: pub?.name,
     ));
+    existingIds.add(ff.relId);
+  }
+
+  for (final entry in referencedFileAbs.entries) {
+    if (existingIds.contains(entry.key)) continue;
+    nodes.add(_Node(
+      id: entry.key,
+      type: 'file',
+      state: 'unused',
+      sizeLOC: await _estimateLOC(entry.value),
+    ));
+    existingIds.add(entry.key);
   }
   for (final ext in externals) {
     nodes.add(_Node(id: ext, type: 'external', state: 'used'));
@@ -358,13 +374,13 @@ _Resolved _resolveUri(String cwd, String fromFileAbs, String uri, String? selfPk
     if (selfPkg != null && pkg == selfPkg) {
       // Resolve to ./lib/<sub>
       final abs = _normalize(_join(cwd, _join('lib', sub.replaceAll('/', _sep))));
-      if (File(abs).existsSync()) return _Resolved.file(abs);
+      if (File(abs).existsSync() || _isWithinRepo(abs, cwd)) return _Resolved.file(abs);
       // If not present, treat as external (perhaps build step)
     }
     final localBase = localPackages[pkg];
     if (localBase != null) {
       final abs = _normalize(_join(localBase, sub.replaceAll('/', _sep)));
-      if (File(abs).existsSync()) return _Resolved.file(abs);
+      if (File(abs).existsSync() || _isWithinRepo(abs, cwd)) return _Resolved.file(abs);
     }
     return _Resolved.external('pub:$pkg');
   }
@@ -374,14 +390,14 @@ _Resolved _resolveUri(String cwd, String fromFileAbs, String uri, String? selfPk
     final baseDir = _dir(fromFileAbs);
     final candidate = uri.replaceAll('/', _sep).replaceAll('\\', _sep);
     final abs = _normalize(_join(baseDir, candidate));
-    if (File(abs).existsSync()) return _Resolved.file(abs);
+    if (File(abs).existsSync() || _isWithinRepo(abs, cwd)) return _Resolved.file(abs);
     return _Resolved.external('pub:unknown'); // fallback (should be rare)
   }
 
   // Absolute file path (unlikely in Dart imports) — try to normalize
   if (uri.contains(':') || uri.startsWith(_sep)) {
     final abs = _normalize(uri);
-    if (File(abs).existsSync()) return _Resolved.file(abs);
+    if (File(abs).existsSync() || _isWithinRepo(abs, cwd)) return _Resolved.file(abs);
     return _Resolved.external('pub:unknown');
   }
 
