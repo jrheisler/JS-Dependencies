@@ -248,6 +248,13 @@ window.addEventListener('DOMContentLoaded', () => {
   const cfg = { charge: -800, linkDist: 90, linkStr: 0.07, minDegree: 0, showUnusedOnly: false, hideExternals: false, hideDynamic: false };
 
   // --- DOM ---
+  const $ = (id)=>{
+    if(typeof id === 'string' && id.startsWith('#')){
+      return document.getElementById(id.slice(1));
+    }
+    return document.getElementById(id);
+  };
+
   const svg = d3.select('#svg');
   const g = svg.append('g');
   const linkG = g.append('g').attr('class','links');
@@ -317,12 +324,6 @@ window.addEventListener('DOMContentLoaded', () => {
     .force('collision', d3.forceCollide().radius(d=>sizeFor(d)+6));
 
   // --- UI bindings ---
-  const $ = (id)=>{
-    if(typeof id === 'string' && id.startsWith('#')){
-      return document.getElementById(id.slice(1));
-    }
-    return document.getElementById(id);
-  };
   const statusEl = $('status');
   const setStatus = (msg)=>{ if(statusEl) statusEl.textContent = msg || ''; };
   const setText = (id, value)=>{ const el = $(id); if(el) el.textContent = value; };
