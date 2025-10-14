@@ -46,6 +46,11 @@ String _rel(String target, String from) {
   if (T.startsWith(F + _sep)) return T.substring(F.length + 1);
   return T; // fallback absolute
 }
+bool _isWithinRepo(String target, String root) {
+  final T = _normalize(_abs(target));
+  final R = _normalize(_abs(root));
+  return T == R || T.startsWith(R + _sep);
+}
 String _join(String a, String b) {
   if (a.isEmpty) return b;
   if (b.isEmpty) return a;
@@ -137,6 +142,7 @@ void main(List<String> args) async {
 
   // 1) Discover project info
   final pub = await _readPubspec(cwd); // get self package name if any
+  final localPackages = await _readPackageConfig(cwd);
 
   // 2) Collect Dart files
   final files = await _collectDartFiles(cwd);
@@ -154,7 +160,7 @@ void main(List<String> args) async {
 
   for (final ff in facts) {
     for (final d in ff.directives) {
-      final resolved = _resolveUri(cwd, ff.absPath, d.uri, pub?.name);
+      final resolved = _resolveUri(cwd, ff.absPath, d.uri, pub?.name, localPackages);
       if (resolved.type == 'file' && resolved.path != null) {
         edges.add(_Edge(
           source: ff.relId,
@@ -284,6 +290,40 @@ Future<_Pubspec?> _readPubspec(String cwd) async {
   return null;
 }
 
+Future<Map<String, String>> _readPackageConfig(String cwd) async {
+  final result = <String, String>{};
+  final configPath = _join(cwd, '.dart_tool${_sep}package_config.json');
+  final file = File(configPath);
+  if (!await file.exists()) return result;
+  try {
+    final text = await file.readAsString();
+    final data = jsonDecode(text);
+    if (data is Map && data['packages'] is List) {
+      final packages = data['packages'] as List;
+      final configDir = _dir(configPath);
+      final configUri = Uri.directory(configDir, windows: Platform.isWindows);
+      for (final entry in packages) {
+        if (entry is! Map) continue;
+        final name = entry['name'];
+        final rootUriRaw = entry['rootUri'];
+        final packageUriRaw = entry['packageUri'];
+        if (name is! String) continue;
+        final rootUri = rootUriRaw is String
+            ? configUri.resolve(rootUriRaw)
+            : configUri;
+        final packageUri = packageUriRaw is String
+            ? rootUri.resolve(packageUriRaw)
+            : rootUri;
+        final basePath = _normalize(packageUri.toFilePath(windows: Platform.isWindows));
+        if (_isWithinRepo(basePath, cwd)) {
+          result[name] = basePath;
+        }
+      }
+    }
+  } catch (_) {}
+  return result;
+}
+
 // ---------------- resolve URIs ----------------
 class _Resolved {
   final String type;  // 'file' | 'external'
@@ -301,7 +341,8 @@ bool _isLikelyRelativeImport(String uri) {
   return true;
 }
 
-_Resolved _resolveUri(String cwd, String fromFileAbs, String uri, String? selfPkg) {
+_Resolved _resolveUri(String cwd, String fromFileAbs, String uri, String? selfPkg,
+    Map<String, String> localPackages) {
   // dart:core, dart:io ...
   if (uri.startsWith('dart:')) {
     final name = uri.substring('dart:'.length);
@@ -319,6 +360,11 @@ _Resolved _resolveUri(String cwd, String fromFileAbs, String uri, String? selfPk
       final abs = _normalize(_join(cwd, _join('lib', sub.replaceAll('/', _sep))));
       if (File(abs).existsSync()) return _Resolved.file(abs);
       // If not present, treat as external (perhaps build step)
+    }
+    final localBase = localPackages[pkg];
+    if (localBase != null) {
+      final abs = _normalize(_join(localBase, sub.replaceAll('/', _sep)));
+      if (File(abs).existsSync()) return _Resolved.file(abs);
     }
     return _Resolved.external('pub:$pkg');
   }
