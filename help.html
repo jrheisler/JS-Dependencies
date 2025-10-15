@@ -136,7 +136,9 @@
         </ul>
         <h3>Filters</h3>
         <ul>
-          <li><strong>Show unused only</strong> — Display only modules not referenced by others.</li>
+          <li><strong>Show disconnected only</strong> — Focus on files unreachable in <em>every</em> profile.</li>
+          <li><strong>Show dynamic-only</strong> — Surface nodes that rely solely on dynamic evidence.</li>
+          <li><strong>Show deferred-only</strong> — Highlight modules loaded lazily.</li>
           <li><strong>Hide externals</strong> — Exclude packages from <code>node_modules</code>.</li>
           <li><strong>Hide dynamic edges</strong> — Remove dynamic/heuristic edges.</li>
           <li><strong>Minimum degree</strong> — Slider with live count to prune low‑degree nodes.</li>
@@ -148,18 +150,15 @@
           <li><strong>Link strength</strong> — Spring stiffness of edges.</li>
         </ul>
         <h3>Legend</h3>
-        <p>
-          <span class="pill"><span class="dot" style="background:var(--accent2)"></span> Used</span>
-          <span class="pill"><span class="dot" style="background:#273049"></span> Unused</span>
-          <span class="pill"><span class="dot" style="background:var(--warning)"></span> Side‑effect only</span>
-          <span class="pill"><span class="dot" style="background:var(--external)"></span> External</span>
-        </p>
+        <p>The legend now reflects <strong>profile-aware statuses</strong>. Each badge lists a color and explanation for the active profile.</p>
         <ul>
-          <li><strong>Green nodes</strong> (<code>var(--accent2)</code>) highlight modules that are actively used elsewhere in the codebase.</li>
-          <li><strong>Slate-blue nodes</strong> (<code>#273049</code>) mark modules that nothing depends on, so they are currently unused.</li>
-          <li><strong>Gold nodes</strong> (<code>var(--warning)</code>) represent files imported strictly for their side effects.</li>
-          <li><strong>Purple-gray nodes</strong> (<code>var(--external)</code>) denote external dependencies such as packages from <code>node_modules</code>.</li>
-          <li>Switching to <em>Type</em>, <em>Degree</em>, or <em>Package</em> color modes recolors nodes dynamically based on that perspective.</li>
+          <li><strong>Reachable (current profile)</strong> — Active profile entrypoints can reach the node; the default bright green.</li>
+          <li><strong>Reachable in other profile(s)</strong> — Only reachable when you switch profiles; shown in aqua.</li>
+          <li><strong>Deferred-only</strong> — Only discovered through deferred or lazy edges; highlighted in violet.</li>
+          <li><strong>Dynamic-only</strong> — Backed solely by dynamic loading, coverage, or keep rules; shown in amber.</li>
+          <li><strong>Test-only</strong> / <strong>Build-time only</strong> — Loaded exclusively through the corresponding edge phases.</li>
+          <li><strong>Disconnected (all profiles)</strong> — Never reached in any profile; bright pink and the primary deletion candidates.</li>
+          <li>Switching to <em>Type</em>, <em>Degree</em>, or <em>Package</em> color modes still recolors nodes dynamically based on that perspective.</li>
         </ul>
       </section>
 
@@ -176,7 +175,7 @@
       <section id="hud">
         <h2>HUD & Highlighting</h2>
         <ul>
-          <li>The floating HUD shows live counts for nodes, edges, used, and unused after filters are applied.</li>
+          <li>The floating HUD shows live counts for nodes, edges, <strong>reachable</strong>, <strong>disconnected</strong>, and <strong>dynamic-only</strong> nodes after filters are applied.</li>
           <li>Click any metric pill to spotlight the corresponding nodes or edges directly in the graph.</li>
           <li>Metric highlights stack with manual selections and respect the current color mode.</li>
         </ul>
@@ -190,6 +189,7 @@
         <ul>
           <li><strong>Pure Leaves</strong> — Nodes with one connection.</li>
           <li><strong>Side‑effect Files</strong> — Imported for effects only.</li>
+          <li><strong>Unused &amp; attached</strong> — Disconnected nodes that still share edges (prime review targets).</li>
           <li><strong>Maximum Degree</strong> — Highest node connectivity.</li>
         </ul>
         <h3>Help</h3>
@@ -210,7 +210,7 @@
         <h2>Data Handling & Filtering</h2>
         <ul>
           <li>JSON datasets are normalized; degrees are computed before rendering.</li>
-          <li>Filters applied: unused only, hide externals, hide dynamic edges, minimum degree.</li>
+          <li>Filters applied: show disconnected only, show dynamic-only, show deferred-only, hide externals, hide dynamic edges, minimum degree.</li>
           <li>State resets clear previous visualization and sidebar metrics when reloading.</li>
           <li>Search status messages confirm matches (e.g., “Match 2/5”) while <span class="kbd">Enter</span> cycles through them.</li>
         </ul>
@@ -218,38 +218,40 @@
 
       <section id="logic">
         <h2>Dependency Logic Explained</h2>
-        <p>The <strong>Nurox Dependency Analyzer</strong> scans every source file in your project and builds a visual map of how your code connects. This section explains how file states—<em>used</em>, <em>unused</em>, and <em>side-effect only</em>—are determined.</p>
+        <p>The <strong>Nurox Dependency Analyzer</strong> scans every source file in your project and builds a visual map of how your code connects. The reclassification system now produces richer <em>statuses</em> that factor in multiple profiles and edge phases.</p>
 
         <h3>1. Adding Files as Nodes</h3>
-        <p>Every project file becomes a <strong>node</strong> in the graph. Each file starts out marked as <strong>unused</strong>. External packages such as those inside <code>node_modules</code> are added separately and immediately marked <strong>used</strong>, since they come from outside your source tree.</p>
+        <p>Every project file becomes a <strong>node</strong> in the graph. External packages such as those inside <code>node_modules</code> are tracked separately so you can hide them with a single toggle.</p>
 
         <h3>2. Tracking Connections</h3>
-        <p>Whenever one file imports or exports from another, Nurox records that link as an <strong>edge</strong> between them. These edges describe relationships but do not by themselves change a node’s state. A file can have incoming or outgoing links and still remain “unused.”</p>
+        <p>Whenever one file imports or exports from another, Nurox records that link as an <strong>edge</strong>. Each edge carries metadata about how it loads (static, deferred, or dynamic) and which phase it belongs to (runtime, test, or build).</p>
 
-        <h3>3. Finding Entry Points</h3>
-        <p>Nurox identifies <strong>entry nodes</strong>—the starting points of your application—by reading fields such as <code>main</code>, <code>module</code>, or <code>exports</code> in <code>package.json</code>. If none are declared, it looks for common patterns like <code>index.js</code> or <code>src/main.ts</code>.</p>
+        <h3>3. Profiles & Entrypoints</h3>
+        <p>Nurox identifies <strong>entry nodes</strong> by reading hints such as <code>main</code>, <code>module</code>, or <code>exports</code> fields and can honour multiple <em>profiles</em> (for example, app vs. tests). Switching profiles in the header recalculates reachability from that profile’s entrypoints.</p>
 
-        <h3>4. Determining What’s Used</h3>
-        <p>From those entry nodes, the analyzer performs a <strong>reachability search</strong> (depth-first traversal). It walks every outgoing edge and marks reachable files as <strong>used</strong>. Files imported solely for execution side effects are marked <strong>side-effect only</strong>.</p>
+        <h3>4. Reachability Analysis</h3>
+        <p>For each profile the analyzer performs several traversals: full reachability, without deferred edges, without dynamic edges, runtime-only, test-allowed, and build-allowed. These sets decide whether a node is reachable now, only via deferred edges, only via dynamic signals, and which execution phase touches it.</p>
 
-        <h3>5. Unused but Linked Files</h3>
-        <p>Some files may still have connections yet stay marked “unused.” This happens when they are imported by other files that are themselves <em>not</em> reachable from an entry point. In that case, the node remains outside the reachability set and keeps its “unused” state.</p>
+        <h3>5. Classifying Nodes</h3>
+        <p>The results of those traversals are merged into statuses. Nodes reached in the active profile are tagged <strong>Reachable (current profile)</strong>. Nodes hit only in other profiles are labeled <strong>Reachable in other profile(s)</strong>. Files that require deferred edges become <strong>Deferred-only</strong>; those backed solely by dynamic evidence become <strong>Dynamic-only</strong>. If the only paths are through test or build edges, they receive <strong>Test-only</strong> or <strong>Build-time only</strong>. Anything untouched in every profile falls into <strong>Disconnected (all profiles)</strong>, marking it as a safe deletion candidate.</p>
 
         <div class="hr"></div>
 
         <h3>Summary</h3>
         <table>
-          <thead><tr><th>Concept</th><th>Meaning</th></tr></thead>
+          <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
           <tbody>
-            <tr><td><strong>Nodes</strong></td><td>Project files and external packages.</td></tr>
-            <tr><td><strong>Edges</strong></td><td>Import/export relationships between files.</td></tr>
-            <tr><td><strong>Used</strong></td><td>Files reachable from an entry point.</td></tr>
-            <tr><td><strong>Unused</strong></td><td>Files not reachable from any entry point.</td></tr>
-            <tr><td><strong>Side-effect only</strong></td><td>Files imported for runtime effects only.</td></tr>
+            <tr><td><strong>Reachable (current profile)</strong></td><td>Reached from entrypoints in the active profile.</td></tr>
+            <tr><td><strong>Reachable in other profile(s)</strong></td><td>Not reached right now but reached when another profile is active.</td></tr>
+            <tr><td><strong>Deferred-only</strong></td><td>Requires deferred or lazy edges to be discovered.</td></tr>
+            <tr><td><strong>Dynamic-only</strong></td><td>Supported only by dynamic loading, coverage, or keep rules.</td></tr>
+            <tr><td><strong>Test-only</strong></td><td>Only reachable via test-phase edges.</td></tr>
+            <tr><td><strong>Build-time only</strong></td><td>Only referenced during build/code generation phases.</td></tr>
+            <tr><td><strong>Disconnected (all profiles)</strong></td><td>Unreachable in any profile — prime candidates for cleanup.</td></tr>
           </tbody>
         </table>
 
-        <p>This reachability-based model ensures the graph reflects <strong>real execution paths</strong>, not just surface-level references—helping you identify truly unused code with confidence.</p>
+        <p>This profile-aware model mirrors <strong>real execution paths</strong> for each scenario, letting you distinguish between truly disconnected code and modules that are simply deferred, dynamic, or tied to a different profile.</p>
       </section>
 
       <section id="export">
