@@ -321,8 +321,19 @@ void main(List<String> args) async {
   // 8) Reachability
   final usedSet = entries.isEmpty ? <String>{} : _reach(entries, edges);
   for (final n in nodes) {
-    if (n.type == 'external') { n.state = 'used'; continue; }
-    n.state = usedSet.contains(n.id) ? 'used' : 'unused';
+    if (n.type == 'external') {
+      n.state = 'used';
+      continue;
+    }
+    if (usedSet.contains(n.id)) {
+      n.state = 'used';
+      continue;
+    }
+    // Treat any file that participates in the dependency graph as "used".
+    // Nodes with zero degree remain "unused" so isolated files can still
+    // be detected, but connected components without an entry point are
+    // no longer mislabeled as unused.
+    n.state = (n.inDeg > 0 || n.outDeg > 0) ? 'used' : 'unused';
   }
 
   // 9) Write output
