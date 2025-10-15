@@ -1126,6 +1126,10 @@ window.addEventListener('DOMContentLoaded', () => {
     const reachableElsewhere = (reachByNode.get(id) || new Set()).size > (reachableHere ? 1 : 0);
     const reachableAny = reachByNode.has(id);
 
+    if(!reachableAny){
+      return ['disconnected_all_profiles'];
+    }
+
     if(reachableHere){
       statuses.add('reachable_current');
       if(!res.reachableNoDeferred.has(id)) statuses.add('deferred_only');
@@ -1140,7 +1144,6 @@ window.addEventListener('DOMContentLoaded', () => {
       const phaseTags = String(node.phase || node.scope || '').toLowerCase();
       if(phaseTags.includes('test') || node.test === true || node.isTest === true) statuses.add('test_only');
       if(phaseTags.includes('build') || node.build === true) statuses.add('build_time_only');
-      if(!reachableAny) statuses.add('disconnected_all_profiles');
       if(!reachableElsewhere && !statuses.size) statuses.add('disconnected_all_profiles');
     }
 
