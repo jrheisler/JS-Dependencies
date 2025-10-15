@@ -123,9 +123,12 @@ void main(List<String> args) async {
 
   // 2) parse facts
   final facts = <_CsFacts>[];
+  final factsByAbs = <String, _CsFacts>{};
   for (final f in files) {
     final text = await File(f).readAsString();
-    facts.add(_extractFacts(cwd, f, text));
+    final fact = _extractFacts(cwd, f, text);
+    facts.add(fact);
+    factsByAbs[fact.absPath] = fact;
   }
 
   // 3) build namespace -> files map
@@ -151,13 +154,19 @@ void main(List<String> args) async {
   // 5) edges + externals
   final edges = <_Edge>[];
   final externals = <String>{};
+  final edgeKeys = <String>{};
+
+  void addEdge(_Edge edge) {
+    final key = '${edge.source}\u0000${edge.target}\u0000${edge.kind}';
+    if (edgeKeys.add(key)) edges.add(edge);
+  }
 
   for (final ff in facts) {
     // using namespaces
     for (final ns in ff.usingNamespaces) {
       final targetAbs = nsAnchor[ns];
       if (targetAbs != null) {
-        edges.add(_Edge(
+        addEdge(_Edge(
           source: ff.relId,
           target: _rel(targetAbs, cwd),
           kind: 'using',
@@ -166,14 +175,14 @@ void main(List<String> args) async {
       } else {
         final ext = _externalForNamespace(ns);
         externals.add(ext);
-        edges.add(_Edge(source: ff.relId, target: ext, kind: 'using', certainty: 'static'));
+        addEdge(_Edge(source: ff.relId, target: ext, kind: 'using', certainty: 'static'));
       }
     }
     // using static Foo.Bar.Baz -> try resolve file Baz.cs
     for (final fqType in ff.usingStaticTypes) {
       final resolved = _resolveTypeToFile(cwd, fqType);
       if (resolved != null && File(resolved).existsSync()) {
-        edges.add(_Edge(
+        addEdge(_Edge(
           source: ff.relId,
           target: _rel(resolved, cwd),
           kind: 'using_static',
@@ -182,10 +191,37 @@ void main(List<String> args) async {
       } else {
         final ext = _externalForType(fqType);
         externals.add(ext);
-        edges.add(_Edge(source: ff.relId, target: ext, kind: 'using_static', certainty: 'static'));
+        addEdge(_Edge(source: ff.relId, target: ext, kind: 'using_static', certainty: 'static'));
       }
     }
   }
+
+  // Files within the same namespace implicitly depend on one another.
+  nsToFiles.forEach((ns, list) {
+    if (list.length < 2) return;
+    final anchorAbs = nsAnchor[ns];
+    if (anchorAbs == null) return;
+    final anchorFacts = factsByAbs[anchorAbs];
+    if (anchorFacts == null) return;
+    final anchorRel = anchorFacts.relId;
+    for (final abs in list) {
+      final facts = factsByAbs[abs];
+      if (facts == null) continue;
+      if (abs == anchorAbs) continue;
+      addEdge(_Edge(
+        source: facts.relId,
+        target: anchorRel,
+        kind: 'namespace_peer',
+        certainty: 'heuristic',
+      ));
+      addEdge(_Edge(
+        source: anchorRel,
+        target: facts.relId,
+        kind: 'namespace_peer',
+        certainty: 'heuristic',
+      ));
+    }
+  });
 
   // 6) nodes
   final nodes = <_Node>[];
