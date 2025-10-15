@@ -906,7 +906,15 @@ window.addEventListener('DOMContentLoaded', () => {
     if(fromNodes.length){
       return Array.from(new Set(fromNodes));
     }
-    const degRoots = graph.nodes.filter(n => (n.type||'file')==='file' && (n.inDeg||0)===0).map(n=>n.id);
+    const degRoots = graph.nodes
+      .filter(n => {
+        if((n.type||'file')!=='file') return false;
+        if((n.inDeg||0)!==0) return false;
+        const totalDeg = (n.inDeg||0)+(n.outDeg||0);
+        // Skip truly isolated files so they can be classified as disconnected.
+        return totalDeg > 0;
+      })
+      .map(n=>n.id);
     if(degRoots.length){
       return Array.from(new Set(degRoots));
     }
