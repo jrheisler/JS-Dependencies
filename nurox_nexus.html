@@ -1112,7 +1112,10 @@ window.addEventListener('DOMContentLoaded', () => {
       profileResults.forEach(res => {
         const statuses = determineNodeStatuses(node, res, reachByNode);
         node.statusByProfile[res.profile.name] = statuses;
-        node.primaryByProfile[res.profile.name] = STATUS_ORDER.find(st => statuses.includes(st)) || statuses[0] || 'disconnected_all_profiles';
+        const primary = statuses.includes('disconnected_all_profiles')
+          ? 'disconnected_all_profiles'
+          : STATUS_ORDER.find(st => statuses.includes(st)) || statuses[0] || 'disconnected_all_profiles';
+        node.primaryByProfile[res.profile.name] = primary;
       });
     });
     updateProfileLegend();
@@ -1144,7 +1147,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const phaseTags = String(node.phase || node.scope || '').toLowerCase();
       if(phaseTags.includes('test') || node.test === true || node.isTest === true) statuses.add('test_only');
       if(phaseTags.includes('build') || node.build === true) statuses.add('build_time_only');
-      if(!reachableElsewhere && !statuses.size) statuses.add('disconnected_all_profiles');
+      if(!reachableElsewhere) statuses.add('disconnected_all_profiles');
     }
 
     return Array.from(statuses);
