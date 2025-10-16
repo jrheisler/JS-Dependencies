@@ -55,6 +55,9 @@
     label { display: flex; align-items:center; gap: 8px; color: var(--muted); font-size: 12px; margin: 6px 0; }
     .row { display: flex; gap: 8px; align-items: center; }
     .row > * { flex: 1; }
+    .crawl-root-row { display: flex; gap: 8px; align-items: stretch; }
+    .crawl-root-row input[type="text"] { flex: 1; }
+    .crawl-root-row button { flex: 0 0 auto; white-space: nowrap; padding: 8px 14px; }
     .pill { display: inline-flex; align-items:center; gap:6px; padding: 4px 8px; border-radius: 999px; background: var(--chip); color: var(--text); font-size: 12px; }
     .badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:600; letter-spacing:.02em; text-transform:uppercase; background:rgba(255,255,255,.08); color:var(--text); }
     .badge .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
@@ -169,7 +172,11 @@
     <div class="group" id="viewerControls" hidden>
       <h3>Local Crawl</h3>
       <label for="crawlRoot">Folder to crawl</label>
-      <input type="text" id="crawlRoot" placeholder="Path to project root" autocomplete="off" />
+      <div class="crawl-root-row">
+        <input type="text" id="crawlRoot" placeholder="Path to project root" autocomplete="off" />
+        <button type="button" class="btn" id="crawlRootBrowse" title="Browse for folder">Browse…</button>
+      </div>
+      <input type="file" id="crawlRootPicker" webkitdirectory directory multiple hidden />
       <div class="section-label">Languages</div>
       <div id="crawlLangList" class="lang-list"></div>
       <label><input type="checkbox" id="crawlClear" checked /> Clear previous graph before crawling</label>
@@ -485,6 +492,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const inViewerMode = !!viewerToken;
   const viewerControls = $('viewerControls');
   const viewerRootInput = $('crawlRoot');
+  const viewerRootBrowseBtn = $('crawlRootBrowse');
+  const viewerRootPicker = $('crawlRootPicker');
   const viewerClearInput = $('crawlClear');
   const viewerLangList = $('crawlLangList');
   const viewerStatusNote = $('viewerStatus');
@@ -499,12 +508,72 @@ window.addEventListener('DOMContentLoaded', () => {
     if(loadViewerGraphBtn) loadViewerGraphBtn.disabled = busy;
     if(viewerControls) viewerControls.setAttribute('aria-busy', busy ? 'true' : 'false');
   };
+  const persistViewerRoot = ()=>{
+    if(viewerRootInput){
+      saveLastCrawlRoot(viewerRootInput.value.trim());
+    }
+  };
+  const updateViewerRootValue = (value)=>{
+    if(!viewerRootInput) return;
+    viewerRootInput.value = value;
+    viewerRootInput.dispatchEvent(new Event('change', { bubbles: true }));
+  };
   if(viewerRootInput){
     const savedRoot = loadLastCrawlRoot();
     if(savedRoot) viewerRootInput.value = savedRoot;
-    const persistRoot = ()=> saveLastCrawlRoot(viewerRootInput.value.trim());
-    viewerRootInput.addEventListener('change', persistRoot);
-    viewerRootInput.addEventListener('blur', persistRoot);
+    viewerRootInput.addEventListener('change', persistViewerRoot);
+    viewerRootInput.addEventListener('blur', persistViewerRoot);
+  }
+  if(viewerRootBrowseBtn){
+    viewerRootBrowseBtn.addEventListener('click', async ()=>{
+      try {
+        if(viewerRootPicker){
+          viewerRootPicker.value = '';
+          viewerRootPicker.click();
+          return;
+        }
+        if(window.showDirectoryPicker){
+          const handle = await window.showDirectoryPicker();
+          if(handle){
+            updateViewerRootValue(handle.name || '');
+          }
+          return;
+        }
+      } catch (err) {
+        if(err?.name !== 'AbortError'){
+          console.error('Unable to browse for crawl root', err);
+        }
+      }
+      if(viewerRootInput){
+        viewerRootInput.focus();
+      }
+    });
+  }
+  if(viewerRootPicker){
+    viewerRootPicker.addEventListener('change', ()=>{
+      const files = viewerRootPicker.files;
+      if(!files || files.length === 0) return;
+      const primary = files[0];
+      let folderPath = '';
+      if(primary){
+        const filePath = typeof primary.path === 'string' ? primary.path : '';
+        if(filePath){
+          folderPath = filePath.replace(/[\\/][^\\/]*$/, '');
+        }
+        if(!folderPath && primary.webkitRelativePath){
+          const relative = primary.webkitRelativePath.replace(/\\+/g, '/');
+          if(relative.includes('/')){
+            folderPath = relative.substring(0, relative.lastIndexOf('/'));
+          } else {
+            folderPath = relative;
+          }
+        }
+        if(!folderPath){
+          folderPath = primary.name || '';
+        }
+      }
+      updateViewerRootValue(folderPath.trim());
+    });
   }
   if(viewerControls){
     viewerControls.hidden = !inViewerMode;
