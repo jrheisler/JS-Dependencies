@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Nurox Nexus — Help & User Guide</title>
+  <style>
+    :root{
+      --bg:#0b0d12; --panel:#121622; --ink:#0f1320; --muted:#8a93a5; --text:#e8ecf1;
+      --accent:#7c5cff; --accent2:#1dd1a1; --warning:#f3b33d; --external:#3b2f5a; --border:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--accent) rgba(255,255,255,.08)}
+    *::-webkit-scrollbar{width:12px;height:12px}
+    *::-webkit-scrollbar-track{background:rgba(9,11,18,.65);border-radius:999px}
+    *::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(124,92,255,.85),rgba(29,209,161,.85));border-radius:999px;border:2px solid rgba(9,11,18,.65);box-shadow:0 2px 6px rgba(0,0,0,.35) inset}
+    *::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(124,92,255,1),rgba(29,209,161,1))}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    a{color:var(--accent)}
+    .back-link{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(124,92,255,.12);color:var(--accent);text-decoration:none;font-weight:600;transition:background .2s ease,color .2s ease}
+    .back-link:hover{background:rgba(124,92,255,.24)}
+    .wrap{display:grid;grid-template-columns: 280px 1fr; gap: 20px; min-height:100%}
+    header{grid-column:1/-1;position:sticky;top:0;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0));backdrop-filter:saturate(120%) blur(4px);border-bottom:1px solid var(--border);z-index:5}
+    header .inner{display:flex;align-items:center;gap:12px;padding:14px 16px}
+    .logo{font-weight:800;letter-spacing:.2px}
+    .badge{padding:2px 8px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.04);font-size:12px;color:var(--muted)}
+
+    nav{position:sticky; top:64px; align-self:start; padding:16px; margin:16px; background:var(--panel); border:1px solid var(--border); border-radius:14px}
+    nav h3{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted)}
+    nav a{display:block; padding:6px 8px; border-radius:8px; color:var(--text); text-decoration:none}
+    nav a:hover{background:#0f1320}
+    nav .small{font-size:12px;color:var(--muted);margin-top:6px}
+
+    main{padding:24px 24px 64px}
+    section{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px 18px 10px; margin:16px 0}
+    h1{font-size:28px;margin:16px 0}
+    h2{font-size:18px;margin:10px 0 6px}
+    h3{font-size:14px;margin:8px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+    p{margin:8px 0}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .kbd{background:#111526;border:1px solid rgba(255,255,255,.18);padding:2px 6px;border-radius:6px;font-size:12px}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;background:#1a2030}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .hr{height:1px;background:var(--border);margin:10px 0}
+    ul{margin:6px 0 6px 18px}
+    li{margin:4px 0}
+
+    table{width:100%;border-collapse:collapse;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left}
+    thead th{background:#0f1320;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.12em}
+
+    footer{grid-column:1/-1;color:var(--muted);padding:16px 24px}
+
+    /* Print */
+    @media print{
+      body{background:#fff;color:#111}
+      section{background:#fff;border-color:#ccc}
+      nav{display:none}
+      header{position:static;background:#fff;border-color:#ccc}
+      a{color:#000}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="inner">
+        <a class="back-link" href="nurox_nexus.html">← Back to Graph</a>
+        <div class="logo">Nurox Nexus</div>
+        <div class="badge">Help & User Guide</div>
+        <div style="flex:1"></div>
+        <div class="badge">v1.2</div>
+      </div>
+    </header>
+
+    <nav>
+      <h3>Contents</h3>
+      <a href="#overview">Overview</a>
+      <a href="#layout">Layout & Navigation</a>
+      <a href="#header">Header Controls</a>
+      <a href="#left">Left Sidebar</a>
+      <a href="#canvas">Central Visualization</a>
+      <a href="#hud">HUD & Highlighting</a>
+      <a href="#right">Right Sidebar</a>
+      <a href="#interaction">Interaction & Pinning</a>
+      <a href="#data">Data Handling & Filtering</a>
+      <a href="#export">Export & Persistence</a>
+      <a href="#help-modal">Help Modal</a>
+      <a href="#shortcuts">Keyboard Shortcuts</a>
+      <a href="#troubleshooting">Troubleshooting</a>
+      <a href="#contact">Contact</a>
+      <div class="small">Press <span class="kbd">Ctrl/Cmd+F</span> to search this page.</div>
+    </nav>
+
+    <main>
+      <section id="overview">
+        <h1>Overview</h1>
+        <p><strong>Nurox Nexus</strong> is an interactive visualization tool for exploring codebase dependencies. It turns a JSON dataset—typically produced by the Nurox Dependency Analyzer—into a live, force-directed graph that reveals relationships between modules, files, and packages.</p>
+        <p>The interface uses a responsive, three‑column layout in dark mode. A collapsible sidebar latch lets you maximise the canvas while keeping controls a click away.</p>
+      </section>
+
+      <section id="layout">
+        <h2>Layout & Navigation</h2>
+        <ul>
+          <li><strong>Left Sidebar</strong> — Search, Filters, Physics controls, and Legend. Collapse or expand it using the header button or floating latch.</li>
+          <li><strong>Center Canvas</strong> — Interactive graph with live HUD overlay and highlighting metrics.</li>
+          <li><strong>Right Sidebar</strong> — Node details, insights, contextual help, and quick documentation access.</li>
+          <li><strong>Shared Header</strong> — Global controls, status messaging, color modes, and export actions.</li>
+        </ul>
+      </section>
+
+      <section id="header">
+        <h2>Header Controls</h2>
+        <table>
+          <thead><tr><th>Control</th><th>Function</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Title / Status</strong></td><td>Branding plus live announcements for load outcomes.</td></tr>
+            <tr><td><strong>Load graph</strong></td><td>Open a local JSON graph file or drop a <code>.json</code> anywhere on the page.</td></tr>
+            <tr><td><strong>SBOM CSV</strong></td><td>Export a software bill of materials for the graph. Pair with the <em>Filtered only</em> checkbox to target the current view.</td></tr>
+            <tr><td><strong>Filtered only</strong></td><td>Checkbox that scopes SBOM exports to nodes currently surviving filters.</td></tr>
+            <tr><td><strong>Color mode</strong></td><td>Switch between <em>State</em>, <em>Type</em>, <em>Degree</em>, and <em>Package</em> color palettes.</td></tr>
+            <tr><td><strong>Reset View</strong></td><td>Restore the initial zoom and pan.</td></tr>
+            <tr><td><strong>Hide/Show Sidebar</strong></td><td>Collapse or expand the left sidebar without losing settings.</td></tr>
+            <tr><td><strong>Pause / Resume</strong></td><td>Toggle the physics simulation; the label reflects the active state.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="left">
+        <h2>Left Sidebar</h2>
+        <h3>Search</h3>
+        <ul>
+          <li>Type to find a node by name or path with incremental feedback.</li>
+          <li><span class="kbd">Enter</span> jumps to the next match, centering the node and highlighting neighbors.</li>
+          <li>Shortcut: <span class="kbd">Ctrl/Cmd+F</span> focuses the search field instantly.</li>
+        </ul>
+        <h3>Filters</h3>
+        <ul>
+          <li><strong>Show disconnected only</strong> — Focus on files unreachable in <em>every</em> profile.</li>
+          <li><strong>Show dynamic-only</strong> — Surface nodes that rely solely on dynamic evidence.</li>
+          <li><strong>Show deferred-only</strong> — Highlight modules loaded lazily.</li>
+          <li><strong>Hide externals</strong> — Exclude packages from <code>node_modules</code>.</li>
+          <li><strong>Hide dynamic edges</strong> — Remove dynamic/heuristic edges.</li>
+          <li><strong>Minimum degree</strong> — Slider with live count to prune low‑degree nodes.</li>
+        </ul>
+        <h3>Physics Controls</h3>
+        <ul>
+          <li><strong>Charge</strong> — Node repulsion strength.</li>
+          <li><strong>Link distance</strong> — Ideal spacing of connected nodes.</li>
+          <li><strong>Link strength</strong> — Spring stiffness of edges.</li>
+        </ul>
+        <h3>Legend</h3>
+        <p>The legend now reflects <strong>profile-aware statuses</strong>. Each badge lists a color and explanation for the active profile.</p>
+        <ul>
+          <li><strong>Reachable (current profile)</strong> — Active profile entrypoints can reach the node; the default bright green.</li>
+          <li><strong>Reachable in other profile(s)</strong> — Only reachable when you switch profiles; shown in aqua.</li>
+          <li><strong>Deferred-only</strong> — Only discovered through deferred or lazy edges; highlighted in violet.</li>
+          <li><strong>Dynamic-only</strong> — Backed solely by dynamic loading, coverage, or keep rules; shown in amber.</li>
+          <li><strong>Test-only</strong> / <strong>Build-time only</strong> — Loaded exclusively through the corresponding edge phases.</li>
+          <li><strong>Disconnected (all profiles)</strong> — Never reached in any profile; bright pink and the primary deletion candidates.</li>
+          <li>Switching to <em>Type</em>, <em>Degree</em>, or <em>Package</em> color modes still recolors nodes dynamically based on that perspective.</li>
+        </ul>
+      </section>
+
+      <section id="canvas">
+        <h2>Central Visualization</h2>
+        <ul>
+          <li><strong>D3.js</strong> force‑directed graph with zoom and pan.</li>
+          <li>Drag a node to pin; <strong>double‑click</strong> to unpin.</li>
+          <li>Nodes update color based on the selected color mode; dynamic edges are dashed.</li>
+          <li>Pin positions persist locally, so custom layouts survive reloads.</li>
+        </ul>
+      </section>
+
+      <section id="hud">
+        <h2>HUD & Highlighting</h2>
+        <ul>
+          <li>The floating HUD shows live counts for nodes, edges, <strong>reachable</strong>, <strong>disconnected</strong>, and <strong>dynamic-only</strong> nodes after filters are applied.</li>
+          <li>Click any metric pill to spotlight the corresponding nodes or edges directly in the graph.</li>
+          <li>Metric highlights stack with manual selections and respect the current color mode.</li>
+        </ul>
+      </section>
+
+      <section id="right">
+        <h2>Right Sidebar</h2>
+        <h3>Selection</h3>
+        <p>Shows details for the selected node: ID, type, state, package, LOC, and degree. Neighbor list is sorted by degree; clicking a neighbor jumps focus to it.</p>
+        <h3>Insights</h3>
+        <ul>
+          <li><strong>Pure Leaves</strong> — Nodes with one connection.</li>
+          <li><strong>Side‑effect Files</strong> — Imported for effects only.</li>
+          <li><strong>Unused &amp; attached</strong> — Disconnected nodes that still share edges (prime review targets).</li>
+          <li><strong>Maximum Degree</strong> — Highest node connectivity.</li>
+        </ul>
+        <h3>Help</h3>
+        <p>Tips and reminders for common actions plus a direct link to the in-app help modal.</p>
+      </section>
+
+      <section id="interaction">
+        <h2>Interaction & Pinning</h2>
+        <ul>
+          <li>Selecting a node dims unrelated nodes/links; neighbors stay fully visible.</li>
+          <li>Optional <em>Dim Links</em> mode de‑emphasizes background edges and works alongside HUD metric highlights.</li>
+          <li>The camera smoothly centers on the focused node using the current zoom transform.</li>
+          <li>Dragging a node saves its pinned position in your browser so layouts persist between sessions; double-click to release it.</li>
+        </ul>
+      </section>
+
+      <section id="data">
+        <h2>Data Handling & Filtering</h2>
+        <ul>
+          <li>JSON datasets are normalized; degrees are computed before rendering.</li>
+          <li>Filters applied: show disconnected only, show dynamic-only, show deferred-only, hide externals, hide dynamic edges, minimum degree.</li>
+          <li>State resets clear previous visualization and sidebar metrics when reloading.</li>
+          <li>Search status messages confirm matches (e.g., “Match 2/5”) while <span class="kbd">Enter</span> cycles through them.</li>
+        </ul>
+      </section>
+
+      <section id="logic">
+        <h2>Dependency Logic Explained</h2>
+        <p>The <strong>Nurox Dependency Analyzer</strong> scans every source file in your project and builds a visual map of how your code connects. The reclassification system now produces richer <em>statuses</em> that factor in multiple profiles and edge phases.</p>
+
+        <h3>1. Adding Files as Nodes</h3>
+        <p>Every project file becomes a <strong>node</strong> in the graph. External packages such as those inside <code>node_modules</code> are tracked separately so you can hide them with a single toggle.</p>
+
+        <h3>2. Tracking Connections</h3>
+        <p>Whenever one file imports or exports from another, Nurox records that link as an <strong>edge</strong>. Each edge carries metadata about how it loads (static, deferred, or dynamic) and which phase it belongs to (runtime, test, or build).</p>
+
+        <h3>3. Profiles & Entrypoints</h3>
+        <p>Nurox identifies <strong>entry nodes</strong> by reading hints such as <code>main</code>, <code>module</code>, or <code>exports</code> fields and can honour multiple <em>profiles</em> (for example, app vs. tests). Switching profiles in the header recalculates reachability from that profile’s entrypoints.</p>
+
+        <h3>4. Reachability Analysis</h3>
+        <p>For each profile the analyzer performs several traversals: full reachability, without deferred edges, without dynamic edges, runtime-only, test-allowed, and build-allowed. These sets decide whether a node is reachable now, only via deferred edges, only via dynamic signals, and which execution phase touches it.</p>
+
+        <h3>5. Classifying Nodes</h3>
+        <p>The results of those traversals are merged into statuses. Nodes reached in the active profile are tagged <strong>Reachable (current profile)</strong>. Nodes hit only in other profiles are labeled <strong>Reachable in other profile(s)</strong>. Files that require deferred edges become <strong>Deferred-only</strong>; those backed solely by dynamic evidence become <strong>Dynamic-only</strong>. If the only paths are through test or build edges, they receive <strong>Test-only</strong> or <strong>Build-time only</strong>. Anything untouched in every profile falls into <strong>Disconnected (all profiles)</strong>, marking it as a safe deletion candidate.</p>
+
+        <div class="hr"></div>
+
+        <h3>Summary</h3>
+        <table>
+          <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Reachable (current profile)</strong></td><td>Reached from entrypoints in the active profile.</td></tr>
+            <tr><td><strong>Reachable in other profile(s)</strong></td><td>Not reached right now but reached when another profile is active.</td></tr>
+            <tr><td><strong>Deferred-only</strong></td><td>Requires deferred or lazy edges to be discovered.</td></tr>
+            <tr><td><strong>Dynamic-only</strong></td><td>Supported only by dynamic loading, coverage, or keep rules.</td></tr>
+            <tr><td><strong>Test-only</strong></td><td>Only reachable via test-phase edges.</td></tr>
+            <tr><td><strong>Build-time only</strong></td><td>Only referenced during build/code generation phases.</td></tr>
+            <tr><td><strong>Disconnected (all profiles)</strong></td><td>Unreachable in any profile — prime candidates for cleanup.</td></tr>
+          </tbody>
+        </table>
+
+        <p>This profile-aware model mirrors <strong>real execution paths</strong> for each scenario, letting you distinguish between truly disconnected code and modules that are simply deferred, dynamic, or tied to a different profile.</p>
+      </section>
+
+      <section id="export">
+        <h2>Export & Persistence</h2>
+        <ul>
+          <li><strong>SBOM CSV</strong> exports node metadata (state, type, package, LOC, degree). Use <em>Filtered only</em> to scope the export.</li>
+          <li><strong>Auto‑load</strong> attempts URL param (e.g., <code>?load=graph.json</code>) or defaults to <code>jsDependencies.json</code>, falling back to a demo dataset with status messaging.</li>
+          <li>Sidebar collapse state and node pin positions are saved locally to keep your layout intact.</li>
+        </ul>
+      </section>
+
+      <section id="help-modal">
+        <h2>Help Modal</h2>
+        <ul>
+          <li>The right-sidebar help link opens an accessible modal containing this guide without leaving the graph.</li>
+          <li>The modal traps focus, supports <span class="kbd">Esc</span> to close, and returns focus to the originating control.</li>
+          <li>When opened for the first time the help content loads lazily, keeping initial page weight minimal.</li>
+        </ul>
+      </section>
+
+      <section id="shortcuts">
+        <h2>Keyboard Shortcuts</h2>
+        <table>
+          <thead><tr><th>Key</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><span class="kbd">Ctrl/Cmd + F</span></td><td>Focus search field</td></tr>
+            <tr><td><span class="kbd">H</span></td><td>Toggle labels</td></tr>
+            <tr><td><span class="kbd">L</span></td><td>Dim / restore link brightness</td></tr>
+            <tr><td><span class="kbd">Space</span></td><td>Pause / resume physics</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>Troubleshooting</h2>
+        <table>
+          <thead><tr><th>Issue</th><th>Possible Cause</th><th>Solution</th></tr></thead>
+          <tbody>
+            <tr><td>Graph fails to load</td><td>Invalid or missing JSON</td><td>Verify structure and reload manually.</td></tr>
+            <tr><td>Graph appears empty</td><td>Filters hide all nodes</td><td>Reset filters and reload the data.</td></tr>
+            <tr><td>SBOM CSV is empty</td><td>No nodes match current filters</td><td>Disable <em>Filtered only</em> or relax filters, then export again.</td></tr>
+            <tr><td>Simulation doesn’t move</td><td>Physics paused</td><td>Click <em>Resume ▶</em> in the header.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="contact">
+        <h2>Contact & Attribution</h2>
+        <p><strong>Developer:</strong> Nurox Technologies</p>
+        <p><strong>Product:</strong> Nurox Nexus — Dependency Visualization Suite</p>
+        <p><strong>Support:</strong> <a href="mailto:support@nurox.dev">support@nurox.dev</a></p>
+      </section>
+
+      <footer>
+        © <span id="y"></span> Nurox Technologies — All rights reserved.
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // dynamic year
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
