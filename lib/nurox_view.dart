@@ -76,6 +76,76 @@ class Graph {
 }
 
 // ----------------------------
+// Initial graph bootstrapping
+// ----------------------------
+Future<Graph> _loadInitialGraph() async {
+  final graph = Graph();
+  final data = await _loadBundledGraph();
+  if (data != null) {
+    graph.addGraph(data);
+    _log('Loaded bundled sample graph with ${graph.nodes.length} nodes / ${graph.edges.length} edges');
+  } else {
+    _log('No bundled sample graph found; starting empty.');
+  }
+  return graph;
+}
+
+Future<Map<String, dynamic>?> _loadBundledGraph() async {
+  const candidates = [
+    'samples/jsNuroxDependencies.json',
+    'samples/jsDependencies.json',
+    'jsNuroxDependencies.json',
+    'jsDependencies.json',
+  ];
+
+  final locations = <String>{};
+  locations.add(Directory.current.path);
+  try {
+    final scriptDir = File(Platform.script.toFilePath()).parent.path;
+    locations.add(scriptDir);
+    locations.add(_join(scriptDir, 'public'));
+    locations.add(_join(scriptDir, 'samples'));
+  } catch (_) {}
+  final exeDir = File(Platform.resolvedExecutable).parent.path;
+  locations.add(exeDir);
+  locations.add(_join(exeDir, 'public'));
+  locations.add(_join(exeDir, 'samples'));
+
+  final visited = <String>{};
+
+  Future<Map<String, dynamic>?> tryPath(String path) async {
+    final normalized = File(path).absolute.path;
+    if (!visited.add(normalized)) return null;
+    final file = File(normalized);
+    if (!await file.exists()) return null;
+    try {
+      final jsonText = await file.readAsString();
+      final decoded = jsonDecode(jsonText);
+      if (decoded is Map<String, dynamic>) {
+        _log('Loaded bundled graph from ${file.path}');
+        return decoded;
+      }
+      _warn('Bundled graph ${file.path} did not contain a JSON object');
+    } catch (e) {
+      _warn('Failed to read bundled graph ${file.path}: $e');
+    }
+    return null;
+  }
+
+  for (final candidate in candidates) {
+    final direct = await tryPath(candidate);
+    if (direct != null) return direct;
+    for (final base in locations) {
+      if (base.isEmpty) continue;
+      final hit = await tryPath(_join(base, candidate));
+      if (hit != null) return hit;
+    }
+  }
+
+  return null;
+}
+
+// ----------------------------
 // Config: known crawler exe names
 // (edit or extend as you add languages)
 // ----------------------------
@@ -115,6 +185,8 @@ Graph _lastGraph = Graph();
 Future<void> main(List<String> args) async {
   final port = await _findFreePort(start: 5217, tries: 20);
   _token = _makeToken();
+
+  _lastGraph = await _loadInitialGraph();
 
   final server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
   _log('Nurox Viewer running at http://127.0.0.1:$port');
