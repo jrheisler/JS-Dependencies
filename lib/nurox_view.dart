@@ -180,7 +180,8 @@ Future<void> _route(HttpRequest req, int port) async {
   if (method == 'POST' && path == '/api/crawl') {
     final body = await utf8.decoder.bind(req).join();
     final cfg = (body.isNotEmpty ? jsonDecode(body) : {}) as Map<String, dynamic>;
-    final root = (cfg['root'] ?? '').toString();
+    final rawRoot = (cfg['root'] ?? '').toString();
+    final root = _resolveRootPath(rawRoot);
     final langs = ((cfg['languages'] ?? const []) as List).map((e) => e.toString()).toList();
     final clear = cfg['clear'] == true;
 
@@ -319,6 +320,45 @@ Future<int> _runCrawler(String exe, String root) async {
   final code = await p.exitCode;
   _log('Exit [$exe]: $code');
   return code;
+}
+
+String _resolveRootPath(String raw) {
+  var value = raw.trim();
+  if (value.isEmpty) return value;
+
+  if (value == '~') {
+    final home = _homeDirectory();
+    if (home != null && home.isNotEmpty) return home;
+    return value;
+  }
+
+  if (value.startsWith('~/') || value.startsWith('~\\')) {
+    final home = _homeDirectory();
+    if (home != null && home.isNotEmpty) {
+      final remainder = value.substring(2);
+      return _join(home, remainder);
+    }
+    return value;
+  }
+
+  return value;
+}
+
+String? _homeDirectory() {
+  final env = Platform.environment;
+  if (Platform.isWindows) {
+    final profile = env['USERPROFILE'];
+    if (profile != null && profile.isNotEmpty) return profile;
+    final drive = env['HOMEDRIVE'];
+    final path = env['HOMEPATH'];
+    if (drive != null && path != null) {
+      return '$drive$path';
+    }
+    return null;
+  }
+  final home = env['HOME'];
+  if (home != null && home.isNotEmpty) return home;
+  return null;
 }
 
 String _join(String a, String b) {
