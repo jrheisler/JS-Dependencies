@@ -49,6 +49,7 @@
 
     .group { background: #0f1320; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px; }
     .group h3 { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
+    .group .section-label { margin: 10px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
     input[type="text"], select { width: 100%; background: #0d1220; border: 1px solid rgba(255,255,255,.08); color: var(--text); padding: 8px 10px; border-radius: 10px; outline: none; }
     header select.btn { width: auto; min-width: 0; }
     label { display: flex; align-items:center; gap: 8px; color: var(--muted); font-size: 12px; margin: 6px 0; }
@@ -81,7 +82,15 @@
     .entrypoints .entry button { background:none; border:none; color:var(--accent2); cursor:pointer; font-size:12px; text-decoration:underline; }
     .btn-inline { width:100%; margin-top:8px; padding:8px 10px; background:rgba(124,92,255,.16); border:1px solid rgba(124,92,255,.35); color:var(--text); border-radius:10px; font-size:12px; cursor:pointer; transition:.2s; }
     .btn-inline:hover { background:rgba(124,92,255,.26); }
+    .btn-inline[disabled] { opacity:.55; cursor:not-allowed; }
     .status-note { color:var(--muted); font-size:12px; margin-top:6px; }
+    #viewerControls .lang-list { display:grid; gap:6px; margin-top:8px; }
+    #viewerControls .lang-option { display:flex; align-items:center; justify-content:space-between; padding:6px 8px; border-radius:8px; border:1px solid rgba(255,255,255,.08); background:#0d1220; font-size:12px; color:var(--text); }
+    #viewerControls .lang-option input { margin-right:8px; }
+    #viewerControls .lang-option .lang-name { flex:1; }
+    #viewerControls .lang-option .lang-meta { font-size:11px; color:var(--muted); margin-left:12px; }
+    #viewerControls .lang-option[data-available="false"] { opacity:.55; }
+    #viewerControls .lang-option[data-available="false"] .lang-meta { color:var(--danger); }
 
     /* Graph elements */
     svg { width: 100%; height: 100%; display: block; }
@@ -157,6 +166,17 @@
   </button>
 
   <aside id="sidebar" aria-hidden="false">
+    <div class="group" id="viewerControls" hidden>
+      <h3>Local Crawl</h3>
+      <label for="crawlRoot">Folder to crawl</label>
+      <input type="text" id="crawlRoot" placeholder="Path to project root" autocomplete="off" />
+      <div class="section-label">Languages</div>
+      <div id="crawlLangList" class="lang-list"></div>
+      <label><input type="checkbox" id="crawlClear" checked /> Clear previous graph before crawling</label>
+      <button type="button" class="btn-inline" id="startCrawl">Start crawl</button>
+      <button type="button" class="btn-inline" id="loadViewerGraph">Load latest graph</button>
+      <div class="status-note" id="viewerStatus"></div>
+    </div>
     <div class="group">
       <h3>Search</h3>
       <input type="text" id="search" placeholder="Find node by name/path (Enter to select)" />
@@ -459,6 +479,195 @@ window.addEventListener('DOMContentLoaded', () => {
   const setText = (id, value)=>{ const el = $(id); if(el) el.textContent = value; };
   const setDisplay = (id, value)=>{ const el = $(id); if(el) el.style.display = value; };
   const setHTML = (id, value)=>{ const el = $(id); if(el) el.innerHTML = value; };
+  const tokenMeta = document.querySelector('meta[name="nurox-token"]');
+  const viewerToken = new URLSearchParams(window.location.search).get('token') || tokenMeta?.content || '';
+  const viewerHeaders = viewerToken ? { 'Authorization': `Bearer ${viewerToken}` } : {};
+  const inViewerMode = !!viewerToken;
+  const viewerControls = $('viewerControls');
+  const viewerRootInput = $('crawlRoot');
+  const viewerClearInput = $('crawlClear');
+  const viewerLangList = $('crawlLangList');
+  const viewerStatusNote = $('viewerStatus');
+  const startCrawlBtn = $('startCrawl');
+  const loadViewerGraphBtn = $('loadViewerGraph');
+  const LAST_ROOT_KEY = 'nurox:nexus:lastCrawlRoot';
+  const loadLastCrawlRoot = ()=>{ try{ return localStorage.getItem(LAST_ROOT_KEY) || ''; }catch{ return ''; } };
+  const saveLastCrawlRoot = (value)=>{ try{ localStorage.setItem(LAST_ROOT_KEY, value); }catch{} };
+  const setViewerStatus = (msg)=>{ if(viewerStatusNote) viewerStatusNote.textContent = msg || ''; };
+  const toggleViewerBusy = (busy)=>{
+    if(startCrawlBtn) startCrawlBtn.disabled = busy;
+    if(loadViewerGraphBtn) loadViewerGraphBtn.disabled = busy;
+    if(viewerControls) viewerControls.setAttribute('aria-busy', busy ? 'true' : 'false');
+  };
+  if(viewerRootInput){
+    const savedRoot = loadLastCrawlRoot();
+    if(savedRoot) viewerRootInput.value = savedRoot;
+    const persistRoot = ()=> saveLastCrawlRoot(viewerRootInput.value.trim());
+    viewerRootInput.addEventListener('change', persistRoot);
+    viewerRootInput.addEventListener('blur', persistRoot);
+  }
+  if(viewerControls){
+    viewerControls.hidden = !inViewerMode;
+    if(!viewerControls.hidden){
+      viewerControls.removeAttribute('hidden');
+    }
+  }
+  if(startCrawlBtn){ startCrawlBtn.addEventListener('click', startViewerCrawl); }
+  if(loadViewerGraphBtn){ loadViewerGraphBtn.addEventListener('click', handleViewerGraphLoad); }
+  if(inViewerMode){
+    initViewerPanel();
+  }
+  function getSelectedViewerLanguages(){
+    if(!viewerLangList) return [];
+    return Array.from(viewerLangList.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+  }
+
+  async function refreshViewerLanguages(){
+    if(!inViewerMode || !viewerLangList) return false;
+    try {
+      const resp = await fetch('/api/languages', { headers: viewerHeaders, cache: 'no-store' });
+      let data;
+      try {
+        data = await resp.json();
+      } catch (err) {
+        throw new Error('Invalid /api/languages response');
+      }
+      if(!resp.ok){
+        const errMsg = data?.error ? String(data.error) : `HTTP ${resp.status}`;
+        throw new Error(errMsg);
+      }
+      const entries = Object.entries(data?.languages || {}).sort((a,b)=> a[0].localeCompare(b[0]));
+      viewerLangList.innerHTML = '';
+      if(entries.length === 0){
+        const empty = document.createElement('div');
+        empty.className = 'status-note';
+        empty.textContent = 'No crawlers detected.';
+        viewerLangList.appendChild(empty);
+      } else {
+        entries.forEach(([name, meta]) => {
+          const info = meta || {};
+          const available = info.available === true;
+          const label = document.createElement('label');
+          label.className = 'lang-option';
+          label.dataset.available = available ? 'true' : 'false';
+          if(info.path){ label.title = `Executable: ${info.path}`; }
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.value = name;
+          checkbox.disabled = !available;
+          checkbox.checked = available;
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'lang-name';
+          nameSpan.textContent = name;
+          const metaSpan = document.createElement('span');
+          metaSpan.className = 'lang-meta';
+          metaSpan.textContent = available ? 'Available' : 'Missing';
+          label.appendChild(checkbox);
+          label.appendChild(nameSpan);
+          label.appendChild(metaSpan);
+          viewerLangList.appendChild(label);
+        });
+      }
+      return true;
+    } catch (err) {
+      viewerLangList.innerHTML = '';
+      const note = document.createElement('div');
+      note.className = 'status-note';
+      note.textContent = 'Unable to reach crawler list.';
+      viewerLangList.appendChild(note);
+      if(!viewerStatusNote || !viewerStatusNote.textContent){
+        setViewerStatus(`Failed to load languages: ${err.message || err}`);
+      }
+      return false;
+    }
+  }
+
+  async function initViewerPanel(){
+    if(!inViewerMode || !viewerControls) return;
+    try {
+      const ready = await refreshViewerLanguages();
+      if(ready && (!viewerStatusNote || !viewerStatusNote.textContent)){
+        setViewerStatus('Select languages and start a crawl.');
+      }
+    } catch (err) {
+      setViewerStatus(`Viewer init failed: ${err.message || err}`);
+    }
+  }
+
+  async function startViewerCrawl(){
+    if(!inViewerMode){
+      setViewerStatus('Viewer API not detected.');
+      return;
+    }
+    const root = viewerRootInput ? viewerRootInput.value.trim() : '';
+    const languages = getSelectedViewerLanguages();
+    if(!root){
+      setViewerStatus('Enter a folder path to crawl.');
+      if(viewerRootInput) viewerRootInput.focus();
+      return;
+    }
+    if(languages.length === 0){
+      setViewerStatus('Select at least one language to crawl.');
+      return;
+    }
+    toggleViewerBusy(true);
+    setStatus('Starting crawl…');
+    setViewerStatus('Starting crawl…');
+    try {
+      saveLastCrawlRoot(root);
+      const body = { root, languages, clear: viewerClearInput ? !!viewerClearInput.checked : true };
+      const resp = await fetch('/api/crawl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...viewerHeaders },
+        body: JSON.stringify(body)
+      });
+      let data = {};
+      try {
+        data = await resp.json();
+      } catch (_) {}
+      if(!resp.ok){
+        const errKey = data?.error;
+        let errMsg = errKey ? String(errKey) : `HTTP ${resp.status}`;
+        if(errKey === 'root_not_found') errMsg = 'Folder not found';
+        throw new Error(errMsg);
+      }
+      let counts;
+      try {
+        counts = await loadGraphFromViewer();
+      } catch (loadErr) {
+        setViewerStatus(`Crawl finished but graph load failed: ${loadErr.message || loadErr}`);
+        setStatus(`Graph load failed: ${loadErr.message || loadErr}`);
+        return;
+      }
+      const nodesReported = typeof data.nodes === 'number' ? data.nodes : counts?.nodes;
+      const edgesReported = typeof data.edges === 'number' ? data.edges : counts?.edges;
+      setViewerStatus(`Crawl complete — loaded ${nodesReported ?? counts.nodes} nodes and ${edgesReported ?? counts.edges} edges.`);
+    } catch (err) {
+      setViewerStatus(`Crawl failed: ${err.message || err}`);
+      setStatus(`Crawl failed: ${err.message || err}`);
+    } finally {
+      toggleViewerBusy(false);
+    }
+  }
+
+  async function handleViewerGraphLoad(){
+    if(!inViewerMode){
+      setViewerStatus('Viewer API not detected.');
+      return;
+    }
+    toggleViewerBusy(true);
+    setViewerStatus('Loading graph from viewer…');
+    try {
+      const counts = await loadGraphFromViewer();
+      setViewerStatus(`Loaded ${counts.nodes} nodes and ${counts.edges} edges from viewer.`);
+    } catch (err) {
+      setViewerStatus(`Load failed: ${err.message || err}`);
+      setStatus(`Load failed: ${err.message || err}`);
+    } finally {
+      toggleViewerBusy(false);
+    }
+  }
+
   const colorModeEl = $('colorMode');
   const nodeId = (ref)=> typeof ref === 'object' && ref !== null ? ref.id : ref;
   const isFileProtocol = window.location.protocol === 'file:';
@@ -785,6 +994,36 @@ window.addEventListener('DOMContentLoaded', () => {
     paused = false;
     $('pause').textContent = 'Pause ⏸';
     render();
+  }
+
+  async function loadGraphFromViewer(){
+    if(!inViewerMode){
+      throw new Error('Viewer API not detected');
+    }
+    let resp;
+    try {
+      resp = await fetch('/api/graph', { headers: viewerHeaders, cache: 'no-store' });
+    } catch (err) {
+      throw new Error(`Request failed: ${err.message || err}`);
+    }
+    let data;
+    try {
+      data = await resp.json();
+    } catch (err) {
+      throw new Error('Invalid graph payload');
+    }
+    if(!resp.ok){
+      const errMsg = data?.error ? String(data.error) : `HTTP ${resp.status}`;
+      throw new Error(errMsg);
+    }
+    if(!data || typeof data !== 'object'){
+      throw new Error('Graph payload missing');
+    }
+    loadGraph(data);
+    const nodesCount = Array.isArray(data.nodes) ? data.nodes.length : (typeof data.nodes?.length === 'number' ? data.nodes.length : 0);
+    const edgesCount = Array.isArray(data.edges) ? data.edges.length : (typeof data.edges?.length === 'number' ? data.edges.length : 0);
+    setStatus(`Loaded graph from viewer (${nodesCount} nodes, ${edgesCount} edges)`);
+    return { nodes: nodesCount, edges: edgesCount };
   }
 
   function computeDegrees(){
@@ -1447,6 +1686,25 @@ window.addEventListener('DOMContentLoaded', () => {
   async function tryAutoLoad(){
     const params = new URLSearchParams(window.location.search);
     const autoTarget = params.get('load') || params.get('graph') || 'jsDependencies.json';
+
+    if(inViewerMode){
+      try {
+        const counts = await loadGraphFromViewer();
+        if(viewerStatusNote){
+          if((counts.nodes || counts.edges)){
+            setViewerStatus(`Loaded ${counts.nodes} nodes and ${counts.edges} edges from viewer.`);
+          } else {
+            setViewerStatus('No crawl results yet — start a crawl below.');
+          }
+        }
+        return;
+      } catch (err) {
+        if(viewerStatusNote){
+          setViewerStatus(`Viewer graph unavailable: ${err.message || err}`);
+        }
+        // Continue to fallback below
+      }
+    }
 
     if(isFileProtocol){
       setStatus('Local file mode — use “Load graph.json” to open your data.');
