@@ -503,6 +503,20 @@ window.addEventListener('DOMContentLoaded', () => {
   const viewerStatusNote = $('viewerStatus');
   const startCrawlBtn = $('startCrawl');
   const loadViewerGraphBtn = $('loadViewerGraph');
+  let viewerRootFromPicker = false;
+  const looksLikeFilesystemPath = (raw)=>{
+    if(raw == null) return false;
+    const value = String(raw).trim();
+    if(!value) return false;
+    const lower = value.toLowerCase();
+    if(lower.includes('fakepath')) return false;
+    if(value === '.' || value === '..') return true;
+    if(value.startsWith('./') || value.startsWith('../') || value.startsWith('~/')) return true;
+    if(value.startsWith('/') || value.startsWith('\\')) return true;
+    if(/^[a-zA-Z]:[\\/]/.test(value)) return true;
+    if(value.includes('/') || value.includes('\\')) return true;
+    return false;
+  };
   const LAST_ROOT_KEY = 'nurox:nexus:lastCrawlRoot';
   const loadLastCrawlRoot = ()=>{ try{ return localStorage.getItem(LAST_ROOT_KEY) || ''; }catch{ return ''; } };
   const saveLastCrawlRoot = (value)=>{ try{ localStorage.setItem(LAST_ROOT_KEY, value); }catch{} };
@@ -517,28 +531,53 @@ window.addEventListener('DOMContentLoaded', () => {
       saveLastCrawlRoot(viewerRootInput.value.trim());
     }
   };
-  const updateViewerRootValue = (value)=>{
+  const updateViewerRootValue = (value, opts = {})=>{
     if(!viewerRootInput) return;
-    viewerRootInput.value = value;
+    const normalized = typeof value === 'string' ? value.trim() : '';
+    const fromPicker = opts.fromPicker === true;
+    if(fromPicker) viewerRootFromPicker = true;
+    if(normalized){
+      if(fromPicker && !looksLikeFilesystemPath(normalized)){
+        setViewerStatus('Browser pickers can\'t share the full folder path. Paste the actual project path manually.');
+        if(viewerRootPickerNote) viewerRootPickerNote.hidden = false;
+        viewerRootInput.focus();
+        return;
+      }
+      if(viewerRootPickerNote && viewerRootPickerNote.hidden === false && looksLikeFilesystemPath(normalized)){
+        viewerRootPickerNote.hidden = true;
+      }
+    }
+    if(!normalized && fromPicker){
+      setViewerStatus('Unable to determine folder path from picker. Paste the path manually.');
+      if(viewerRootPickerNote) viewerRootPickerNote.hidden = false;
+      viewerRootInput.focus();
+      return;
+    }
+    viewerRootInput.value = normalized;
     viewerRootInput.dispatchEvent(new Event('change', { bubbles: true }));
   };
   if(viewerRootInput){
     const savedRoot = loadLastCrawlRoot();
-    if(savedRoot) viewerRootInput.value = savedRoot;
+    if(savedRoot){
+      viewerRootInput.value = savedRoot;
+      viewerRootFromPicker = false;
+    }
+    viewerRootInput.addEventListener('input', ()=>{
+      viewerRootFromPicker = false;
+      if(viewerRootPickerNote) viewerRootPickerNote.hidden = true;
+    });
     viewerRootInput.addEventListener('change', persistViewerRoot);
     viewerRootInput.addEventListener('blur', persistViewerRoot);
   }
   if(viewerRootBrowseBtn){
     viewerRootBrowseBtn.addEventListener('click', async ()=>{
+      viewerRootFromPicker = true;
       try {
         if(window.showDirectoryPicker){
           try {
             const handle = await window.showDirectoryPicker();
             if(handle){
-              updateViewerRootValue(handle.name || '');
-              if(viewerRootPickerNote){
-                viewerRootPickerNote.hidden = true;
-              }
+              updateViewerRootValue(handle.name || '', { fromPicker: true });
             }
             return;
           } catch (pickerErr) {
@@ -573,6 +612,7 @@ window.addEventListener('DOMContentLoaded', () => {
       viewerRootPickerNote.hidden = false;
     }
     viewerRootPicker.addEventListener('change', ()=>{
+      viewerRootFromPicker = true;
       const files = viewerRootPicker.files;
       if(!files || files.length === 0) return;
       const primary = files[0];
@@ -594,7 +634,7 @@ window.addEventListener('DOMContentLoaded', () => {
           folderPath = primary.name || '';
         }
       }
-      updateViewerRootValue(folderPath.trim());
+      updateViewerRootValue(folderPath.trim(), { fromPicker: true });
     });
   }
   if(viewerControls){
@@ -694,6 +734,18 @@ window.addEventListener('DOMContentLoaded', () => {
     const languages = getSelectedViewerLanguages();
     if(!root){
       setViewerStatus('Enter a folder path to crawl.');
+      if(viewerRootInput) viewerRootInput.focus();
+      return;
+    }
+    if(root.toLowerCase().includes('fakepath')){
+      setViewerStatus('The selected folder path looks like a browser placeholder. Paste the actual filesystem path.');
+      if(viewerRootPickerNote) viewerRootPickerNote.hidden = false;
+      if(viewerRootInput) viewerRootInput.focus();
+      return;
+    }
+    if(viewerRootFromPicker && !looksLikeFilesystemPath(root)){
+      setViewerStatus('Browser pickers cannot provide the full folder path. Paste the absolute project path manually.');
+      if(viewerRootPickerNote) viewerRootPickerNote.hidden = false;
       if(viewerRootInput) viewerRootInput.focus();
       return;
     }
