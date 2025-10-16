@@ -150,14 +150,14 @@ Future<Map<String, dynamic>?> _loadBundledGraph() async {
 // (edit or extend as you add languages)
 // ----------------------------
 final Map<String, List<String>> _crawlerCandidates = {
-  'js':      ['jsDependency', 'jsDependency.exe'],
-  'py':      ['pyDependency', 'pyDependency.exe'],
-  'go':      ['goDependency', 'goDependency.exe'],
-  'rust':    ['rustDependency', 'rustDependency.exe'],
-  'java':    ['javaDependency', 'javaDependency.exe'],
-  'kotlin':  ['kotlinDependency', 'kotlinDependency.exe'],
-  'csharp':  ['csharpDependency', 'csharpDependency.exe'],
-  'dart':    ['dartDependency', 'dartDependency.exe'],
+  'js':      ['jsDependency', 'jsDependency.exe', 'lib/jsDependency.dart'],
+  'py':      ['pyDependency', 'pyDependency.exe', 'lib/pyDependency.dart'],
+  'go':      ['goDependency', 'goDependency.exe', 'lib/goDependency.dart'],
+  'rust':    ['rustDependency', 'rustDependency.exe', 'lib/rustDependency.dart'],
+  'java':    ['javaDependency', 'javaDependency.exe', 'lib/javaDependency.dart'],
+  'kotlin':  ['kotlinDependency', 'kotlinDependency.exe', 'lib/kotlinDependency.dart'],
+  'csharp':  ['csharpDependency', 'csharpDependency.exe', 'lib/csharpDependency.dart'],
+  'dart':    ['dartDependency', 'dartDependency.exe', 'lib/dartDependency.dart'],
 };
 
 // Optional: which output file each crawler writes by default
@@ -411,8 +411,13 @@ Future<String?> _findExecutable(List<String> names) async {
 }
 
 Future<int> _runCrawler(String exe, String root) async {
-  _log('Running: $exe  (cwd: $root)');
-  final p = await Process.start(exe, const <String>[], // crawlers scan CWD; no flags needed
+  final isDartScript = exe.toLowerCase().endsWith('.dart');
+  final command = isDartScript ? 'dart' : exe;
+  final args = isDartScript ? ['run', exe] : const <String>[];
+  final display = isDartScript ? '$command ${args.join(' ')}' : exe;
+
+  _log('Running: $display  (cwd: $root)');
+  final p = await Process.start(command, args, // crawlers scan CWD; no flags needed
       workingDirectory: root, runInShell: true);
 
   // Stream to our stderr to show progress (optional)
