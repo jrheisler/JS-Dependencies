@@ -138,6 +138,7 @@ Future<void> main(List<String> args) async {
 Future<void> _route(HttpRequest req, int port) async {
   final path = req.uri.path;
   final method = req.method.toUpperCase();
+  _debugRequest(req);
 
   // static: "/" -> nexus.html (with token injected)
   if (method == 'GET' && (path == '/' || path == '/index.html' || path == '/nexus.html')) {
@@ -179,6 +180,11 @@ Future<void> _route(HttpRequest req, int port) async {
   // POST /api/crawl  { root, languages: ["js","py"], clear?: true }
   if (method == 'POST' && path == '/api/crawl') {
     final body = await utf8.decoder.bind(req).join();
+    if (body.isEmpty) {
+      _log('  body: <empty>');
+    } else {
+      _log('  body (${body.length} bytes): $body');
+    }
     final cfg = (body.isNotEmpty ? jsonDecode(body) : {}) as Map<String, dynamic>;
     final rawRoot = (cfg['root'] ?? '').toString();
     final root = _resolveRootPath(rawRoot);
@@ -227,12 +233,14 @@ Future<void> _route(HttpRequest req, int port) async {
     for (final g in collected) {
       _lastGraph.addGraph(g);
     }
+    _log('  merged graph now has ${_lastGraph.nodes.length} nodes / ${_lastGraph.edges.length} edges');
     _sendJson(req, 200, {'ok': true, 'nodes': _lastGraph.nodes.length, 'edges': _lastGraph.edges.length});
     return;
   }
 
   // GET /api/graph -> merged graph (or empty)
   if (method == 'GET' && path == '/api/graph') {
+    _log('  serving merged graph with ${_lastGraph.nodes.length} nodes / ${_lastGraph.edges.length} edges');
     _sendJson(req, 200, _lastGraph.toJson());
     return;
   }
@@ -428,6 +436,28 @@ Future<void> _sendText(HttpRequest req, int code, String text) async {
 // ----------------------------
 void _log(String s) => stderr.writeln('[info] $s');
 void _warn(String s) => stderr.writeln('[warn] $s');
+
+void _debugRequest(HttpRequest req) {
+  final method = req.method.toUpperCase();
+  final uri = req.uri;
+  final query = uri.query.isEmpty ? '' : '?${uri.query}';
+  final remote = req.connectionInfo?.remoteAddress.address ?? 'unknown';
+  _log('HTTP $method ${uri.path}$query from $remote');
+
+  final referer = req.headers.value('referer') ?? 'n/a';
+  final contentType = req.headers.contentType?.value ?? 'n/a';
+  final contentLength = req.headers.contentLength;
+  final auth = req.headers.value('authorization');
+  final authHint = () {
+    if (auth == null) return 'none';
+    if (auth.startsWith('Bearer ') && auth.length > 10) {
+      return 'Bearer …${auth.substring(auth.length - 4)}';
+    }
+    return auth;
+  }();
+
+  _log('  headers: referer=$referer, content-type=$contentType, length=${contentLength < 0 ? 'n/a' : contentLength}, authorization=$authHint');
+}
 
 // ----------------------------
 // Minimal fallback HTML (only used if nexus.html not found)
