@@ -293,27 +293,48 @@ Future<String?> _resolveCrawler(String lang) async {
 }
 
 Future<String?> _findExecutable(List<String> names) async {
+  final visited = <String>{};
+
+  Future<String?> probeDir(String dir) async {
+    if (dir.isEmpty) return null;
+    final normalized = Directory(dir).absolute.path;
+    if (!visited.add(normalized)) return null;
+    for (final n in names) {
+      final candidate = File(_join(normalized, n));
+      if (await candidate.exists()) return candidate.path;
+    }
+    return null;
+  }
+
   // 1) current directory
-  for (final n in names) {
-    final f = File(n);
-    if (await f.exists()) return f.absolute.path;
-  }
-  // 2) alongside exe
+  final currentDir = Directory.current.path;
+  final directHit = await probeDir(currentDir);
+  if (directHit != null) return directHit;
+
+  // 2) alongside the Dart entry-point (useful when running `dart run`)
+  try {
+    final scriptDir = File(Platform.script.toFilePath()).parent.path;
+    final scriptHit = await probeDir(scriptDir);
+    if (scriptHit != null) return scriptHit;
+    final publicHit = await probeDir(_join(scriptDir, 'public'));
+    if (publicHit != null) return publicHit;
+  } catch (_) {}
+
+  // 3) alongside the compiled executable (when packaged)
   final binDir = File(Platform.resolvedExecutable).parent.path;
-  for (final n in names) {
-    final f = File(_join(binDir, n));
-    if (await f.exists()) return f.path;
-  }
-  // 3) PATH
+  final binHit = await probeDir(binDir);
+  if (binHit != null) return binHit;
+  final binPublicHit = await probeDir(_join(binDir, 'public'));
+  if (binPublicHit != null) return binPublicHit;
+
+  // 4) PATH
   final pathEnv = Platform.environment['PATH'] ?? '';
   final sep = Platform.isWindows ? ';' : ':';
   for (final dir in pathEnv.split(sep)) {
-    if (dir.trim().isEmpty) continue;
-    for (final n in names) {
-      final p = _join(dir, n);
-      if (await File(p).exists()) return p;
-    }
+    final hit = await probeDir(dir.trim());
+    if (hit != null) return hit;
   }
+
   return null;
 }
 
