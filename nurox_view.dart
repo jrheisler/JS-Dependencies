@@ -27,7 +27,7 @@ class Graph {
 
   void addGraph(Map<String, dynamic> g) {
     final ns = (g['nodes'] as List?) ?? const [];
-    final es = (g['edges'] ?? g['links'] as List?) ?? const [];
+    final es = (g['edges'] as List?) ?? (g['links'] as List?) ?? const [];
     for (final n in ns) {
       final id = (n['id'] ?? '').toString();
       if (id.isEmpty) continue;
