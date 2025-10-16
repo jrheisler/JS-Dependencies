@@ -177,6 +177,9 @@
         <button type="button" class="btn" id="crawlRootBrowse" title="Browse for folder">Browse…</button>
       </div>
       <input type="file" id="crawlRootPicker" webkitdirectory directory multiple hidden />
+      <p class="status-note" id="crawlRootPickerNote" hidden>
+        Selecting a folder only shares its path with this browser session — nothing is uploaded.
+      </p>
       <div class="section-label">Languages</div>
       <div id="crawlLangList" class="lang-list"></div>
       <label><input type="checkbox" id="crawlClear" checked /> Clear previous graph before crawling</label>
@@ -494,6 +497,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const viewerRootInput = $('crawlRoot');
   const viewerRootBrowseBtn = $('crawlRootBrowse');
   const viewerRootPicker = $('crawlRootPicker');
+  const viewerRootPickerNote = $('crawlRootPickerNote');
   const viewerClearInput = $('crawlClear');
   const viewerLangList = $('crawlLangList');
   const viewerStatusNote = $('viewerStatus');
@@ -527,15 +531,28 @@ window.addEventListener('DOMContentLoaded', () => {
   if(viewerRootBrowseBtn){
     viewerRootBrowseBtn.addEventListener('click', async ()=>{
       try {
+        if(window.showDirectoryPicker){
+          try {
+            const handle = await window.showDirectoryPicker();
+            if(handle){
+              updateViewerRootValue(handle.name || '');
+              if(viewerRootPickerNote){
+                viewerRootPickerNote.hidden = true;
+              }
+            }
+            return;
+          } catch (pickerErr) {
+            if(pickerErr?.name === 'AbortError'){
+              return;
+            }
+            console.error('Unable to open directory picker', pickerErr);
+          }
+        }
         if(viewerRootPicker){
           viewerRootPicker.value = '';
           viewerRootPicker.click();
-          return;
-        }
-        if(window.showDirectoryPicker){
-          const handle = await window.showDirectoryPicker();
-          if(handle){
-            updateViewerRootValue(handle.name || '');
+          if(viewerRootPickerNote){
+            viewerRootPickerNote.hidden = false;
           }
           return;
         }
@@ -550,6 +567,11 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
   if(viewerRootPicker){
+    if(viewerRootPickerNote && typeof window.showDirectoryPicker === 'function'){
+      viewerRootPickerNote.hidden = true;
+    } else if(viewerRootPickerNote){
+      viewerRootPickerNote.hidden = false;
+    }
     viewerRootPicker.addEventListener('change', ()=>{
       const files = viewerRootPicker.files;
       if(!files || files.length === 0) return;
