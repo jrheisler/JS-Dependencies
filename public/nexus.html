@@ -674,7 +674,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
             if(prefix){
               const usesBackslash = filePath.includes('\\') && !filePath.includes('/');
-              folderPath = usesBackslash ? prefix.replace(/\//g, '\') : prefix;
+              folderPath = usesBackslash ? prefix.replace(/\//g, '\\') : prefix;
             }
           }
           if(!folderPath){
