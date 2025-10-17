@@ -1700,18 +1700,61 @@ window.addEventListener('DOMContentLoaded', () => {
   function render(){
     applyFilters();
 
+    function summarizeFiltered(){
+      const summary = {
+        nodes: {
+          total: 0,
+          reachableCurrent: 0,
+          disconnected: 0,
+          dynamicOnly: 0,
+          pureLeaves: 0,
+          sideEffects: 0,
+          unusedAttached: 0,
+          maxDegree: 0
+        },
+        edges: {
+          total: 0,
+          dynamic: 0
+        }
+      };
+
+      filtered.nodes.forEach(n => {
+        summary.nodes.total += 1;
+
+        const statuses = statusesFor(n);
+        const degree = (n.inDeg || 0) + (n.outDeg || 0);
+
+        if(statuses.includes('reachable_current')) summary.nodes.reachableCurrent += 1;
+        if(statuses.includes('disconnected_all_profiles')) summary.nodes.disconnected += 1;
+        if(statuses.includes('dynamic_only')) summary.nodes.dynamicOnly += 1;
+        if(degree === 1 && !statuses.includes('reachable_current')) summary.nodes.pureLeaves += 1;
+        if(n.hasSideEffects === true) summary.nodes.sideEffects += 1;
+        if(statuses.includes('disconnected_all_profiles') && degree > 0) summary.nodes.unusedAttached += 1;
+        if(degree > summary.nodes.maxDegree) summary.nodes.maxDegree = degree;
+      });
+
+      filtered.edges.forEach(e => {
+        summary.edges.total += 1;
+        if(isDynamicEdge(e)) summary.edges.dynamic += 1;
+      });
+
+      return summary;
+    }
+
+    const summary = summarizeFiltered();
+
     // HUD counts
-    setText('nCount', filtered.nodes.length);
-    setText('eCount', filtered.edges.length);
-    setText('uCount', filtered.nodes.filter(n=>statusesFor(n).includes('reachable_current')).length);
-    setText('xCount', filtered.nodes.filter(n=>statusesFor(n).includes('disconnected_all_profiles')).length);
-    setText('dCount', filtered.nodes.filter(n=>statusesFor(n).includes('dynamic_only')).length);
+    setText('nCount', summary.nodes.total);
+    setText('eCount', summary.edges.total);
+    setText('uCount', summary.nodes.reachableCurrent);
+    setText('xCount', summary.nodes.disconnected);
+    setText('dCount', summary.nodes.dynamicOnly);
 
     // Insights
-    setText('pureLeaves', filtered.nodes.filter(n=> (n.inDeg||0)+(n.outDeg||0)===1 && !statusesFor(n).includes('reachable_current')).length);
-    setText('sideFx', filtered.nodes.filter(n=> n.hasSideEffects === true).length);
-    setText('unusedAttached', filtered.nodes.filter(n=> statusesFor(n).includes('disconnected_all_profiles') && ((n.inDeg||0)+(n.outDeg||0))>0).length);
-    setText('maxDeg', filtered.nodes.reduce((m,n)=>Math.max(m,(n.inDeg||0)+(n.outDeg||0)),0));
+    setText('pureLeaves', summary.nodes.pureLeaves);
+    setText('sideFx', summary.nodes.sideEffects);
+    setText('unusedAttached', summary.nodes.unusedAttached);
+    setText('maxDeg', summary.nodes.maxDegree);
 
     // JOINs
     const links = linkG.selectAll('line').data(filtered.edges, d=>d.id || `${nodeId(d.source)}=>${nodeId(d.target)}:${d.kind||''}`);
