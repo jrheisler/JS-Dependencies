@@ -518,8 +518,37 @@ window.addEventListener('DOMContentLoaded', () => {
     return false;
   };
   const LAST_ROOT_KEY = 'nurox:nexus:lastCrawlRoot';
+  const LAST_LANGS_KEY = 'nurox:nexus:lastCrawlLangs';
   const loadLastCrawlRoot = ()=>{ try{ return localStorage.getItem(LAST_ROOT_KEY) || ''; }catch{ return ''; } };
   const saveLastCrawlRoot = (value)=>{ try{ localStorage.setItem(LAST_ROOT_KEY, value); }catch{} };
+  const loadLastCrawlLangs = ()=>{
+    try {
+      const raw = localStorage.getItem(LAST_LANGS_KEY);
+      if(!raw) return [];
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)){
+        return parsed.map(item => String(item)).filter(Boolean);
+      }
+    } catch {}
+    return [];
+  };
+  const saveLastCrawlLangs = (values)=>{
+    try {
+      const unique = Array.from(new Set((values || []).map(v => String(v).trim()).filter(Boolean)));
+      localStorage.setItem(LAST_LANGS_KEY, JSON.stringify(unique));
+    } catch {}
+  };
+  let viewerLangSelection = new Set(loadLastCrawlLangs());
+  const persistViewerLangSelection = ()=>{
+    if(!viewerLangList) return;
+    const checkboxes = Array.from(viewerLangList.querySelectorAll('input[type="checkbox"]'));
+    const selected = checkboxes.filter(el => el.checked && !el.disabled).map(el => el.value);
+    const available = new Set(checkboxes.map(el => el.value));
+    const previous = new Set(viewerLangSelection);
+    const extras = Array.from(previous).filter(lang => !available.has(lang));
+    viewerLangSelection = new Set([...selected, ...extras]);
+    saveLastCrawlLangs(Array.from(viewerLangSelection));
+  };
   const setViewerStatus = (msg)=>{ if(viewerStatusNote) viewerStatusNote.textContent = msg || ''; };
   const toggleViewerBusy = (busy)=>{
     if(startCrawlBtn) startCrawlBtn.disabled = busy;
@@ -568,6 +597,13 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     viewerRootInput.addEventListener('change', persistViewerRoot);
     viewerRootInput.addEventListener('blur', persistViewerRoot);
+  }
+  if(viewerLangList){
+    viewerLangList.addEventListener('change', (event)=>{
+      if(event.target && event.target.matches('input[type="checkbox"]')){
+        persistViewerLangSelection();
+      }
+    });
   }
   if(viewerRootBrowseBtn){
     viewerRootBrowseBtn.addEventListener('click', async ()=>{
@@ -619,16 +655,34 @@ window.addEventListener('DOMContentLoaded', () => {
       let folderPath = '';
       if(primary){
         const filePath = typeof primary.path === 'string' ? primary.path : '';
+        const relativeRaw = typeof primary.webkitRelativePath === 'string' ? primary.webkitRelativePath : '';
+        const normalizedRelative = relativeRaw.replace(/\\+/g, '/').replace(/^\.\/?/, '');
         if(filePath){
-          folderPath = filePath.replace(/[\\/][^\\/]*$/, '');
-        }
-        if(!folderPath && primary.webkitRelativePath){
-          const relative = primary.webkitRelativePath.replace(/\\+/g, '/');
-          if(relative.includes('/')){
-            folderPath = relative.substring(0, relative.lastIndexOf('/'));
-          } else {
-            folderPath = relative;
+          const normalizedFilePath = filePath.replace(/\\+/g, '/');
+          if(normalizedRelative && normalizedFilePath.endsWith(normalizedRelative)){
+            let prefix = normalizedFilePath.slice(0, normalizedFilePath.length - normalizedRelative.length);
+            const originalPrefix = prefix;
+            if(prefix.endsWith('/')){
+              prefix = prefix.slice(0, -1);
+            }
+            if(!prefix && originalPrefix.startsWith('/')){
+              prefix = '/';
+            }
+            if(/^[A-Za-z]:$/.test(prefix) && originalPrefix.endsWith('/')){
+              prefix = originalPrefix;
+            }
+            if(prefix){
+              const usesBackslash = filePath.includes('\\') && !filePath.includes('/');
+              folderPath = usesBackslash ? prefix.replace(/\//g, '\') : prefix;
+            }
           }
+          if(!folderPath){
+            folderPath = filePath.replace(/[\\/][^\\/]*$/, '');
+          }
+        }
+        if(!folderPath && normalizedRelative){
+          const firstSlash = normalizedRelative.indexOf('/');
+          folderPath = firstSlash > 0 ? normalizedRelative.slice(0, firstSlash) : normalizedRelative;
         }
         if(!folderPath){
           folderPath = primary.name || '';
@@ -649,8 +703,12 @@ window.addEventListener('DOMContentLoaded', () => {
     initViewerPanel();
   }
   function getSelectedViewerLanguages(){
-    if(!viewerLangList) return [];
-    return Array.from(viewerLangList.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+    if(!viewerLangList) return Array.from(viewerLangSelection);
+    const selected = Array.from(viewerLangList.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+    if(selected.length === 0 && viewerLangSelection.size > 0){
+      return Array.from(viewerLangSelection);
+    }
+    return selected;
   }
 
   async function refreshViewerLanguages(){
@@ -675,6 +733,7 @@ window.addEventListener('DOMContentLoaded', () => {
         empty.textContent = 'No crawlers detected.';
         viewerLangList.appendChild(empty);
       } else {
+        const hasStoredSelection = viewerLangSelection.size > 0;
         entries.forEach(([name, meta]) => {
           const info = meta || {};
           const available = info.available === true;
@@ -686,7 +745,8 @@ window.addEventListener('DOMContentLoaded', () => {
           checkbox.type = 'checkbox';
           checkbox.value = name;
           checkbox.disabled = !available;
-          checkbox.checked = available;
+          const shouldCheck = hasStoredSelection ? viewerLangSelection.has(name) : available;
+          checkbox.checked = available && shouldCheck;
           const nameSpan = document.createElement('span');
           nameSpan.className = 'lang-name';
           nameSpan.textContent = name;
@@ -698,6 +758,7 @@ window.addEventListener('DOMContentLoaded', () => {
           label.appendChild(metaSpan);
           viewerLangList.appendChild(label);
         });
+        persistViewerLangSelection();
       }
       return true;
     } catch (err) {
@@ -753,6 +814,8 @@ window.addEventListener('DOMContentLoaded', () => {
       setViewerStatus('Select at least one language to crawl.');
       return;
     }
+    saveLastCrawlLangs(languages);
+    viewerLangSelection = new Set(languages);
     toggleViewerBusy(true);
     setStatus('Starting crawl…');
     setViewerStatus('Starting crawl…');

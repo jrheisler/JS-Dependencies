@@ -447,6 +447,11 @@ String _resolveRootPath(String raw) {
     return value;
   }
 
+  try {
+    final absolute = Directory(value).absolute.path;
+    if (absolute.isNotEmpty) value = absolute;
+  } catch (_) {}
+
   return value;
 }
 
