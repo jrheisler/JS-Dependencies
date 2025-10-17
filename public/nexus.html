@@ -339,6 +339,20 @@ window.addEventListener('DOMContentLoaded', () => {
   let workerSeq = 0;
   const workerRequests = new Map();
   let workerBusyMessage = null;
+  const SIM_FULL_ALPHA = 0.8;
+  const SIM_GENTLE_ALPHA = 0.35;
+  const SIM_ACTIVE_TARGET = 0.12;
+  const SIM_GENTLE_TARGET = 0.06;
+  const LOW_MOTION_VELOCITY_THRESHOLD = 0.03;
+  const LOW_MOTION_TICKS_REQUIRED = 24;
+  let renderPending = false;
+  let pendingSimWarmup = false;
+  let pendingGentleWarm = false;
+  let tickPending = false;
+  let queuedTickState = null;
+  let lowMotionTickCount = 0;
+  let userInteractionDepth = 0;
+  let latestTickContext = null;
   const cfg = { charge: -800, linkDist: 90, linkStr: 0.07, minDegree: 0, showDisconnectedOnly: false, showDynamicOnly: false, showDeferredOnly: false, hideExternals: false, hideDynamic: false };
   const KEEP_RULE_KEY = 'nurox:nexus:keepRules';
   const graphHelpers = (window.GraphPreprocessing && window.GraphPreprocessing.helpers) || {};
@@ -568,7 +582,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   updateMetricState();
 
-  const zoom = d3.zoom().scaleExtent([0.1, 4]).on('zoom', (e)=>{ g.attr('transform', e.transform); });
+  const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .on('start', ()=> beginInteraction())
+    .on('zoom', (e)=>{ g.attr('transform', e.transform); })
+    .on('end', ()=> endInteraction());
   svg.call(zoom);
 
   // --- Sim ---
@@ -577,6 +595,91 @@ window.addEventListener('DOMContentLoaded', () => {
     .force('link', d3.forceLink().id(d=>d.id).distance(cfg.linkDist).strength(cfg.linkStr))
     .force('center', d3.forceCenter())
     .force('collision', d3.forceCollide().radius(d=>sizeFor(d)+6));
+
+  function warmSimulation(intensity = SIM_FULL_ALPHA, target = SIM_ACTIVE_TARGET){
+    if(paused) return;
+    sim.alphaTarget(target);
+    sim.alpha(intensity).restart();
+    lowMotionTickCount = 0;
+  }
+
+  function gentleWarmSimulation(){
+    warmSimulation(SIM_GENTLE_ALPHA, SIM_GENTLE_TARGET);
+  }
+
+  function coolSimulation(){
+    if(paused) return;
+    sim.alphaTarget(0);
+    if(sim.alpha() < 0.02){
+      sim.stop();
+    }
+  }
+
+  function beginInteraction(){
+    userInteractionDepth += 1;
+    if(paused) return;
+    sim.alphaTarget(0);
+    if(sim.alpha() < 0.001){
+      sim.alpha(0.001);
+    }
+    sim.restart();
+  }
+
+  function endInteraction(){
+    if(userInteractionDepth > 0) userInteractionDepth -= 1;
+    if(paused || userInteractionDepth > 0) return;
+    if(pendingSimWarmup){
+      warmSimulation();
+      pendingSimWarmup = false;
+      pendingGentleWarm = false;
+    } else {
+      gentleWarmSimulation();
+      pendingGentleWarm = false;
+    }
+  }
+
+  function scheduleTickUpdate(state){
+    queuedTickState = state;
+    if(!tickPending){
+      tickPending = true;
+      requestAnimationFrame(flushTick);
+    }
+  }
+
+  function flushTick(){
+    tickPending = false;
+    const state = queuedTickState;
+    queuedTickState = null;
+    if(!state) return;
+    const { linksSel, nodesSel, labelsSel } = state;
+    linksSel.attr('x1', d=>d.source.x).attr('y1', d=>d.source.y).attr('x2', d=>d.target.x).attr('y2', d=>d.target.y);
+    nodesSel.attr('transform', d=>`translate(${d.x},${d.y})`);
+    labelsSel.attr('x', d=>d.x + sizeFor(d)+4).attr('y', d=>d.y+4);
+    updateAverageVelocity();
+  }
+
+  function updateAverageVelocity(){
+    if(!renderedNodes.length) return;
+    let total = 0;
+    let count = 0;
+    for(const node of renderedNodes){
+      if(!node) continue;
+      const vx = node.vx || 0;
+      const vy = node.vy || 0;
+      total += Math.hypot(vx, vy);
+      count += 1;
+    }
+    if(count === 0) return;
+    const avg = total / count;
+    if(avg < LOW_MOTION_VELOCITY_THRESHOLD){
+      lowMotionTickCount = Math.min(lowMotionTickCount + 1, LOW_MOTION_TICKS_REQUIRED + 1);
+      if(lowMotionTickCount >= LOW_MOTION_TICKS_REQUIRED && userInteractionDepth === 0 && !pendingSimWarmup && !pendingGentleWarm){
+        coolSimulation();
+      }
+    } else {
+      lowMotionTickCount = 0;
+    }
+  }
 
   // --- UI bindings ---
   const statusEl = $('status');
@@ -1108,17 +1211,17 @@ window.addEventListener('DOMContentLoaded', () => {
   const nodeId = (ref)=> typeof ref === 'object' && ref !== null ? ref.id : ref;
   const isFileProtocol = window.location.protocol === 'file:';
   const bindSlider = (id, key, outId) => { const el = $(id); const out = $(outId);
-    const update = ()=>{ cfg[key] = id==='linkStr'? parseFloat(el.value) : parseInt(el.value,10); out.textContent = el.value; if(key==='charge'){ sim.force('charge').strength(cfg.charge); } if(key==='linkDist'){ sim.force('link').distance(cfg.linkDist); } if(key==='linkStr'){ sim.force('link').strength(cfg.linkStr); } sim.alpha(0.6).restart(); };
+    const update = ()=>{ cfg[key] = id==='linkStr'? parseFloat(el.value) : parseInt(el.value,10); out.textContent = el.value; if(key==='charge'){ sim.force('charge').strength(cfg.charge); } if(key==='linkDist'){ sim.force('link').distance(cfg.linkDist); } if(key==='linkStr'){ sim.force('link').strength(cfg.linkStr); } if(paused){ pendingSimWarmup = true; } else { warmSimulation(); pendingSimWarmup = false; pendingGentleWarm = false; } };
     el.addEventListener('input', update); update(); };
   bindSlider('charge','charge','chargeVal');
   bindSlider('linkDist','linkDist','linkDistVal');
   bindSlider('linkStr','linkStr','linkStrVal');
-  $('minDegree').addEventListener('input', e=>{ cfg.minDegree = parseInt(e.target.value,10); $('minDegreeVal').textContent = cfg.minDegree; render(); });
-  $('showDisconnectedOnly').addEventListener('change', e=>{ cfg.showDisconnectedOnly = e.target.checked; render(); });
-  $('showDynamicOnly').addEventListener('change', e=>{ cfg.showDynamicOnly = e.target.checked; render(); });
-  $('showDeferredOnly').addEventListener('change', e=>{ cfg.showDeferredOnly = e.target.checked; render(); });
-  $('hideExternals').addEventListener('change', e=>{ cfg.hideExternals = e.target.checked; render(); });
-  $('hideDynamic').addEventListener('change', e=>{ cfg.hideDynamic = e.target.checked; render(); });
+  $('minDegree').addEventListener('input', e=>{ cfg.minDegree = parseInt(e.target.value,10); $('minDegreeVal').textContent = cfg.minDegree; render({ reheat: true }); });
+  $('showDisconnectedOnly').addEventListener('change', e=>{ cfg.showDisconnectedOnly = e.target.checked; render({ reheat: true }); });
+  $('showDynamicOnly').addEventListener('change', e=>{ cfg.showDynamicOnly = e.target.checked; render({ reheat: true }); });
+  $('showDeferredOnly').addEventListener('change', e=>{ cfg.showDeferredOnly = e.target.checked; render({ reheat: true }); });
+  $('hideExternals').addEventListener('change', e=>{ cfg.hideExternals = e.target.checked; render({ reheat: true }); });
+  $('hideDynamic').addEventListener('change', e=>{ cfg.hideDynamic = e.target.checked; render({ reheat: true }); });
   if(colorModeEl){
     colorModeEl.setAttribute('aria-label','Color mode');
     colorModeEl.addEventListener('change', ()=> {
@@ -1133,7 +1236,7 @@ window.addEventListener('DOMContentLoaded', () => {
     profileSelect.addEventListener('change', (e)=>{
       const idx = parseInt(e.target.value, 10);
       currentProfileIndex = Number.isNaN(idx) ? 0 : Math.max(0, Math.min(idx, profiles.length-1));
-      render();
+      render({ reheat: true });
       updateProfileLegend();
       const active = profiles[currentProfileIndex];
       setStatus(`Profile: ${active?.name || 'default'}`);
@@ -1176,7 +1279,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }, false);
   $('resetView').addEventListener('click', ()=>{ svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity); });
-  $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; paused ? sim.stop() : sim.alpha(0.6).restart(); });
+  $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; if(paused){ sim.stop(); } else { warmSimulation(); pendingSimWarmup = false; pendingGentleWarm = false; } lowMotionTickCount = 0; });
   $('exportSbom').addEventListener('click', exportSbom);
   const toggleSidebarBtn = $('toggleSidebar');
   const sidebarLatch = $('sidebarLatch');
@@ -1493,7 +1596,7 @@ window.addEventListener('DOMContentLoaded', () => {
     applyProcessedGraph(result, previousPositions);
     paused = false;
     $('pause').textContent = 'Pause ⏸';
-    render();
+    render({ reheat: true });
     return result;
   }
 
@@ -1657,7 +1760,21 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function render(){
+  function render(options = {}){
+    const opts = (options && typeof options === 'object') ? options : {};
+    const reheat = opts.reheat !== undefined ? opts.reheat : true;
+    const gentle = opts.gentle === true;
+    if(reheat) pendingSimWarmup = true;
+    if(gentle) pendingGentleWarm = true;
+    if(renderPending) return;
+    renderPending = true;
+    requestAnimationFrame(()=>{
+      renderPending = false;
+      performRender();
+    });
+  }
+
+  function performRender(){
     applyFilters();
 
     function summarizeFiltered(){
@@ -1730,9 +1847,9 @@ window.addEventListener('DOMContentLoaded', () => {
     nodes.exit().remove();
     const nodesEnter = nodes.enter().append('g').attr('class', d=>`node ${stateClass(d)} ${isExternal(d)?'external':''}`)
       .call(d3.drag()
-        .on('start', (e,d)=>{ if(!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
-        .on('drag', (e,d)=>{ d.fx = e.x; d.fy = e.y; })
-        .on('end', (e,d)=>{ if(!e.active) sim.alphaTarget(0); pins[d.id] = {x: d.fx ?? d.x, y: d.fy ?? d.y}; savePins(pins); }))
+        .on('start', (e,d)=>{ beginInteraction(); d.fx = d.x; d.fy = d.y; if(latestTickContext) scheduleTickUpdate(latestTickContext); })
+        .on('drag', (e,d)=>{ d.fx = e.x; d.fy = e.y; if(latestTickContext) scheduleTickUpdate(latestTickContext); })
+        .on('end', (e,d)=>{ endInteraction(); pins[d.id] = {x: d.fx ?? d.x, y: d.fy ?? d.y}; savePins(pins); if(latestTickContext) scheduleTickUpdate(latestTickContext); }))
       .on('click', (e,d)=> selectNode(d))
       .on('dblclick', (e,d)=>{ d.fx = null; d.fy = null; delete pins[d.id]; savePins(pins); })
     ;
@@ -1768,14 +1885,20 @@ window.addEventListener('DOMContentLoaded', () => {
     updateHighlights();
 
     // Sim data
-    sim.nodes(filtered.nodes).on('tick', ticked);
+    const tickContext = { linksSel, nodesSel, labelsSel };
+    latestTickContext = tickContext;
+    sim.nodes(filtered.nodes).on('tick', ()=> scheduleTickUpdate(tickContext));
     sim.force('link').links(filtered.edges);
-    if(!paused) sim.alpha(0.8).restart();
-
-    function ticked(){
-      linksSel.attr('x1', d=>d.source.x).attr('y1', d=>d.source.y).attr('x2', d=>d.target.x).attr('y2', d=>d.target.y);
-      nodesSel.attr('transform', d=>`translate(${d.x},${d.y})`);
-      labelsSel.attr('x', d=>d.x + sizeFor(d)+4).attr('y', d=>d.y+4);
+    scheduleTickUpdate(tickContext);
+    if(!paused && userInteractionDepth === 0){
+      if(pendingSimWarmup){
+        warmSimulation();
+        pendingSimWarmup = false;
+        pendingGentleWarm = false;
+      } else if(pendingGentleWarm){
+        gentleWarmSimulation();
+        pendingGentleWarm = false;
+      }
     }
 
     if(selectedNode){
