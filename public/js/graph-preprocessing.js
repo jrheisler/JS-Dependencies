@@ -1,0 +1,419 @@
+(function(global){
+  'use strict';
+
+  const nodeId = (ref) => (ref && typeof ref === 'object') ? ref.id : ref;
+
+  function computeDegrees(graph){
+    const idMap = new Map(graph.nodes.map(node => [node.id, node]));
+    graph.nodes.forEach(node => {
+      node.inDeg = 0;
+      node.outDeg = 0;
+    });
+    graph.edges.forEach(edge => {
+      const src = nodeId(edge.source);
+      const tgt = nodeId(edge.target);
+      if(idMap.has(src)) idMap.get(src).outDeg += 1;
+      if(idMap.has(tgt)) idMap.get(tgt).inDeg += 1;
+    });
+  }
+
+  function inferUsageStates(graph){
+    const fileNodes = graph.nodes.filter(node => (node.type || 'file') === 'file');
+    const hasFileUsage = fileNodes.some(node => node.state && node.state !== 'unused');
+    if(hasFileUsage || fileNodes.length === 0) return;
+
+    const idMap = new Map(graph.nodes.map(node => [node.id, node]));
+    const adjacency = new Map();
+    graph.edges.forEach(edge => {
+      const src = nodeId(edge.source);
+      const tgt = nodeId(edge.target);
+      if(!idMap.has(src) || !idMap.has(tgt)) return;
+      if(!adjacency.has(src)) adjacency.set(src, new Set());
+      adjacency.get(src).add(tgt);
+    });
+
+    const seeds = new Set();
+    fileNodes.forEach(node => { if(node.hasSideEffects) seeds.add(node.id); });
+    graph.edges.forEach(edge => {
+      if(edge.kind === 'side_effect'){
+        const tgt = nodeId(edge.target);
+        if(idMap.has(tgt)) seeds.add(tgt);
+      }
+    });
+
+    if(seeds.size === 0){
+      fileNodes.forEach(node => {
+        const inDeg = node.inDeg || 0;
+        const outDeg = node.outDeg || 0;
+        if(inDeg === 0 && outDeg > 0) seeds.add(node.id);
+      });
+    }
+
+    const used = new Set();
+    const queue = Array.from(seeds);
+    while(queue.length){
+      const id = queue.shift();
+      if(used.has(id)) continue;
+      used.add(id);
+      const next = adjacency.get(id);
+      if(!next) continue;
+      next.forEach(nid => {
+        if(!idMap.has(nid)) return;
+        const neighbor = idMap.get(nid);
+        if((neighbor.type || 'file') === 'file' && !used.has(nid)) queue.push(nid);
+      });
+    }
+
+    graph.nodes.forEach(node => {
+      if((node.type || 'file') !== 'file') return;
+      if(used.has(node.id)){
+        const fanOut = adjacency.get(node.id);
+        const hasFanOut = fanOut && fanOut.size > 0;
+        if(node.hasSideEffects && (node.inDeg || 0) === 0 && !hasFanOut){
+          node.state = 'side_effect_only';
+        } else {
+          node.state = 'used';
+        }
+      } else if(node.hasSideEffects){
+        node.state = 'side_effect_only';
+      } else {
+        node.state = 'unused';
+      }
+    });
+  }
+
+  function edgeTypeString(edge){
+    return String(edge?.type || edge?.kind || edge?.mode || '').toLowerCase();
+  }
+
+  function isDeferredEdge(edge){
+    if(!edge) return false;
+    if(edge.deferred === true || edge.lazy === true || edge.loading === 'deferred') return true;
+    const t = edgeTypeString(edge);
+    return t.includes('defer') || t.includes('lazy');
+  }
+
+  function isDynamicEdge(edge){
+    if(!edge) return false;
+    if(edge.dynamic === true || edge.reflection === true) return true;
+    if(edge.certainty === 'heuristic' || edge.mode === 'runtime_dynamic') return true;
+    const t = edgeTypeString(edge);
+    return t.includes('dynamic') || t.includes('require.ensure') || t.includes('eval');
+  }
+
+  function edgePhase(edge){
+    if(!edge) return 'runtime';
+    const phaseSource = edge.phase || edge.stage || edge.scope || edge.context || edgeTypeString(edge);
+    const phase = String(phaseSource).toLowerCase();
+    if(phase.includes('test') || edge.test === true) return 'test';
+    if(phase.includes('spec')) return 'test';
+    if(phase.includes('build') || phase.includes('codegen') || phase.includes('tool') || edge.build === true) return 'build';
+    return 'runtime';
+  }
+
+  function isEdgeActiveInProfile(edge, profile){
+    if(!profile) return true;
+    if(Array.isArray(edge?.profiles)){
+      if(edge.profiles.length === 0) return true;
+      return edge.profiles.includes(profile.name);
+    }
+    if(typeof edge?.profile === 'string'){
+      return edge.profile === profile.name;
+    }
+    if(edge?.when && typeof edge.when === 'string'){
+      return edge.when.split(',').map(s => s.trim()).filter(Boolean).includes(profile.name);
+    }
+    if(edge?.flags && profile.flags){
+      for(const [flag, expected] of Object.entries(edge.flags)){
+        const actual = profile.flags?.[flag];
+        if(expected === true && !actual) return false;
+        if(expected === false && actual) return false;
+        if(typeof expected === 'string' && actual !== expected) return false;
+      }
+    }
+    return true;
+  }
+
+  function hasDynamicEvidence(node){
+    if(!node) return false;
+    if(node.dynamic === true || node.runtimeLoaded === true || node.dynamicOnly === true) return true;
+    if(typeof node.coverageHits === 'number' && node.coverageHits > 0) return true;
+    if(typeof node.runtimeHits === 'number' && node.runtimeHits > 0) return true;
+    if(Array.isArray(node.coverage) && node.coverage.some(value => (value || 0) > 0)) return true;
+    if(Array.isArray(node.events) && node.events.some(ev => String(ev?.type || '').toLowerCase().includes('load'))) return true;
+    if(Array.isArray(node.tags) && node.tags.some(tag => String(tag).toLowerCase().includes('dynamic'))) return true;
+    return false;
+  }
+
+  function normalizeEntrypoints(raw, graph){
+    const sources = [raw?.entrypoints, raw?.entryPoints, raw?.entry_points, raw?.entrances];
+    const collected = [];
+    sources.forEach(item => {
+      if(item == null) return;
+      if(Array.isArray(item)){
+        item.forEach(x => collected.push(x));
+      } else if(item && typeof item === 'object' && Array.isArray(item.list)){
+        item.list.forEach(x => collected.push(x));
+      } else {
+        collected.push(item);
+      }
+    });
+    const ids = collected
+      .map(x => (typeof x === 'string' ? x : x?.id))
+      .filter(Boolean);
+    if(ids.length){
+      return Array.from(new Set(ids));
+    }
+    const fromNodes = graph.nodes
+      .filter(node => node.entrypoint || node.isEntrypoint || node.isEntryPoint || node.isRoot)
+      .map(node => node.id);
+    if(fromNodes.length){
+      return Array.from(new Set(fromNodes));
+    }
+    const degRoots = graph.nodes
+      .filter(node => {
+        if((node.type || 'file') !== 'file') return false;
+        if((node.inDeg || 0) !== 0) return false;
+        const totalDeg = (node.inDeg || 0) + (node.outDeg || 0);
+        return totalDeg > 0;
+      })
+      .map(node => node.id);
+    if(degRoots.length){
+      return Array.from(new Set(degRoots));
+    }
+    return graph.nodes.slice(0, 1).map(node => node.id).filter(Boolean);
+  }
+
+  function normalizeProfiles(raw){
+    const list = [];
+    const maybeProfiles = raw?.profiles || raw?.profile || raw?.targets || [];
+    if(Array.isArray(maybeProfiles)){
+      maybeProfiles.forEach((p, idx) => {
+        if(typeof p === 'string'){
+          list.push({ name: p, flags: {} });
+        } else if(p && typeof p === 'object'){
+          list.push({ name: p.name || `profile-${idx+1}`, flags: p.flags || p.gates || {} });
+        }
+      });
+    } else if(maybeProfiles && typeof maybeProfiles === 'object'){
+      Object.entries(maybeProfiles).forEach(([name, cfg]) => {
+        if(cfg && typeof cfg === 'object'){
+          list.push({ name, flags: cfg.flags || cfg });
+        }
+      });
+    } else if(typeof maybeProfiles === 'string'){
+      list.push({ name: maybeProfiles, flags: {} });
+    }
+    if(list.length === 0){
+      return [{ name: 'default', flags: {} }];
+    }
+    return list;
+  }
+
+  function compileRule(rule){
+    if(!rule) return null;
+    if(rule instanceof RegExp) return rule;
+    if(typeof rule === 'string'){
+      try { return new RegExp(rule); } catch { return null; }
+    }
+    if(typeof rule === 'object'){
+      if(typeof rule.regex === 'string'){
+        try { return new RegExp(rule.regex, rule.flags || ''); } catch { return null; }
+      }
+      if(typeof rule.pattern === 'string'){
+        const glob = rule.glob === true;
+        const base = glob
+          ? `^${rule.pattern.replace(/[.+^${}()|\[\]\\]/g,'\\$&').replace(/\*/g,'.*')}$`
+          : rule.pattern;
+        try { return new RegExp(base, rule.flags || ''); } catch { return null; }
+      }
+    }
+    return null;
+  }
+
+  function compileKeepRules(keepRuleConfig = [], localKeepRules = []){
+    const compiled = [];
+    [...keepRuleConfig, ...localKeepRules].forEach(rule => {
+      const re = compileRule(rule);
+      if(re) compiled.push(re);
+    });
+    return compiled;
+  }
+
+  const STATUS_ORDER = [
+    'reachable_current',
+    'deferred_only',
+    'dynamic_only',
+    'test_only',
+    'build_time_only',
+    'reachable_other_profile',
+    'disconnected_all_profiles'
+  ];
+
+  function matchesKeepRuleFromList(list, id){
+    if(!id) return false;
+    return list.some(re => {
+      try { return re.test(id); } catch { return false; }
+    });
+  }
+
+  function computeProfileReachability(graph, entrypoints, profile){
+    const activeEdges = graph.edges.filter(edge => isEdgeActiveInProfile(edge, profile));
+    const adjacency = new Map();
+    activeEdges.forEach(edge => {
+      const src = nodeId(edge.source);
+      const tgt = nodeId(edge.target);
+      if(!src || !tgt) return;
+      if(!adjacency.has(src)) adjacency.set(src, []);
+      adjacency.get(src).push(edge);
+    });
+    const starts = entrypoints.length ? entrypoints : graph.nodes.slice(0,1).map(node => node.id).filter(Boolean);
+    const uniqueStarts = Array.from(new Set(starts));
+    const traverse = (filterFn) => {
+      const seen = new Set();
+      const stack = uniqueStarts.slice();
+      while(stack.length){
+        const id = stack.pop();
+        if(!id || seen.has(id)) continue;
+        seen.add(id);
+        const edges = adjacency.get(id);
+        if(!edges) continue;
+        edges.forEach(edge => {
+          if(filterFn && !filterFn(edge)) return;
+          const tgt = nodeId(edge.target);
+          if(tgt && !seen.has(tgt)) stack.push(tgt);
+        });
+      }
+      return seen;
+    };
+
+    const reachableAll = traverse(()=>true);
+    const reachableNoDeferred = traverse(edge => !isDeferredEdge(edge));
+    const reachableNoDynamic = traverse(edge => !isDynamicEdge(edge));
+    const reachableRuntime = traverse(edge => edgePhase(edge) === 'runtime');
+    const reachableTest = traverse(edge => edgePhase(edge) !== 'build');
+    const reachableBuild = traverse(edge => edgePhase(edge) !== 'test');
+
+    return { profile, adjacency, reachableAll, reachableNoDeferred, reachableNoDynamic, reachableRuntime, reachableTest, reachableBuild };
+  }
+
+  function determineNodeStatuses(node, res, reachByNode, compiledKeepRules){
+    const statuses = new Set();
+    const id = node.id;
+    const reachableHere = res.reachableAll.has(id);
+    const reachableElsewhere = (reachByNode.get(id) || new Set()).size > (reachableHere ? 1 : 0);
+    const reachableAny = reachByNode.has(id);
+
+    if(!reachableAny){
+      return ['disconnected_all_profiles'];
+    }
+
+    if(reachableHere){
+      statuses.add('reachable_current');
+      if(!res.reachableNoDeferred.has(id)) statuses.add('deferred_only');
+      if(!res.reachableNoDynamic.has(id)) statuses.add('dynamic_only');
+      if(!res.reachableRuntime.has(id)){
+        if(res.reachableTest.has(id)) statuses.add('test_only');
+        if(res.reachableBuild.has(id)) statuses.add('build_time_only');
+      }
+    } else {
+      if(reachableElsewhere) statuses.add('reachable_other_profile');
+      if(matchesKeepRuleFromList(compiledKeepRules, id) || hasDynamicEvidence(node)) statuses.add('dynamic_only');
+      const phaseTags = String(node.phase || node.scope || '').toLowerCase();
+      if(phaseTags.includes('test') || node.test === true || node.isTest === true) statuses.add('test_only');
+      if(phaseTags.includes('build') || node.build === true) statuses.add('build_time_only');
+      if(!reachableElsewhere) statuses.add('disconnected_all_profiles');
+    }
+
+    return Array.from(statuses);
+  }
+
+  function classifyGraph(graph, profiles, entrypoints, options){
+    const compiledKeepRules = options?.compiledKeepRules || [];
+    const profileResults = profiles.map(profile => computeProfileReachability(graph, entrypoints, profile));
+    const reachByNode = new Map();
+    profileResults.forEach(res => {
+      res.reachableAll.forEach(id => {
+        if(!reachByNode.has(id)) reachByNode.set(id, new Set());
+        reachByNode.get(id).add(res.profile.name);
+      });
+    });
+
+    graph.nodes.forEach(node => {
+      node.statusByProfile = node.statusByProfile || {};
+      node.primaryByProfile = node.primaryByProfile || {};
+      node.reachableProfiles = Array.from(reachByNode.get(node.id) || []);
+      profileResults.forEach(res => {
+        const statuses = determineNodeStatuses(node, res, reachByNode, compiledKeepRules);
+        node.statusByProfile[res.profile.name] = statuses;
+        const primary = statuses.includes('disconnected_all_profiles')
+          ? 'disconnected_all_profiles'
+          : STATUS_ORDER.find(st => statuses.includes(st)) || statuses[0] || 'disconnected_all_profiles';
+        node.primaryByProfile[res.profile.name] = primary;
+      });
+    });
+
+    return profileResults;
+  }
+
+  function toSerializableRegexList(list){
+    return list.map(re => ({ source: re.source, flags: re.flags }));
+  }
+
+  function preprocessGraph(payload){
+    const rawGraph = payload?.rawGraph || {};
+    const keepRuleConfig = Array.isArray(payload?.keepRuleConfig) ? payload.keepRuleConfig : [];
+    const localKeepRules = Array.isArray(payload?.localKeepRules) ? payload.localKeepRules : [];
+
+    const normalizedEdges = Array.isArray(rawGraph.edges || rawGraph.links)
+      ? (rawGraph.edges || rawGraph.links).map(edge => ({ ...edge, source: edge.source, target: edge.target }))
+      : [];
+    const graph = {
+      nodes: Array.isArray(rawGraph.nodes) ? rawGraph.nodes.map(node => ({ ...node })) : [],
+      edges: normalizedEdges
+    };
+
+    computeDegrees(graph);
+    inferUsageStates(graph);
+    const entrypoints = normalizeEntrypoints(rawGraph, graph);
+    const profiles = normalizeProfiles(rawGraph);
+    const compiledKeepRules = compileKeepRules(keepRuleConfig, localKeepRules);
+    const profileResults = classifyGraph(graph, profiles, entrypoints, { compiledKeepRules });
+
+    return {
+      graph,
+      entrypoints,
+      profiles,
+      compiledKeepRules: toSerializableRegexList(compiledKeepRules),
+      profileResults: profileResults.map(res => ({
+        profile: res.profile,
+        reachableAll: Array.from(res.reachableAll),
+        reachableNoDeferred: Array.from(res.reachableNoDeferred),
+        reachableNoDynamic: Array.from(res.reachableNoDynamic),
+        reachableRuntime: Array.from(res.reachableRuntime),
+        reachableTest: Array.from(res.reachableTest),
+        reachableBuild: Array.from(res.reachableBuild)
+      }))
+    };
+  }
+
+  global.GraphPreprocessing = {
+    computeDegrees,
+    inferUsageStates,
+    computeProfileReachability,
+    classifyGraph,
+    preprocessGraph,
+    STATUS_ORDER,
+    helpers: {
+      nodeId,
+      isDeferredEdge,
+      isDynamicEdge,
+      edgePhase,
+      isEdgeActiveInProfile,
+      hasDynamicEvidence,
+      normalizeEntrypoints,
+      normalizeProfiles,
+      compileKeepRules
+    }
+  };
+})(typeof self !== 'undefined' ? self : this);

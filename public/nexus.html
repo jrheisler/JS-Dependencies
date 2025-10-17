@@ -139,6 +139,7 @@
     .modal-header { padding: 14px 44px 12px 18px; font-weight: 600; letter-spacing: .4px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(15,18,30,.85); }
     .modal-shell iframe { border-radius: 0 0 16px 16px; }
   </style>
+  <script src="js/graph-preprocessing.js"></script>
 </head>
 <body>
 <div id="app">
@@ -333,8 +334,19 @@ window.addEventListener('DOMContentLoaded', () => {
   let keepRuleConfig = [];
   let localKeepRules = [];
   let compiledKeepRules = [];
+  let rawGraphData = null;
+  let graphWorker = null;
+  let workerSeq = 0;
+  const workerRequests = new Map();
+  let workerBusyMessage = null;
   const cfg = { charge: -800, linkDist: 90, linkStr: 0.07, minDegree: 0, showDisconnectedOnly: false, showDynamicOnly: false, showDeferredOnly: false, hideExternals: false, hideDynamic: false };
   const KEEP_RULE_KEY = 'nurox:nexus:keepRules';
+  const graphHelpers = (window.GraphPreprocessing && window.GraphPreprocessing.helpers) || {};
+
+  const isDynamicEdge = graphHelpers.isDynamicEdge || (() => false);
+  const isEdgeActiveInProfile = graphHelpers.isEdgeActiveInProfile || (() => true);
+  const hasDynamicEvidence = graphHelpers.hasDynamicEvidence || (() => false);
+  const compileKeepRulesHelper = graphHelpers.compileKeepRules || (() => []);
 
   // --- DOM ---
   const $ = (id)=>{
@@ -362,15 +374,17 @@ window.addEventListener('DOMContentLoaded', () => {
     build_time_only: 'Only referenced during build/code generation edges.',
     disconnected_all_profiles: 'Unreachable in every profile — safe delete candidate.'
   };
-  const STATUS_ORDER = [
-    'reachable_current',
-    'deferred_only',
-    'dynamic_only',
-    'test_only',
-    'build_time_only',
-    'reachable_other_profile',
-    'disconnected_all_profiles'
-  ];
+  const STATUS_ORDER = (window.GraphPreprocessing && Array.isArray(window.GraphPreprocessing.STATUS_ORDER))
+    ? window.GraphPreprocessing.STATUS_ORDER.slice()
+    : [
+      'reachable_current',
+      'deferred_only',
+      'dynamic_only',
+      'test_only',
+      'build_time_only',
+      'reachable_other_profile',
+      'disconnected_all_profiles'
+    ];
 
   const currentProfileName = () => profiles[currentProfileIndex]?.name || 'default';
   function statusesFor(node){
@@ -570,6 +584,99 @@ window.addEventListener('DOMContentLoaded', () => {
   const setText = (id, value)=>{ const el = $(id); if(el) el.textContent = value; };
   const setDisplay = (id, value)=>{ const el = $(id); if(el) el.style.display = value; };
   const setHTML = (id, value)=>{ const el = $(id); if(el) el.innerHTML = value; };
+
+  const reviveRegexList = (list)=>{
+    if(!Array.isArray(list)) return [];
+    const revived = [];
+    list.forEach(item => {
+      if(!item || typeof item.source !== 'string') return;
+      try {
+        revived.push(new RegExp(item.source, item.flags || ''));
+      } catch {
+        /* ignore invalid */
+      }
+    });
+    return revived;
+  };
+
+  function terminateGraphWorker(reason){
+    if(!graphWorker) return;
+    try { graphWorker.terminate(); } catch {}
+    graphWorker = null;
+    workerRequests.forEach(({ reject }) => {
+      try { reject(reason || new Error('Worker terminated')); } catch {}
+    });
+    workerRequests.clear();
+    workerBusyMessage = null;
+  }
+
+  function handleWorkerMessage(event){
+    const data = event.data || {};
+    const job = workerRequests.get(data.id);
+    if(!job) return;
+    workerRequests.delete(data.id);
+    const { resolve, reject, options } = job;
+    const successMessage = Object.prototype.hasOwnProperty.call(options || {}, 'successMessage')
+      ? options.successMessage
+      : ((options && options.startMessage) ? 'Graph processing complete.' : null);
+    if(data.type === 'result'){
+      if(successMessage != null){
+        setStatus(successMessage);
+      }
+      workerBusyMessage = null;
+      resolve(data.result);
+      return;
+    }
+    const errorInfo = data.error || {};
+    const err = new Error(errorInfo.message || 'Worker error');
+    if(errorInfo.stack) err.stack = String(errorInfo.stack);
+    const prefix = options?.errorPrefix || 'Graph processing failed';
+    setStatus(`${prefix}: ${err.message}`);
+    workerBusyMessage = null;
+    reject(err);
+  }
+
+  function handleWorkerError(event){
+    const err = event?.error instanceof Error ? event.error : new Error(event?.message || 'Worker error');
+    setStatus(`Graph worker crashed: ${err.message || err}`);
+    terminateGraphWorker(err);
+  }
+
+  function ensureGraphWorker(){
+    if(graphWorker) return graphWorker;
+    try {
+      graphWorker = new Worker('js/graph-worker.js');
+      graphWorker.addEventListener('message', handleWorkerMessage);
+      graphWorker.addEventListener('error', handleWorkerError);
+      return graphWorker;
+    } catch (err) {
+      setStatus(`Failed to start graph worker: ${err.message || err}`);
+      throw err;
+    }
+  }
+
+  function requestGraphProcessing(payload, options = {}){
+    const worker = ensureGraphWorker();
+    const id = ++workerSeq;
+    if(options.startMessage){
+      workerBusyMessage = options.startMessage;
+      setStatus(options.startMessage);
+    }
+    return new Promise((resolve, reject) => {
+      workerRequests.set(id, { resolve, reject, options });
+      try {
+        worker.postMessage({ id, type: 'process', payload });
+      } catch (err) {
+        workerRequests.delete(id);
+        const prefix = options.errorPrefix || 'Graph processing failed';
+        setStatus(`${prefix}: ${err.message || err}`);
+        workerBusyMessage = null;
+        reject(err);
+      }
+    });
+  }
+
+  window.addEventListener('beforeunload', () => terminateGraphWorker());
   const tokenMeta = document.querySelector('meta[name="nurox-token"]');
   const viewerToken = new URLSearchParams(window.location.search).get('token') || tokenMeta?.content || '';
   const viewerHeaders = viewerToken ? { 'Authorization': `Bearer ${viewerToken}` } : {};
@@ -1026,8 +1133,8 @@ window.addEventListener('DOMContentLoaded', () => {
     profileSelect.addEventListener('change', (e)=>{
       const idx = parseInt(e.target.value, 10);
       currentProfileIndex = Number.isNaN(idx) ? 0 : Math.max(0, Math.min(idx, profiles.length-1));
-      classifyGraph();
       render();
+      updateProfileLegend();
       const active = profiles[currentProfileIndex];
       setStatus(`Profile: ${active?.name || 'default'}`);
     });
@@ -1040,7 +1147,7 @@ window.addEventListener('DOMContentLoaded', () => {
     try {
       const text = await f.text();
       const parsed = JSON.parse(text);
-      loadGraph(parsed);
+      await loadGraph(parsed);
       setStatus(`Loaded ${f.name}`);
     } catch(err) {
       console.error('Failed to load graph file', err);
@@ -1061,7 +1168,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if(!f) return;
     try{
       const txt = await f.text();
-      loadGraph(JSON.parse(txt));
+      await loadGraph(JSON.parse(txt));
       setStatus(`Loaded ${f.name}`);
     }catch(err){
       console.error(err);
@@ -1278,6 +1385,7 @@ window.addEventListener('DOMContentLoaded', () => {
     currentProfileIndex = 0;
     keepRuleConfig = [];
     compiledKeepRules = [];
+    rawGraphData = null;
     selectedNode = null;
     linkG.selectAll('*').remove();
     nodeG.selectAll('*').remove();
@@ -1302,30 +1410,108 @@ window.addEventListener('DOMContentLoaded', () => {
     if(keepRuleNote){ keepRuleNote.textContent = ''; }
   }
 
-  function loadGraph(gjson){
-    clearGraph();
-    // Normalize expected schema
-    graph = { nodes: (gjson.nodes||[]).map(n=>({ ...n })), edges: (gjson.edges||gjson.links||[]).map(e=>({ ...e, source: e.source, target: e.target })) };
+  const captureNodePositions = ()=>{
+    const map = new Map();
+    graph.nodes.forEach(node => {
+      if(!node || node.id == null) return;
+      map.set(node.id, {
+        x: node.x,
+        y: node.y,
+        vx: node.vx,
+        vy: node.vy,
+        fx: node.fx,
+        fy: node.fy
+      });
+    });
+    return map;
+  };
+
+  function convertProfileResults(rawList){
+    if(!Array.isArray(rawList)) return [];
+    return rawList.map(item => ({
+      profile: item.profile,
+      reachableAll: new Set(item.reachableAll || []),
+      reachableNoDeferred: new Set(item.reachableNoDeferred || []),
+      reachableNoDynamic: new Set(item.reachableNoDynamic || []),
+      reachableRuntime: new Set(item.reachableRuntime || []),
+      reachableTest: new Set(item.reachableTest || []),
+      reachableBuild: new Set(item.reachableBuild || [])
+    }));
+  }
+
+  function applyProcessedGraph(result, previousPositions){
+    const fallbackProfile = { name: 'default', flags: {} };
+    const processed = result && typeof result === 'object' ? result : {};
+    const newGraph = processed.graph && typeof processed.graph === 'object'
+      ? processed.graph
+      : { nodes: [], edges: [] };
+    const positionSource = previousPositions instanceof Map ? previousPositions : null;
+    if(positionSource){
+      newGraph.nodes.forEach(node => {
+        const stored = positionSource.get(node.id);
+        if(!stored) return;
+        if(typeof stored.x === 'number') node.x = stored.x;
+        if(typeof stored.y === 'number') node.y = stored.y;
+        if(typeof stored.vx === 'number') node.vx = stored.vx;
+        if(typeof stored.vy === 'number') node.vy = stored.vy;
+        if(typeof stored.fx === 'number' && typeof stored.fy === 'number'){
+          node.fx = stored.fx;
+          node.fy = stored.fy;
+        }
+      });
+    }
+    graph = newGraph;
+    entrypoints = Array.isArray(processed.entrypoints) ? processed.entrypoints.slice() : [];
+    profiles = Array.isArray(processed.profiles) && processed.profiles.length
+      ? processed.profiles
+      : [fallbackProfile];
+    compiledKeepRules = reviveRegexList(processed.compiledKeepRules);
+    profileResults = convertProfileResults(processed.profileResults);
+    currentProfileIndex = 0;
     pins = loadPins();
-    graph.nodes.forEach(n => {
-      const p = pins[n.id];
-      if(p && typeof p.x==='number' && typeof p.y==='number'){
-        n.fx = p.x; n.fy = p.y; // pin
-        n.x = p.x; n.y = p.y;
+    graph.nodes.forEach(node => {
+      const pin = pins[node.id];
+      if(pin && typeof pin.x === 'number' && typeof pin.y === 'number'){
+        node.fx = pin.x;
+        node.fy = pin.y;
+        if(typeof node.x !== 'number') node.x = pin.x;
+        if(typeof node.y !== 'number') node.y = pin.y;
       }
     });
-    computeDegrees();
-    entrypoints = normalizeEntrypoints(gjson);
-    profiles = normalizeProfiles(gjson);
-    keepRuleConfig = Array.isArray(gjson.keepRules) ? gjson.keepRules : [];
-    localKeepRules = loadLocalKeepRules();
-    compileKeepRules();
-    currentProfileIndex = 0;
     updateProfileSelect();
-    classifyGraph();
+    updateProfileLegend();
+    updateEntrypointsPanel();
+  }
+
+  async function requestAndApplyGraph(rawGraph, options = {}, previousPositions){
+    const payload = {
+      rawGraph,
+      keepRuleConfig,
+      localKeepRules
+    };
+    const result = await requestGraphProcessing(payload, options);
+    applyProcessedGraph(result, previousPositions);
     paused = false;
     $('pause').textContent = 'Pause ⏸';
     render();
+    return result;
+  }
+
+  async function loadGraph(gjson){
+    if(!gjson || typeof gjson !== 'object'){
+      throw new Error('Graph payload missing or invalid');
+    }
+    clearGraph();
+    rawGraphData = gjson;
+    keepRuleConfig = Array.isArray(gjson.keepRules) ? gjson.keepRules : [];
+    localKeepRules = loadLocalKeepRules();
+    compileKeepRules();
+    try {
+      await requestAndApplyGraph(gjson, { startMessage: 'Processing graph…' });
+    } catch (err) {
+      clearGraph();
+      throw err;
+    }
   }
 
   async function loadGraphFromViewer(){
@@ -1351,87 +1537,11 @@ window.addEventListener('DOMContentLoaded', () => {
     if(!data || typeof data !== 'object'){
       throw new Error('Graph payload missing');
     }
-    loadGraph(data);
+    await loadGraph(data);
     const nodesCount = Array.isArray(data.nodes) ? data.nodes.length : (typeof data.nodes?.length === 'number' ? data.nodes.length : 0);
     const edgesCount = Array.isArray(data.edges) ? data.edges.length : (typeof data.edges?.length === 'number' ? data.edges.length : 0);
     setStatus(`Loaded graph from viewer (${nodesCount} nodes, ${edgesCount} edges)`);
     return { nodes: nodesCount, edges: edgesCount };
-  }
-
-  function computeDegrees(){
-    const id2 = new Map(graph.nodes.map(n=>[n.id,n]));
-    graph.nodes.forEach(n=>{ n.inDeg=0; n.outDeg=0; });
-    graph.edges.forEach(e=>{
-      const src = nodeId(e.source);
-      const tgt = nodeId(e.target);
-      if(id2.has(src)) id2.get(src).outDeg++;
-      if(id2.has(tgt)) id2.get(tgt).inDeg++;
-    });
-  }
-
-  function inferUsageStates(){
-    const fileNodes = graph.nodes.filter(n=> (n.type||'file') === 'file');
-    const hasFileUsage = fileNodes.some(n=> n.state && n.state !== 'unused');
-    if(hasFileUsage || fileNodes.length === 0) return;
-
-    const id2 = new Map(graph.nodes.map(n=>[n.id, n]));
-    const adjacency = new Map();
-    graph.edges.forEach(e=>{
-      const src = nodeId(e.source);
-      const tgt = nodeId(e.target);
-      if(!id2.has(src) || !id2.has(tgt)) return;
-      if(!adjacency.has(src)) adjacency.set(src, new Set());
-      adjacency.get(src).add(tgt);
-    });
-
-    const seeds = new Set();
-    fileNodes.forEach(n=>{ if(n.hasSideEffects) seeds.add(n.id); });
-    graph.edges.forEach(e=>{
-      if(e.kind === 'side_effect'){
-        const tgt = nodeId(e.target);
-        if(id2.has(tgt)) seeds.add(tgt);
-      }
-    });
-
-    if(seeds.size === 0){
-      fileNodes.forEach(n=>{
-        const inDeg = n.inDeg || 0;
-        const outDeg = n.outDeg || 0;
-        if(inDeg === 0 && outDeg > 0) seeds.add(n.id);
-      });
-    }
-
-    const used = new Set();
-    const queue = Array.from(seeds);
-    while(queue.length){
-      const id = queue.shift();
-      if(used.has(id)) continue;
-      used.add(id);
-      const next = adjacency.get(id);
-      if(!next) continue;
-      next.forEach(nid=>{
-        if(!id2.has(nid)) return;
-        const neighbor = id2.get(nid);
-        if((neighbor.type||'file') === 'file' && !used.has(nid)) queue.push(nid);
-      });
-    }
-
-    graph.nodes.forEach(n=>{
-      if((n.type||'file') !== 'file') return;
-      if(used.has(n.id)){
-        const fanOut = adjacency.get(n.id);
-        const hasFanOut = fanOut && fanOut.size > 0;
-        if(n.hasSideEffects && (n.inDeg||0)===0 && !hasFanOut){
-          n.state = 'side_effect_only';
-        } else {
-          n.state = 'used';
-        }
-      } else if(n.hasSideEffects){
-        n.state = 'side_effect_only';
-      } else {
-        n.state = 'unused';
-      }
-    });
   }
 
   function applyFilters(){
@@ -1454,65 +1564,6 @@ window.addEventListener('DOMContentLoaded', () => {
     filtered = { nodes, edges };
   }
 
-  function normalizeEntrypoints(raw){
-    const sources = [raw.entrypoints, raw.entryPoints, raw.entry_points, raw.entrances];
-    const collected = [];
-    sources.forEach(item => {
-      if(item == null) return;
-      if(Array.isArray(item)){
-        item.forEach(x => collected.push(x));
-      } else if(item && typeof item === 'object' && Array.isArray(item.list)){
-        item.list.forEach(x => collected.push(x));
-      } else {
-        collected.push(item);
-      }
-    });
-    const ids = collected
-      .map(x => (typeof x === 'string' ? x : x?.id))
-      .filter(Boolean);
-    if(ids.length){
-      return Array.from(new Set(ids));
-    }
-    const fromNodes = graph.nodes.filter(n => n.entrypoint || n.isEntrypoint || n.isEntryPoint || n.isRoot).map(n=>n.id);
-    if(fromNodes.length){
-      return Array.from(new Set(fromNodes));
-    }
-    const degRoots = graph.nodes
-      .filter(n => {
-        if((n.type||'file')!=='file') return false;
-        if((n.inDeg||0)!==0) return false;
-        const totalDeg = (n.inDeg||0)+(n.outDeg||0);
-        // Skip truly isolated files so they can be classified as disconnected.
-        return totalDeg > 0;
-      })
-      .map(n=>n.id);
-    if(degRoots.length){
-      return Array.from(new Set(degRoots));
-    }
-    return graph.nodes.slice(0, 1).map(n=>n.id).filter(Boolean);
-  }
-
-  function normalizeProfiles(raw){
-    const list = [];
-    const maybeProfiles = raw.profiles || raw.profile || raw.targets || [];
-    if(Array.isArray(maybeProfiles)){
-      maybeProfiles.forEach((p, idx)=>{
-        if(typeof p === 'string'){ list.push({ name: p, flags: {} }); }
-        else if(p && typeof p === 'object'){ list.push({ name: p.name || `profile-${idx+1}`, flags: p.flags || p.gates || {} }); }
-      });
-    } else if(maybeProfiles && typeof maybeProfiles === 'object'){
-      Object.entries(maybeProfiles).forEach(([name, cfg])=>{
-        if(cfg && typeof cfg === 'object'){ list.push({ name, flags: cfg.flags || cfg }); }
-      });
-    } else if(typeof maybeProfiles === 'string'){
-      list.push({ name: maybeProfiles, flags: {} });
-    }
-    if(list.length === 0){
-      return [{ name: 'default', flags: {} }];
-    }
-    return list;
-  }
-
   function loadLocalKeepRules(){
     try{
       const raw = JSON.parse(localStorage.getItem(KEEP_RULE_KEY)||'[]');
@@ -1527,29 +1578,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function compileKeepRules(){
-    const toRegex = (rule)=>{
-      if(!rule) return null;
-      if(rule instanceof RegExp) return rule;
-      if(typeof rule === 'string'){
-        try{ return new RegExp(rule); }catch{ return null; }
-      }
-      if(typeof rule === 'object'){
-        if(typeof rule.regex === 'string'){
-          try{ return new RegExp(rule.regex, rule.flags || ''); }catch{return null; }
-        }
-        if(typeof rule.pattern === 'string'){
-          const glob = rule.glob === true;
-          const base = glob ? `^${rule.pattern.replace(/[.+^${}()|\[\]\\]/g,'\\$&').replace(/\*/g,'.*')}$` : rule.pattern;
-          try{ return new RegExp(base, rule.flags || ''); }catch{return null; }
-        }
-      }
-      return null;
-    };
-    compiledKeepRules = [];
-    [...keepRuleConfig, ...localKeepRules].forEach(rule=>{
-      const re = toRegex(rule);
-      if(re) compiledKeepRules.push(re);
-    });
+    compiledKeepRules = compileKeepRulesHelper(keepRuleConfig, localKeepRules);
   }
 
   function matchesKeepRule(id){
@@ -1559,178 +1588,26 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function addKeepRule(id){
+  async function addKeepRule(id){
     if(!id) return;
     if(matchesKeepRule(id)) return;
     const pattern = { regex: `^${escapeRegExp(id)}$` };
     localKeepRules.push(pattern);
     saveLocalKeepRules(localKeepRules);
     compileKeepRules();
-    classifyGraph();
-    render();
-    setStatus(`Added keepRule for ${id}`);
-  }
-
-  function edgeTypeString(e){
-    return String(e?.type || e?.kind || e?.mode || '').toLowerCase();
-  }
-
-  function isDeferredEdge(e){
-    if(!e) return false;
-    if(e.deferred === true || e.lazy === true || e.loading === 'deferred') return true;
-    const t = edgeTypeString(e);
-    return t.includes('defer') || t.includes('lazy');
-  }
-
-  function isDynamicEdge(e){
-    if(!e) return false;
-    if(e.dynamic === true || e.reflection === true) return true;
-    if(e.certainty === 'heuristic' || e.mode === 'runtime_dynamic') return true;
-    const t = edgeTypeString(e);
-    return t.includes('dynamic') || t.includes('require.ensure') || t.includes('eval');
-  }
-
-  function edgePhase(e){
-    if(!e) return 'runtime';
-    const phaseSource = e.phase || e.stage || e.scope || e.context || edgeTypeString(e);
-    const phase = String(phaseSource).toLowerCase();
-    if(phase.includes('test') || e.test === true) return 'test';
-    if(phase.includes('spec')) return 'test';
-    if(phase.includes('build') || phase.includes('codegen') || phase.includes('tool') || e.build === true) return 'build';
-    return 'runtime';
-  }
-
-  function isEdgeActiveInProfile(e, profile){
-    if(!profile) return true;
-    if(Array.isArray(e.profiles)){
-      if(e.profiles.length === 0) return true;
-      return e.profiles.includes(profile.name);
+    if(!rawGraphData){
+      setStatus('No graph loaded.');
+      return;
     }
-    if(typeof e.profile === 'string'){
-      return e.profile === profile.name;
+    try {
+      await requestAndApplyGraph(rawGraphData, { startMessage: 'Reprocessing graph…' }, captureNodePositions());
+      setStatus(`Added keepRule for ${id}`);
+    } catch (err) {
+      console.error('Failed to reprocess graph with keepRule', err);
+      setStatus(`Failed to apply keepRule: ${err.message || err}`);
     }
-    if(e.when && typeof e.when === 'string'){
-      return e.when.split(',').map(s=>s.trim()).filter(Boolean).includes(profile.name);
-    }
-    if(e.flags && profile.flags){
-      for(const [flag, expected] of Object.entries(e.flags)){
-        const actual = profile.flags?.[flag];
-        if(expected === true && !actual) return false;
-        if(expected === false && actual) return false;
-        if(typeof expected === 'string' && actual !== expected) return false;
-      }
-    }
-    return true;
   }
 
-  function hasDynamicEvidence(node){
-    if(!node) return false;
-    if(node.dynamic === true || node.runtimeLoaded === true || node.dynamicOnly === true) return true;
-    if(typeof node.coverageHits === 'number' && node.coverageHits > 0) return true;
-    if(typeof node.runtimeHits === 'number' && node.runtimeHits > 0) return true;
-    if(Array.isArray(node.coverage) && node.coverage.some(v => (v||0) > 0)) return true;
-    if(Array.isArray(node.events) && node.events.some(ev => String(ev?.type||'').toLowerCase().includes('load'))) return true;
-    if(Array.isArray(node.tags) && node.tags.some(tag => String(tag).toLowerCase().includes('dynamic'))) return true;
-    return false;
-  }
-
-  function computeProfileReachability(profile){
-    const activeEdges = graph.edges.filter(e => isEdgeActiveInProfile(e, profile));
-    const adjacency = new Map();
-    activeEdges.forEach(e => {
-      const src = nodeId(e.source);
-      const tgt = nodeId(e.target);
-      if(!src || !tgt) return;
-      if(!adjacency.has(src)) adjacency.set(src, []);
-      adjacency.get(src).push(e);
-    });
-    const starts = entrypoints.length ? entrypoints : graph.nodes.slice(0,1).map(n=>n.id).filter(Boolean);
-    const uniqueStarts = Array.from(new Set(starts));
-    const traverse = (filterFn)=>{
-      const seen = new Set();
-      const stack = uniqueStarts.slice();
-      while(stack.length){
-        const id = stack.pop();
-        if(!id || seen.has(id)) continue;
-        seen.add(id);
-        const edges = adjacency.get(id);
-        if(!edges) continue;
-        edges.forEach(edge => {
-          if(filterFn && !filterFn(edge)) return;
-          const tgt = nodeId(edge.target);
-          if(tgt && !seen.has(tgt)) stack.push(tgt);
-        });
-      }
-      return seen;
-    };
-
-    const reachableAll = traverse(()=>true);
-    const reachableNoDeferred = traverse(edge => !isDeferredEdge(edge));
-    const reachableNoDynamic = traverse(edge => !isDynamicEdge(edge));
-    const reachableRuntime = traverse(edge => edgePhase(edge) === 'runtime');
-    const reachableTest = traverse(edge => edgePhase(edge) !== 'build');
-    const reachableBuild = traverse(edge => edgePhase(edge) !== 'test');
-
-    return { profile, adjacency, reachableAll, reachableNoDeferred, reachableNoDynamic, reachableRuntime, reachableTest, reachableBuild };
-  }
-
-  function classifyGraph(){
-    profileResults = profiles.map(profile => computeProfileReachability(profile));
-    const reachByNode = new Map();
-    profileResults.forEach(res => {
-      res.reachableAll.forEach(id => {
-        if(!reachByNode.has(id)) reachByNode.set(id, new Set());
-        reachByNode.get(id).add(res.profile.name);
-      });
-    });
-
-    graph.nodes.forEach(node => {
-      node.statusByProfile = node.statusByProfile || {};
-      node.primaryByProfile = node.primaryByProfile || {};
-      node.reachableProfiles = Array.from(reachByNode.get(node.id) || []);
-      profileResults.forEach(res => {
-        const statuses = determineNodeStatuses(node, res, reachByNode);
-        node.statusByProfile[res.profile.name] = statuses;
-        const primary = statuses.includes('disconnected_all_profiles')
-          ? 'disconnected_all_profiles'
-          : STATUS_ORDER.find(st => statuses.includes(st)) || statuses[0] || 'disconnected_all_profiles';
-        node.primaryByProfile[res.profile.name] = primary;
-      });
-    });
-    updateProfileLegend();
-    updateEntrypointsPanel();
-  }
-
-  function determineNodeStatuses(node, res, reachByNode){
-    const statuses = new Set();
-    const id = node.id;
-    const reachableHere = res.reachableAll.has(id);
-    const reachableElsewhere = (reachByNode.get(id) || new Set()).size > (reachableHere ? 1 : 0);
-    const reachableAny = reachByNode.has(id);
-
-    if(!reachableAny){
-      return ['disconnected_all_profiles'];
-    }
-
-    if(reachableHere){
-      statuses.add('reachable_current');
-      if(!res.reachableNoDeferred.has(id)) statuses.add('deferred_only');
-      if(!res.reachableNoDynamic.has(id)) statuses.add('dynamic_only');
-      if(!res.reachableRuntime.has(id)){
-        if(res.reachableTest.has(id)) statuses.add('test_only');
-        if(res.reachableBuild.has(id)) statuses.add('build_time_only');
-      }
-    } else {
-      if(reachableElsewhere) statuses.add('reachable_other_profile');
-      if(matchesKeepRule(id) || hasDynamicEvidence(node)) statuses.add('dynamic_only');
-      const phaseTags = String(node.phase || node.scope || '').toLowerCase();
-      if(phaseTags.includes('test') || node.test === true || node.isTest === true) statuses.add('test_only');
-      if(phaseTags.includes('build') || node.build === true) statuses.add('build_time_only');
-      if(!reachableElsewhere) statuses.add('disconnected_all_profiles');
-    }
-
-    return Array.from(statuses);
-  }
 
   function updateProfileSelect(){
     if(!profileSelect) return;
@@ -1935,7 +1812,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if(keepRuleBtn){
       keepRuleBtn.style.display = matchesKeepRule(n.id) ? 'none' : 'block';
-      keepRuleBtn.onclick = ()=> addKeepRule(n.id);
+      keepRuleBtn.onclick = ()=>{ addKeepRule(n.id); };
     }
     if(keepRuleNote){
       const notes = [];
@@ -2111,20 +1988,20 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     if(isFileProtocol){
+      await loadGraph(demo);
       setStatus('Local file mode — use “Load graph.json” to open your data.');
-      loadGraph(demo);
       return;
     }
     try {
       const resp = await fetch(autoTarget, { cache: 'no-cache' });
       if(!resp.ok) throw new Error(`Missing ${autoTarget} (${resp.status})`);
       const data = await resp.json();
-      loadGraph(data);
+      await loadGraph(data);
       setStatus(`Loaded ${autoTarget}`);
     } catch(err) {
       console.warn('Falling back to demo graph', err);
+      await loadGraph(demo);
       setStatus('Demo graph loaded — click “Load graph.json” or drop a JSON file onto the canvas.');
-      loadGraph(demo);
     }
   }
 
