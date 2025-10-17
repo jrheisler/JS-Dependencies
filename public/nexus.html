@@ -48,6 +48,7 @@
     body.sidebar-collapsed .sidebar-latch { left: 16px; }
 
     .group { background: #0f1320; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px; }
+    .group[data-viewer-available="false"] { border-color: rgba(255,92,122,.35); box-shadow: 0 0 0 1px rgba(255,92,122,.2) inset; }
     .group h3 { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
     .group .section-label { margin: 10px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
     input[type="text"], select { width: 100%; background: #0d1220; border: 1px solid rgba(255,255,255,.08); color: var(--text); padding: 8px 10px; border-radius: 10px; outline: none; }
@@ -692,9 +693,11 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
   if(viewerControls){
-    viewerControls.hidden = !inViewerMode;
-    if(!viewerControls.hidden){
-      viewerControls.removeAttribute('hidden');
+    viewerControls.hidden = false;
+    viewerControls.removeAttribute('hidden');
+    viewerControls.dataset.viewerAvailable = inViewerMode ? 'true' : 'false';
+    if(!inViewerMode){
+      setViewerStatus('Desktop viewer not detected — launch the viewer app to enable crawlers.');
     }
   }
   if(startCrawlBtn){ startCrawlBtn.addEventListener('click', startViewerCrawl); }
