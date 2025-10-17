@@ -611,6 +611,40 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  const extractFullPathFromHandle = (handle)=>{
+    if(!handle || typeof handle !== 'object') return '';
+    const candidates = [];
+    const pushCandidate = (value)=>{
+      if(typeof value === 'string' && value.trim()){
+        candidates.push(value.trim());
+      }
+    };
+    // Common non-standard properties exposed by desktop shells / polyfills.
+    pushCandidate(handle.path);
+    pushCandidate(handle.fullPath);
+    pushCandidate(handle.fsPath);
+    // Some implementations expose path segments instead of a joined path.
+    if(Array.isArray(handle.pathSegments) && handle.pathSegments.length){
+      pushCandidate(handle.pathSegments.join('/'));
+    }
+    // WebKit-style relative paths sometimes appear on file handles.
+    pushCandidate(handle.webkitRelativePath);
+    if(candidates.length === 0){
+      return typeof handle.name === 'string' ? handle.name : '';
+    }
+    // Prefer the longest candidate since it is most likely to represent the full path.
+    candidates.sort((a, b)=>b.length - a.length);
+    let best = candidates[0];
+    // Normalise redundant separators without losing platform style.
+    const looksWindows = /\\/.test(best) && !/\//.test(best);
+    if(looksWindows){
+      best = best.replace(/\\+/g, '\\');
+    } else {
+      best = best.replace(/\/+/g, '/');
+    }
+    return best;
+  };
+
   if(viewerRootBrowseBtn){
     viewerRootBrowseBtn.addEventListener('click', async ()=>{
       viewerRootFromPicker = true;
@@ -619,7 +653,8 @@ window.addEventListener('DOMContentLoaded', () => {
           try {
             const handle = await window.showDirectoryPicker();
             if(handle){
-              updateViewerRootValue(handle.name || '', { fromPicker: true });
+              const handlePath = extractFullPathFromHandle(handle);
+              updateViewerRootValue(handlePath, { fromPicker: true });
             }
             return;
           } catch (pickerErr) {
