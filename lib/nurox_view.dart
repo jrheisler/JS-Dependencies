@@ -1,5 +1,5 @@
 // nurox_view.dart — minimal controller for Nurox Nexus
-// - Serves your existing nexus.html on localhost
+// - Serves your existing nuros_nexus.html on localhost (still supports legacy nexus.html)
 // - Orchestrates language crawlers (executables) by spawning them in the selected root
 // - Merges multiple *Dependencies.json files into one in-memory graph
 // - Simple REST API + bearer token security
@@ -8,7 +8,7 @@
 // Run:     ./nurox-view
 //
 // Default endpoints:
-//   GET  /                 -> nexus.html (token injected as <meta>)
+//   GET  /                 -> nuros_nexus.html (token injected as <meta>)
 //   GET  /api/languages    -> which crawlers are available
 //   POST /api/crawl        -> { root, languages: ["js","py", ...] }  (spawns crawlers)
 //   GET  /api/graph        -> { nodes, edges }  (merged)
@@ -212,8 +212,12 @@ Future<void> _route(HttpRequest req, int port) async {
   final method = req.method.toUpperCase();
   _debugRequest(req);
 
-  // static: "/" -> nexus.html (with token injected)
-  if (method == 'GET' && (path == '/' || path == '/index.html' || path == '/nexus.html')) {
+  // static: "/" -> nuros_nexus.html (with token injected)
+  if (method == 'GET' &&
+      (path == '/' ||
+          path == '/index.html' ||
+          path == '/nuros_nexus.html' ||
+          path == '/nexus.html')) {
     final html = await _loadViewerHtml();
     final injected = _injectTokenIntoHtml(html, _token);
     req.response.headers.contentType = ContentType.html;
@@ -358,15 +362,21 @@ bool _authorized(HttpRequest req) {
 }
 
 Future<String> _loadViewerHtml() async {
-  // Try ./nexus.html relative to working dir
-  final local = File('nexus.html');
-  if (await local.exists()) return await local.readAsString();
+  const candidates = ['nuros_nexus.html', 'nexus.html'];
 
-  // Try alongside the executable
-  final exe = File(Platform.resolvedExecutable);
-  final exeDir = exe.parent.path;
-  final sibling = File(_join(exeDir, 'nexus.html'));
-  if (await sibling.exists()) return await sibling.readAsString();
+  for (final name in candidates) {
+    final local = File(name);
+    if (await local.exists()) return await local.readAsString();
+  }
+
+  try {
+    final exe = File(Platform.resolvedExecutable);
+    final exeDir = exe.parent.path;
+    for (final name in candidates) {
+      final sibling = File(_join(exeDir, name));
+      if (await sibling.exists()) return await sibling.readAsString();
+    }
+  } catch (_) {}
 
   // Fallback: minimal inline page that asks user to load data or crawl
   return _fallbackHtml;
@@ -700,7 +710,7 @@ void _debugRequest(HttpRequest req) {
 }
 
 // ----------------------------
-// Minimal fallback HTML (only used if nexus.html not found)
+// Minimal fallback HTML (only used if nuros_nexus.html/nexus.html not found)
 // ----------------------------
 const String _fallbackHtml = r'''<!doctype html>
 <html lang="en"><head>
@@ -713,7 +723,7 @@ pre{background:#0f1320;border:1px solid rgba(255,255,255,.08);padding:1rem;borde
 </style>
 </head><body>
 <h1>Nurox Viewer</h1>
-<p>This is a lightweight fallback page (couldn't find <code>nexus.html</code>). You can still crawl and view raw JSON:</p>
+<p>This is a lightweight fallback page (couldn't find <code>nuros_nexus.html</code> or <code>nexus.html</code>). You can still crawl and view raw JSON:</p>
 <div class="row">
   <label>Root: <input id="root" size="60" placeholder="C:\\repo or /home/me/repo"/></label>
   <label>Languages:
