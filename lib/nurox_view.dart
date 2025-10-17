@@ -222,6 +222,21 @@ Future<void> _route(HttpRequest req, int port) async {
     return;
   }
 
+  if (method == 'GET' && path == '/favicon.ico') {
+    final icon = await _locateResource('favicon.ico');
+    if (icon != null) {
+      req.response.headers.contentType = ContentType('image', 'x-icon');
+      req.response.headers.set(HttpHeaders.cacheControlHeader, 'public, max-age=86400');
+      req.response.add(await icon.readAsBytes());
+      await req.response.close();
+    } else {
+      _warn('Favicon not found while serving /favicon.ico');
+      req.response.statusCode = HttpStatus.notFound;
+      await req.response.close();
+    }
+    return;
+  }
+
   // small probe
   if (method == 'GET' && path == '/healthz') {
     _sendText(req, 200, 'ok');
@@ -343,6 +358,45 @@ Future<String> _loadViewerHtml() async {
 
   // Fallback: minimal inline page that asks user to load data or crawl
   return _fallbackHtml;
+}
+
+Future<File?> _locateResource(String relativePath) async {
+  final visited = <String>{};
+
+  Future<File?> probe(String path) async {
+    final file = File(path);
+    final normalized = file.absolute.path;
+    if (!visited.add(normalized)) return null;
+    if (await file.exists()) return file;
+    return null;
+  }
+
+  final direct = await probe(relativePath);
+  if (direct != null) return direct;
+
+  final publicDirect = await probe(_join('public', relativePath));
+  if (publicDirect != null) return publicDirect;
+
+  final bases = <String>{};
+  bases.add(Directory.current.path);
+  try {
+    final scriptDir = File(Platform.script.toFilePath()).parent.path;
+    bases.add(scriptDir);
+    bases.add(_join(scriptDir, 'public'));
+  } catch (_) {}
+  try {
+    final exeDir = File(Platform.resolvedExecutable).parent.path;
+    bases.add(exeDir);
+    bases.add(_join(exeDir, 'public'));
+  } catch (_) {}
+
+  for (final base in bases) {
+    if (base.isEmpty) continue;
+    final candidate = await probe(_join(base, relativePath));
+    if (candidate != null) return candidate;
+  }
+
+  return null;
 }
 
 String _injectTokenIntoHtml(String html, String token) {
@@ -568,6 +622,7 @@ void _debugRequest(HttpRequest req) {
 const String _fallbackHtml = r'''<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
 <title>Nurox Viewer</title>
 <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:2rem;background:#0b0d12;color:#e8ecf1}
 button,input,select{font:inherit} .row{display:flex;gap:.5rem;align-items:center;margin:.5rem 0}
