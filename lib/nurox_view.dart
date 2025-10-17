@@ -386,6 +386,7 @@ Future<File?> _locateResource(String relativePath) async {
   final visited = <String>{};
 
   Future<File?> probe(String path) async {
+    if (path.isEmpty) return null;
     final file = File(path);
     final normalized = file.absolute.path;
     if (!visited.add(normalized)) return null;
@@ -393,11 +394,17 @@ Future<File?> _locateResource(String relativePath) async {
     return null;
   }
 
-  final direct = await probe(relativePath);
-  if (direct != null) return direct;
+  String sanitize(String input) {
+    var value = input;
+    if (value.startsWith('/')) value = value.substring(1);
+    return value;
+  }
 
-  final publicDirect = await probe(_join('public', relativePath));
-  if (publicDirect != null) return publicDirect;
+  final initial = sanitize(relativePath);
+  final variants = <String>{initial};
+  if (initial.startsWith('public/')) {
+    variants.add(initial.substring('public/'.length));
+  }
 
   final bases = <String>{};
   bases.add(Directory.current.path);
@@ -412,13 +419,27 @@ Future<File?> _locateResource(String relativePath) async {
     bases.add(_join(exeDir, 'public'));
   } catch (_) {}
 
-  for (final base in bases) {
-    if (base.isEmpty) continue;
-    final candidate = await probe(_join(base, relativePath));
-    if (candidate != null) return candidate;
+  Future<File?> searchVariants(Iterable<String> candidates) async {
+    for (final candidate in candidates) {
+      final direct = await probe(candidate);
+      if (direct != null) return direct;
+
+      final publicDirect = await probe(_join('public', candidate));
+      if (publicDirect != null) return publicDirect;
+
+      for (final base in bases) {
+        if (base.isEmpty) continue;
+        final fromBase = await probe(_join(base, candidate));
+        if (fromBase != null) return fromBase;
+
+        final fromBasePublic = await probe(_join(_join(base, 'public'), candidate));
+        if (fromBasePublic != null) return fromBasePublic;
+      }
+    }
+    return null;
   }
 
-  return null;
+  return await searchVariants(variants);
 }
 
 bool _isSafeStaticPath(String relative) {
