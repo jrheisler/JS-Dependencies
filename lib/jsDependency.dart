@@ -53,7 +53,7 @@ void main(List<String> args) async {
   }
   entriesAbsSet.addAll(_discoverEntries(cwd, pkg, files));
   final entriesAbs = entriesAbsSet.toList();
-  var entriesRel = entriesAbs.map((e) => _rel(e, cwd)).toList();
+  var entryIds = entriesAbs.map(_normalize).toList();
 
   // Parse imports
   final factsByPath = <String, _FileFacts>{};
@@ -89,14 +89,15 @@ void main(List<String> args) async {
   // Nodes
   final nodes = <_Node>[];
   for (final f in files) {
+    final normalized = _normalize(f);
     nodes.add(_Node(
-      id: _rel(f, cwd),
+      id: normalized,
       type: 'file',
       state: 'unused',
       sizeLOC: await _estimateLOC(f),
       packageName: null,
       hasSideEffects: factsByPath[f]?.hasSideEffectImport ?? false,
-      absPath: f,
+      absPath: normalized,
     ));
   }
   for (final e in externals) {
@@ -111,32 +112,32 @@ void main(List<String> args) async {
     ));
   }
 
-  // Relativize edges
-  final relEdges = edges.map((e) {
-    final src = e.source.startsWith(cwd) ? _rel(e.source, cwd) : e.source;
-    final tgt = e.target.startsWith(cwd) ? _rel(e.target, cwd) : e.target;
+  // Normalize edges
+  final normalizedEdges = edges.map((e) {
+    final src = e.source.startsWith(cwd) ? _normalize(e.source) : e.source;
+    final tgt = e.target.startsWith(cwd) ? _normalize(e.target) : e.target;
     return _Edge(source: src, target: tgt, kind: e.kind, certainty: e.certainty);
   }).toList();
 
-  if (entriesRel.isEmpty) {
+  if (entryIds.isEmpty) {
     final inCounts = <String, int>{};
-    for (final e in relEdges) {
+    for (final e in normalizedEdges) {
       inCounts[e.target] = (inCounts[e.target] ?? 0) + 1;
     }
-    entriesRel = nodes
+    entryIds = nodes
         .where((n) => n.type == 'file' && (inCounts[n.id] ?? 0) == 0)
         .map((n) => n.id)
         .toList();
   }
-  if (entriesRel.isEmpty) {
-    entriesRel = nodes.where((n) => n.type == 'file').map((n) => n.id).toList();
+  if (entryIds.isEmpty) {
+    entryIds = nodes.where((n) => n.type == 'file').map((n) => n.id).toList();
   }
 
   // Degrees
-  _computeDegrees(nodes, relEdges);
+  _computeDegrees(nodes, normalizedEdges);
 
   // Reachability
-  final usedSet = _reach(entriesRel, relEdges);
+  final usedSet = _reach(entryIds, normalizedEdges);
   final sideEffectOnly = _sideEffectOnlyTargets(factsByPath, cwd);
 
   for (final n in nodes) {
@@ -152,7 +153,7 @@ void main(List<String> args) async {
   final outPath = _join(cwd, 'jsDependencies.json');
   final out = {
     'nodes': nodes.map((n) => n.toJson()).toList(),
-    'edges': relEdges.map((e) => e.toJson()).toList(),
+    'edges': normalizedEdges.map((e) => e.toJson()).toList(),
   };
   await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
 
@@ -162,8 +163,8 @@ void main(List<String> args) async {
   final unused = nodes.where((n) => n.state == 'unused').length;
   final externCount = nodes.where((n) => n.type == 'external').length;
   final maxDeg = nodes.fold<int>(0, (m, n) => (n.inDeg + n.outDeg) > m ? (n.inDeg + n.outDeg) : m);
-  stderr.writeln('[info] Wrote: ${_rel(outPath, cwd)}');
-  stderr.writeln('[stats] nodes=$total edges=${relEdges.length} used=$used unused=$unused externals=$externCount maxDeg=$maxDeg');
+  stderr.writeln('[info] Wrote: ${_normalize(outPath)}');
+  stderr.writeln('[stats] nodes=$total edges=${normalizedEdges.length} used=$used unused=$unused externals=$externCount maxDeg=$maxDeg');
 
 }
 
@@ -191,6 +192,7 @@ class _Node {
     if (hasSideEffects != null) 'hasSideEffects': hasSideEffects,
     'inDeg': inDeg,
     'outDeg': outDeg,
+    if (absPath != null) 'absPath': absPath,
   };
 }
 
@@ -378,12 +380,11 @@ Set<String> _reach(List<String> entries, List<_Edge> edges) {
 Set<String> _sideEffectOnlyTargets(Map<String, _FileFacts> facts, String cwd) {
   final targets = <String>{};
   facts.forEach((path, ff) {
-    final relFrom = _rel(path, cwd);
     for (final imp in ff.imports) {
       if (imp.kind == 'side_effect') {
         final resolved = _resolveSpecifier(cwd, path, imp.specifier);
         if (resolved != null) {
-          targets.add(_rel(resolved, cwd));
+          targets.add(_normalize(resolved));
         }
       }
     }
