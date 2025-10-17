@@ -250,6 +250,18 @@ Future<void> _route(HttpRequest req, int port) async {
     return;
   }
 
+  // Static assets (e.g. /js/graph-preprocessing.js, /samples/foo.json)
+  if (!isApi && method == 'GET') {
+    final relative = path.startsWith('/') ? path.substring(1) : path;
+    if (relative.isNotEmpty && _isSafeStaticPath(relative)) {
+      final resource = await _locateResource(relative);
+      if (resource != null && await resource.exists()) {
+        await _sendStaticFile(req, resource, relative);
+        return;
+      }
+    }
+  }
+
   // GET /api/languages -> which crawlers are available
   if (method == 'GET' && path == '/api/languages') {
     final langs = <String, Map<String, dynamic>>{};
@@ -397,6 +409,77 @@ Future<File?> _locateResource(String relativePath) async {
   }
 
   return null;
+}
+
+bool _isSafeStaticPath(String relative) {
+  if (relative.contains('..')) return false;
+  if (relative.contains('\\')) return false;
+  return true;
+}
+
+Future<void> _sendStaticFile(
+    HttpRequest req, File file, String relativePath) async {
+  final type = _contentTypeFor(relativePath);
+  if (type != null) {
+    req.response.headers.contentType = type;
+  } else {
+    req.response.headers.contentType = ContentType.binary;
+  }
+  if (type != null && _treatAsText(type)) {
+    req.response.write(await file.readAsString());
+  } else {
+    req.response.add(await file.readAsBytes());
+  }
+  await req.response.close();
+}
+
+ContentType? _contentTypeFor(String path) {
+  final lower = path.toLowerCase();
+  if (lower.endsWith('.js')) {
+    return ContentType('application', 'javascript', charset: 'utf-8');
+  }
+  if (lower.endsWith('.css')) {
+    return ContentType('text', 'css', charset: 'utf-8');
+  }
+  if (lower.endsWith('.html')) {
+    return ContentType.html;
+  }
+  if (lower.endsWith('.json')) {
+    return ContentType('application', 'json', charset: 'utf-8');
+  }
+  if (lower.endsWith('.svg')) {
+    return ContentType('image', 'svg+xml');
+  }
+  if (lower.endsWith('.png')) {
+    return ContentType('image', 'png');
+  }
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) {
+    return ContentType('image', 'jpeg');
+  }
+  if (lower.endsWith('.ico')) {
+    return ContentType('image', 'x-icon');
+  }
+  if (lower.endsWith('.txt')) {
+    return ContentType('text', 'plain', charset: 'utf-8');
+  }
+  if (lower.endsWith('.wasm')) {
+    return ContentType('application', 'wasm');
+  }
+  if (lower.endsWith('.map')) {
+    return ContentType('application', 'json', charset: 'utf-8');
+  }
+  if (lower.endsWith('.woff2')) {
+    return ContentType('font', 'woff2');
+  }
+  return null;
+}
+
+bool _treatAsText(ContentType type) {
+  if (type.primaryType == 'text') return true;
+  if (type.primaryType == 'application') {
+    return type.subType == 'json' || type.subType == 'javascript';
+  }
+  return false;
 }
 
 String _injectTokenIntoHtml(String html, String token) {
