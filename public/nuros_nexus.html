@@ -1,0 +1,2154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    (function(){
+      try {
+        var path = (window.location && window.location.pathname) || '';
+        var normalized = path.replace(/\\+/g, '/');
+        var inPublic = normalized.includes('/public/');
+        if (normalized.endsWith('/public') || normalized.endsWith('/public.')) {
+          inPublic = true;
+        }
+        if (!document.head.querySelector('base')) {
+          var base = document.createElement('base');
+          base.href = inPublic ? './' : './public/';
+          document.head.appendChild(base);
+        }
+      } catch (err) {
+        console.warn('Unable to determine asset base, falling back to default.', err);
+      }
+    })();
+  </script>
+  <title>Nurox Nexus — Used/Unused Module Map</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <style>
+    :root {
+      --bg: #0b0d12;        /* dark slate */
+      --panel: #121622;     /* panel ink */
+      --muted: #8a93a5;     /* muted text */
+      --text: #e8ecf1;      /* primary text */
+      --accent: #7c5cff;    /* purple */
+      --accent2: #1dd1a1;   /* teal */
+      --danger: #ff5c7a;    /* pink/red */
+      --warning: #f3b33d;   /* amber */
+      --grid: rgba(255,255,255,.03);
+      --chip: #1a2030;
+      --sidebar-width: 320px;
+    }
+    * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--accent) rgba(255,255,255,.08); }
+    *::-webkit-scrollbar { width: 12px; height: 12px; }
+    *::-webkit-scrollbar-track { background: rgba(9,11,18,.65); border-radius: 999px; }
+    *::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(124,92,255,.85), rgba(29,209,161,.85)); border-radius: 999px; border: 2px solid rgba(9,11,18,.65); box-shadow: 0 2px 6px rgba(0,0,0,.35) inset; }
+    *::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgba(124,92,255,1), rgba(29,209,161,1)); }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
+    #app { position: relative; display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 48px 1fr; height: 100%; transition: grid-template-columns .25s ease; }
+    body.sidebar-collapsed #app { grid-template-columns: 0 1fr; }
+    header { grid-column: 1 / -1; grid-row: 1; display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.02)); border-bottom: 1px solid rgba(255,255,255,.06); }
+    header .title { font-weight: 700; letter-spacing:.2px; }
+    header .spacer { flex: 1; }
+    header .status { color: var(--muted); font-size: 12px; }
+    header .btn { background: var(--panel); border: 1px solid rgba(255,255,255,.08); color: var(--text); padding: 8px 10px; border-radius: 10px; cursor: pointer; transition: .2s; }
+    header .btn:hover { border-color: rgba(255,255,255,.2); box-shadow: 0 0 0 2px rgba(124,92,255,.2) inset; }
+
+    aside#sidebar { grid-column: 1; grid-row: 2; border-right: 1px solid rgba(255,255,255,.06); background: var(--panel); display: flex; flex-direction: column; gap: 12px; padding: 12px; overflow: auto; transition: transform .25s ease, opacity .25s ease; }
+    body.sidebar-collapsed aside#sidebar { transform: translateX(calc(-1 * var(--sidebar-width))); opacity: 0; pointer-events: none; }
+    section#canvas { position: relative; grid-column: 2; grid-row: 2; overflow: hidden; background-image: radial-gradient(circle at 25px 25px, var(--grid) 1px, transparent 0), radial-gradient(circle at 25px 25px, var(--grid) 1px, transparent 0); background-size: 50px 50px; }
+    header .btn[data-variant="ghost"] { background: transparent; border-color: rgba(255,255,255,.12); }
+    header .btn[data-variant="ghost"]:hover { background: rgba(255,255,255,.06); }
+
+    .sidebar-latch { position: absolute; top: 60px; left: calc(var(--sidebar-width) - 18px); transform: translateX(-50%); display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); background: rgba(9,11,18,.85); color: var(--text); cursor: pointer; z-index: 20; transition: left .25s ease, background .2s ease, border-color .2s ease; box-shadow: 0 8px 18px rgba(0,0,0,.35); }
+    .sidebar-latch:hover { background: rgba(15,18,30,.95); border-color: rgba(255,255,255,.25); }
+    .sidebar-latch .icon { font-size: 12px; }
+    .sidebar-latch .label { font-size: 12px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; }
+    body.sidebar-collapsed .sidebar-latch { left: 16px; }
+
+    .group { background: #0f1320; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px; }
+    .group[data-viewer-available="false"] { border-color: rgba(255,92,122,.35); box-shadow: 0 0 0 1px rgba(255,92,122,.2) inset; }
+    .group h3 { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; }
+    .group .section-label { margin: 10px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+    input[type="text"], select { width: 100%; background: #0d1220; border: 1px solid rgba(255,255,255,.08); color: var(--text); padding: 8px 10px; border-radius: 10px; outline: none; }
+    header select.btn { width: auto; min-width: 0; }
+    label { display: flex; align-items:center; gap: 8px; color: var(--muted); font-size: 12px; margin: 6px 0; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .row > * { flex: 1; }
+    .crawl-root-row { display: flex; gap: 8px; align-items: stretch; }
+    .crawl-root-row input[type="text"] { flex: 1; }
+    .crawl-root-row button { flex: 0 0 auto; white-space: nowrap; padding: 8px 14px; }
+    .pill { display: inline-flex; align-items:center; gap:6px; padding: 4px 8px; border-radius: 999px; background: var(--chip); color: var(--text); font-size: 12px; }
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:600; letter-spacing:.02em; text-transform:uppercase; background:rgba(255,255,255,.08); color:var(--text); }
+    .badge .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+    .badge[data-status="reachable_current"] { background:#1dd1a1; color:#031b13; }
+    .badge[data-status="reachable_current"] .dot { background:#0c7f5a; }
+    .badge[data-status="reachable_other_profile"] { background:#25b7c6; color:#03161a; }
+    .badge[data-status="reachable_other_profile"] .dot { background:#0b7b88; }
+    .badge[data-status="deferred_only"] { background:#7c5cff; color:#0b0630; }
+    .badge[data-status="deferred_only"] .dot { background:#3f2ab8; }
+    .badge[data-status="dynamic_only"] { background:#f3b33d; color:#2e1d00; }
+    .badge[data-status="dynamic_only"] .dot { background:#c17f03; }
+    .badge[data-status="test_only"], .badge[data-status="build_time_only"] { background:#5e667a; color:#e6ecf6; }
+    .badge[data-status="test_only"] .dot, .badge[data-status="build_time_only"] .dot { background:#2f3440; }
+    .badge[data-status="disconnected_all_profiles"] { background:#ff5c7a; color:#2b0209; }
+    .badge[data-status="disconnected_all_profiles"] .dot { background:#b21734; }
+    .badge[data-quiet] { opacity:.9; font-weight:500; text-transform:none; letter-spacing:0; }
+    .badge-group { display:flex; flex-wrap:wrap; gap:6px; }
+    .profile-legend { display:grid; gap:6px; font-size:12px; }
+    .profile-legend .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+    .profile-legend .label { color:var(--muted); text-transform:uppercase; letter-spacing:.12em; font-size:11px; }
+    .profile-legend .row span:last-child { color:var(--muted); }
+    .entrypoints { display:flex; flex-direction:column; gap:6px; max-height:180px; overflow:auto; }
+    .entrypoints .entry { padding:6px 8px; border-radius:8px; border:1px solid rgba(255,255,255,.08); background:#0d1220; font-size:12px; }
+    .entrypoints .entry.missing { border-color:var(--danger); color:var(--danger); }
+    .entrypoints .entry button { background:none; border:none; color:var(--accent2); cursor:pointer; font-size:12px; text-decoration:underline; }
+    .btn-inline { width:100%; margin-top:8px; padding:8px 10px; background:rgba(124,92,255,.16); border:1px solid rgba(124,92,255,.35); color:var(--text); border-radius:10px; font-size:12px; cursor:pointer; transition:.2s; }
+    .btn-inline:hover { background:rgba(124,92,255,.26); }
+    .btn-inline[disabled] { opacity:.55; cursor:not-allowed; }
+    .status-note { color:var(--muted); font-size:12px; margin-top:6px; }
+    #viewerControls .lang-list { display:grid; gap:6px; margin-top:8px; }
+    #viewerControls .lang-option { display:flex; align-items:center; justify-content:space-between; padding:6px 8px; border-radius:8px; border:1px solid rgba(255,255,255,.08); background:#0d1220; font-size:12px; color:var(--text); }
+    #viewerControls .lang-option input { margin-right:8px; }
+    #viewerControls .lang-option .lang-name { flex:1; }
+    #viewerControls .lang-option .lang-meta { font-size:11px; color:var(--muted); margin-left:12px; }
+    #viewerControls .lang-option[data-available="false"] { opacity:.55; }
+    #viewerControls .lang-option[data-available="false"] .lang-meta { color:var(--danger); }
+
+    /* Graph elements */
+    svg { width: 100%; height: 100%; display: block; }
+    .link { stroke: rgba(255,255,255,.18); stroke-width: 1.2; }
+    .link.dynamic { stroke-dasharray: 3 3; opacity: .8; }
+    .node circle { stroke: rgba(255,255,255,.6); stroke-width: .6; }
+    .node.used circle { fill: var(--accent2); }
+    .node.unused circle { fill: #273049; }
+    .node.side_effect_only circle { fill: var(--warning); }
+    .node.external circle { fill: #3b2f5a; }
+    .label { pointer-events: none; font-size: 10px; fill: #d6def0; text-shadow: 0 1px 0 #000; opacity: .85; }
+    .halo { filter: drop-shadow(0 0 6px rgba(124,92,255,.55)); }
+    .node.highlighted circle { fill: #ff47d8; stroke: rgba(255,255,255,.9); stroke-width: 1.4; filter: drop-shadow(0 0 10px rgba(255,71,216,.55)); }
+    .link.highlighted { stroke: #ffe45c; stroke-width: 2; }
+
+    .legend { position: absolute; left: 12px; bottom: 12px; background: rgba(12,14,19,.85); border: 1px solid rgba(255,255,255,.06); padding: 8px 10px; border-radius: 10px; font-size: 12px; display: flex; gap: 10px; }
+    .legend .key { display:flex; align-items:center; gap:6px; }
+    .legend .dot { width: 10px; height: 10px; border-radius: 50%; display:inline-block; }
+    .legend .metric { background: transparent; border: none; color: var(--text); font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
+    .legend .metric:hover, .legend .metric:focus-visible { background: rgba(124,92,255,.16); color: #fff; outline: none; box-shadow: 0 0 0 1px rgba(124,92,255,.35) inset; }
+    .legend .metric.active { background: linear-gradient(135deg, rgba(255,71,216,.9), rgba(255,226,89,.9)); color: #11131d; box-shadow: 0 0 12px rgba(255,226,120,.45); }
+    .legend .metric-sep { align-self: center; color: rgba(255,255,255,.4); }
+
+    .stat { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 13px; }
+    .stat .k { color: var(--muted); }
+    .stat .v { color: var(--text); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .hr { height: 1px; background: rgba(255,255,255,.06); margin: 6px 0; }
+
+    .list { display: grid; gap: 6px; max-height: 200px; overflow: auto; }
+    .list .item { background: #0d1220; padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,.06); cursor: pointer; }
+    .list .item:hover { border-color: rgba(255,255,255,.2); }
+
+    .kbd { background: #111526; border: 1px solid rgba(255,255,255,.15); border-bottom-color: rgba(0,0,0,.3); padding: 2px 6px; border-radius: 6px; font-size: 12px; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(3,5,12,0.88); display: flex; align-items: center; justify-content: center; padding: 4vh 4vw; z-index: 1000; }
+    .modal-overlay[hidden] { display: none; }
+    .modal-shell { position: relative; width: min(1100px, 92vw); height: min(900px, 90vh); background: var(--panel); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; box-shadow: 0 12px 48px rgba(0,0,0,.45); overflow: hidden; display: flex; flex-direction: column; }
+    .modal-shell iframe { flex: 1; border: none; background: #fff; color-scheme: light; }
+    .modal-close { position: absolute; top: 10px; right: 12px; background: rgba(9,11,18,0.8); border: 1px solid rgba(255,255,255,.2); color: var(--text); border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; transition: .2s; font-size: 16px; }
+    .modal-close:hover { border-color: rgba(255,255,255,.5); box-shadow: 0 0 0 2px rgba(124,92,255,.25) inset; }
+    .modal-header { padding: 14px 44px 12px 18px; font-weight: 600; letter-spacing: .4px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(15,18,30,.85); }
+    .modal-shell iframe { border-radius: 0 0 16px 16px; }
+  </style>
+  <script src="js/graph-preprocessing.js"></script>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="title">Nurox Nexus</div>
+    <div class="spacer"></div>
+    <select id="profileSelect" class="btn" title="Switch profile" style="display:none;"></select>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <button class="btn" id="openJson">Load graph.json</button>
+    <input type="file" id="fileInput" accept="application/json" hidden />
+    <button class="btn" id="exportSbom" title="Download SBOM CSV">SBOM CSV</button>
+    <label class="btn" title="Export only the currently filtered nodes">
+      <input type="checkbox" id="exportFiltered" checked style="margin-right:6px;"> Filtered only
+    </label>
+    <select id="colorMode" class="btn" title="Color mode">
+      <option value="state">Color: State</option>
+      <option value="type">Color: Type</option>
+      <option value="degree">Color: Degree</option>
+      <option value="package">Color: Package</option>
+    </select>
+    <button class="btn" id="resetView" title="Reset view">Reset View</button>
+    <button class="btn" id="toggleSidebar" data-variant="ghost" aria-expanded="true" aria-controls="sidebar" title="Toggle sidebar">Hide Sidebar ◀</button>
+    <button class="btn" id="pause" title="Pause/Resume physics">Pause ⏸</button>
+  </header>
+
+  <button class="sidebar-latch" id="sidebarLatch" type="button" aria-controls="sidebar" aria-expanded="true" title="Collapse sidebar">
+    <span class="icon" aria-hidden="true">◀</span>
+    <span class="label">Collapse</span>
+  </button>
+
+  <aside id="sidebar" aria-hidden="false">
+    <div class="group" id="viewerControls" hidden>
+      <h3>Local Crawl</h3>
+      <label for="crawlRoot">Folder to crawl</label>
+      <div class="crawl-root-row">
+        <input type="text" id="crawlRoot" placeholder="Path to project root" autocomplete="off" />
+        <button type="button" class="btn" id="crawlRootBrowse" title="Browse for folder">Browse…</button>
+      </div>
+      <input type="file" id="crawlRootPicker" webkitdirectory directory multiple hidden />
+      <p class="status-note" id="crawlRootPickerNote" hidden>
+        Selecting a folder only shares its path with this browser session — nothing is uploaded.
+      </p>
+      <div class="section-label">Languages</div>
+      <div id="crawlLangList" class="lang-list"></div>
+      <label><input type="checkbox" id="crawlClear" checked /> Clear previous graph before crawling</label>
+      <button type="button" class="btn-inline" id="startCrawl">Start crawl</button>
+      <button type="button" class="btn-inline" id="loadViewerGraph">Load latest graph</button>
+      <div class="status-note" id="viewerStatus"></div>
+    </div>
+    <div class="group">
+      <h3>Search</h3>
+      <input type="text" id="search" placeholder="Find node by name/path (Enter to select)" />
+      <div style="margin-top:8px; color:var(--muted); font-size:12px;">Shortcuts: <span class="kbd">Ctrl/Cmd+F</span> focus search</div>
+      <div style="margin-top:6px; color:var(--muted); font-size:12px;">
+        Tip: drop a <code>.json</code> anywhere to load
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Filter</h3>
+      <label><input type="checkbox" id="showDisconnectedOnly" /> Show disconnected (all profiles) only</label>
+      <label><input type="checkbox" id="showDynamicOnly" /> Show dynamic-only</label>
+      <label><input type="checkbox" id="showDeferredOnly" /> Show deferred-only</label>
+      <label><input type="checkbox" id="hideExternals" /> Hide externals (node_modules)</label>
+      <label><input type="checkbox" id="hideDynamic" /> Hide dynamic edges</label>
+      <div class="row">
+        <div>
+          <label for="minDegree">Min degree</label>
+          <input type="range" id="minDegree" min="0" max="20" value="0" />
+        </div>
+        <div style="width:40px; text-align:center;" class="mono" id="minDegreeVal">0</div>
+      </div>
+    </div>
+
+    <div class="group" id="entrypointsGroup">
+      <h3>Entrypoints</h3>
+      <div class="entrypoints" id="entrypointsList"></div>
+      <div class="status-note" id="entrypointsNote"></div>
+    </div>
+
+    <div class="group">
+      <h3>Selection</h3>
+      <div id="selNone" style="color:var(--muted);">Click a node to see details.</div>
+      <div id="sel" style="display:none;">
+        <div class="stat">
+          <div class="k">Id</div><div class="v mono" id="selId"></div>
+          <div class="k">Type</div><div class="v" id="selType"></div>
+          <div class="k">Status</div><div class="v" id="selState"></div>
+          <div class="k">Package</div><div class="v" id="selPkg"></div>
+          <div class="k">LOC</div><div class="v mono" id="selLoc"></div>
+          <div class="k">Degree</div><div class="v mono" id="selDeg"></div>
+          <div class="k">Profiles</div><div class="v" id="selProfiles"></div>
+        </div>
+        <div class="hr"></div>
+        <div>
+          <div style="color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;">Neighbors</div>
+          <div class="list" id="neighbors"></div>
+        </div>
+        <button type="button" id="markKeepRule" class="btn-inline">False positive? Keep this node</button>
+        <div class="status-note" id="keepRuleNote"></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Insights</h3>
+      <div class="stat" id="insights">
+        <div class="k">Pure leaves</div><div class="v mono" id="pureLeaves">0</div>
+        <div class="k">Side-effect files</div><div class="v mono" id="sideFx">0</div>
+        <div class="k">Unused &amp; attached</div><div class="v mono" id="unusedAttached">0</div>
+        <div class="k">Max degree</div><div class="v mono" id="maxDeg">0</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Legend</h3>
+      <div class="profile-legend" id="profileLegend"></div>
+    </div>
+
+    <div class="group">
+      <h3>Physics</h3>
+      <div class="row">
+        <div>
+          <label for="charge">Charge</label>
+          <input type="range" id="charge" min="-4000" max="0" value="-800" />
+        </div>
+        <div style="width:60px; text-align:center;" class="mono" id="chargeVal">-800</div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="linkDist">Link distance</label>
+          <input type="range" id="linkDist" min="20" max="260" value="90" />
+        </div>
+        <div style="width:60px; text-align:center;" class="mono" id="linkDistVal">90</div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="linkStr">Link strength</label>
+          <input type="range" id="linkStr" min="0" max="1" step="0.01" value="0.07" />
+        </div>
+        <div style="width:60px; text-align:center;" class="mono" id="linkStrVal">0.07</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Help</h3>
+      <div style="color:var(--muted); font-size:13px; line-height:1.5;">
+        • Drag nodes to pin them. Double‑click to unpin.<br>
+        • Scroll to zoom. Right‑drag to pan (or use trackpad).<br>
+        • <span class="kbd">H</span> toggle labels, <span class="kbd">L</span> lighten links, <span class="kbd">Space</span> pause/resume physics.<br>
+        • Need more detail? Visit the <a href="help.html" id="helpLink" style="color:var(--accent);">full help guide</a>.
+      </div>
+    </div>
+  </aside>
+
+  <section id="canvas">
+    <svg id="svg"></svg>
+    <div class="legend" id="hud">
+      <button type="button" class="metric" data-highlight="all">Nodes: <span id="nCount" class="mono">0</span></button>
+      <span class="metric-sep" aria-hidden="true">·</span>
+      <button type="button" class="metric" data-highlight="edges">Edges: <span id="eCount" class="mono">0</span></button>
+      <span class="metric-sep" aria-hidden="true">·</span>
+      <button type="button" class="metric" data-highlight="reachable">Reachable: <span id="uCount" class="mono">0</span></button>
+      <span class="metric-sep" aria-hidden="true">·</span>
+      <button type="button" class="metric" data-highlight="disconnected">Disconnected: <span id="xCount" class="mono">0</span></button>
+      <span class="metric-sep" aria-hidden="true">·</span>
+      <button type="button" class="metric" data-highlight="dynamic">Dynamic-only: <span id="dCount" class="mono">0</span></button>
+    </div>
+  </section>
+
+</div>
+
+<div class="modal-overlay" id="helpModal" hidden aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal-shell">
+    <div class="modal-header">Help &amp; Documentation</div>
+    <button class="modal-close" id="helpClose" aria-label="Close help">✕</button>
+    <iframe id="helpFrame" title="Help documentation"></iframe>
+  </div>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  // --- State ---
+  let graph = { nodes: [], edges: [] };
+  let filtered = { nodes: [], edges: [] };
+  let showLabels = true; let dimLinks = false; let paused = false;
+  let activeHighlight = null;
+  let selectedNode = null;
+  let entrypoints = [];
+  let profiles = [{ name: 'default', flags: {} }];
+  let profileResults = [];
+  let currentProfileIndex = 0;
+  let keepRuleConfig = [];
+  let localKeepRules = [];
+  let compiledKeepRules = [];
+  let rawGraphData = null;
+  let graphWorker = null;
+  let workerSeq = 0;
+  const workerRequests = new Map();
+  let workerBusyMessage = null;
+  const SIM_FULL_ALPHA = 0.8;
+  const SIM_GENTLE_ALPHA = 0.35;
+  const SIM_ACTIVE_TARGET = 0.12;
+  const SIM_GENTLE_TARGET = 0.06;
+  const LOW_MOTION_VELOCITY_THRESHOLD = 0.03;
+  const LOW_MOTION_TICKS_REQUIRED = 24;
+  let renderPending = false;
+  let pendingSimWarmup = false;
+  let pendingGentleWarm = false;
+  let tickPending = false;
+  let queuedTickState = null;
+  let lowMotionTickCount = 0;
+  let userInteractionDepth = 0;
+  let latestTickContext = null;
+  const cfg = { charge: -800, linkDist: 90, linkStr: 0.07, minDegree: 0, showDisconnectedOnly: false, showDynamicOnly: false, showDeferredOnly: false, hideExternals: false, hideDynamic: false };
+  const KEEP_RULE_KEY = 'nurox:nexus:keepRules';
+  const graphHelpers = (window.GraphPreprocessing && window.GraphPreprocessing.helpers) || {};
+
+  const isDynamicEdge = graphHelpers.isDynamicEdge || (() => false);
+  const isEdgeActiveInProfile = graphHelpers.isEdgeActiveInProfile || (() => true);
+  const hasDynamicEvidence = graphHelpers.hasDynamicEvidence || (() => false);
+  const compileKeepRulesHelper = graphHelpers.compileKeepRules || (() => []);
+
+  // --- DOM ---
+  const $ = (id)=>{
+    if(typeof id === 'string' && id.startsWith('#')){
+      return document.getElementById(id.slice(1));
+    }
+    return document.getElementById(id);
+  };
+
+  const STATUS_META = {
+    reachable_current: { label: 'Reachable (current profile)', color: '#1dd1a1' },
+    reachable_other_profile: { label: 'Reachable in other profile(s)', color: '#25b7c6' },
+    deferred_only: { label: 'Deferred only', color: '#7c5cff' },
+    dynamic_only: { label: 'Dynamic only', color: '#f3b33d' },
+    test_only: { label: 'Test only', color: '#5e667a' },
+    build_time_only: { label: 'Build-time only', color: '#5e667a' },
+    disconnected_all_profiles: { label: 'Disconnected (all profiles)', color: '#ff5c7a' }
+  };
+  const STATUS_NOTES = {
+    reachable_current: 'Reached from entrypoints in the active profile.',
+    reachable_other_profile: 'Not reached here but is reached when another profile is active.',
+    deferred_only: 'Reachable only through deferred/lazy imports.',
+    dynamic_only: 'Known only via dynamic loading, coverage, or keepRule.',
+    test_only: 'Only loaded by test edges in this profile.',
+    build_time_only: 'Only referenced during build/code generation edges.',
+    disconnected_all_profiles: 'Unreachable in every profile — safe delete candidate.'
+  };
+  const STATUS_ORDER = (window.GraphPreprocessing && Array.isArray(window.GraphPreprocessing.STATUS_ORDER))
+    ? window.GraphPreprocessing.STATUS_ORDER.slice()
+    : [
+      'reachable_current',
+      'deferred_only',
+      'dynamic_only',
+      'test_only',
+      'build_time_only',
+      'reachable_other_profile',
+      'disconnected_all_profiles'
+    ];
+
+  const currentProfileName = () => profiles[currentProfileIndex]?.name || 'default';
+  function statusesFor(node){
+    if(!node || !node.statusByProfile) return [];
+    return node.statusByProfile[currentProfileName()] || [];
+  }
+  function primaryStatusFor(node){
+    if(!node || !node.primaryByProfile) return 'disconnected_all_profiles';
+    return node.primaryByProfile[currentProfileName()] || 'disconnected_all_profiles';
+  }
+  const ESCAPE_HTML = { "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;" };
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s=>ESCAPE_HTML[s] || s);
+  }
+  function badgesHtml(statuses, node){
+    const list = statuses && statuses.length ? statuses : ['disconnected_all_profiles'];
+    const otherProfiles = (node?.reachableProfiles||[]).filter(name => name !== currentProfileName());
+    return list.map(status => {
+      let label = STATUS_META[status]?.label || status;
+      if(status === 'reachable_other_profile' && otherProfiles.length){
+        label = `Reachable in: ${escapeHtml(otherProfiles.join(', '))}`;
+      }
+      return `<span class="badge" data-status="${status}"><span class="dot"></span>${escapeHtml(label)}</span>`;
+    }).join(' ');
+  }
+  function profileSummaryHtml(node){
+    if(!node || !node.statusByProfile) return '—';
+    const chips = profiles.map(p => {
+      const statuses = node.statusByProfile[p.name] || [];
+      const primary = STATUS_ORDER.find(st => statuses.includes(st)) || statuses[0];
+      const badgeStatus = primary || 'disconnected_all_profiles';
+      return `<span class="badge" data-status="${badgeStatus}" data-quiet="true"><span class="dot"></span>${escapeHtml(p.name)}</span>`;
+    }).filter(Boolean);
+    return chips.length ? `<div class="badge-group">${chips.join('')}</div>` : '—';
+  }
+
+  const svg = d3.select('#svg');
+  const g = svg.append('g');
+  const linkG = g.append('g').attr('class','links');
+  const nodeG = g.append('g').attr('class','nodes');
+  const labelG = g.append('g').attr('class','labels');
+
+  const hud = $('hud');
+  const hudButtons = hud ? Array.from(hud.querySelectorAll('[data-highlight]')) : [];
+  const profileSelect = $('profileSelect');
+  const entrypointsList = $('entrypointsList');
+  const entrypointsNote = $('entrypointsNote');
+  const profileLegend = $('profileLegend');
+  const keepRuleBtn = $('markKeepRule');
+  const keepRuleNote = $('keepRuleNote');
+  const highlightedNodeIds = new Set();
+  let appliedHighlightIds = new Set();
+  const nodeIndexById = new Map();
+  let nodeElements = [];
+  let nodeCircleElements = [];
+  let renderedNodes = [];
+  let edgeElements = [];
+  let renderedEdges = [];
+  let labelElements = [];
+
+  function shouldHighlightNode(d){
+    return highlightedNodeIds.has(d.id);
+  }
+
+  function highlightById(id){
+    const idx = nodeIndexById.get(id);
+    if(idx == null) return;
+    const nodeEl = nodeElements[idx];
+    if(nodeEl) nodeEl.classList.add('highlighted');
+    const circle = nodeCircleElements[idx];
+    if(circle) circle.style.fill = '#ff47d8';
+  }
+
+  function clearHighlightById(id){
+    const idx = nodeIndexById.get(id);
+    if(idx == null) return;
+    const nodeEl = nodeElements[idx];
+    if(nodeEl) nodeEl.classList.remove('highlighted');
+    const circle = nodeCircleElements[idx];
+    if(circle){
+      const nodeData = renderedNodes[idx];
+      if(nodeData) circle.style.fill = getNodeColor(nodeData);
+    }
+  }
+
+  function refreshNodeFill(id){
+    const idx = nodeIndexById.get(id);
+    if(idx == null) return;
+    const circle = nodeCircleElements[idx];
+    if(!circle) return;
+    const nodeData = renderedNodes[idx];
+    if(!nodeData) return;
+    circle.style.fill = highlightedNodeIds.has(id) ? '#ff47d8' : getNodeColor(nodeData);
+  }
+
+  function rebuildHighlightSet(){
+    highlightedNodeIds.clear();
+    if(!activeHighlight) return;
+    switch(activeHighlight){
+      case 'all':
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null) highlightedNodeIds.add(n.id);
+        });
+        break;
+      case 'reachable':
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null && statusesFor(n).includes('reachable_current')) highlightedNodeIds.add(n.id);
+        });
+        break;
+      case 'disconnected':
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null && statusesFor(n).includes('disconnected_all_profiles')) highlightedNodeIds.add(n.id);
+        });
+        break;
+      case 'dynamic':
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null && statusesFor(n).includes('dynamic_only')) highlightedNodeIds.add(n.id);
+        });
+        break;
+      case 'edges':
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null && ((n.inDeg || 0) + (n.outDeg || 0)) > 0) highlightedNodeIds.add(n.id);
+        });
+        break;
+      default:
+        break;
+    }
+  }
+
+  function updateMetricState(){
+    hudButtons.forEach(btn => {
+      const active = activeHighlight === btn.dataset.highlight;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  function updateHighlights(){
+    const prev = appliedHighlightIds;
+    const removals = [];
+    prev.forEach(id => {
+      if(!highlightedNodeIds.has(id) || !nodeIndexById.has(id)) removals.push(id);
+    });
+    removals.forEach(id => {
+      if(!nodeIndexById.has(id)) highlightedNodeIds.delete(id);
+      clearHighlightById(id);
+    });
+
+    const additions = [];
+    highlightedNodeIds.forEach(id => {
+      if(!prev.has(id) && nodeIndexById.has(id)) additions.push(id);
+    });
+    additions.forEach(id => highlightById(id));
+
+    appliedHighlightIds = new Set(highlightedNodeIds);
+
+    const highlightEdges = activeHighlight === 'edges';
+    const edgeOpacity = highlightEdges ? 1 : (dimLinks ? .25 : 1);
+    edgeElements.forEach(el => {
+      if(!el) return;
+      el.classList.toggle('highlighted', highlightEdges);
+      el.setAttribute('opacity', edgeOpacity);
+    });
+  }
+
+  function setHighlightFilter(next){
+    const target = next || null;
+    const nextActive = (target && activeHighlight === target) ? null : target;
+    activeHighlight = nextActive;
+    rebuildHighlightSet();
+    updateMetricState();
+    updateHighlights();
+  }
+
+  if(hudButtons.length){
+    hudButtons.forEach(btn => {
+      btn.setAttribute('aria-pressed', 'false');
+      btn.addEventListener('click', () => setHighlightFilter(btn.dataset.highlight || null));
+    });
+  }
+
+  updateMetricState();
+
+  const zoom = d3.zoom()
+    .scaleExtent([0.1, 4])
+    .on('start', ()=> beginInteraction())
+    .on('zoom', (e)=>{ g.attr('transform', e.transform); })
+    .on('end', ()=> endInteraction());
+  svg.call(zoom);
+
+  // --- Sim ---
+  const sim = d3.forceSimulation()
+    .force('charge', d3.forceManyBody().strength(cfg.charge).theta(0.9))
+    .force('link', d3.forceLink().id(d=>d.id).distance(cfg.linkDist).strength(cfg.linkStr))
+    .force('center', d3.forceCenter())
+    .force('collision', d3.forceCollide().radius(d=>sizeFor(d)+6));
+
+  function warmSimulation(intensity = SIM_FULL_ALPHA, target = SIM_ACTIVE_TARGET){
+    if(paused) return;
+    sim.alphaTarget(target);
+    sim.alpha(intensity).restart();
+    lowMotionTickCount = 0;
+  }
+
+  function gentleWarmSimulation(){
+    warmSimulation(SIM_GENTLE_ALPHA, SIM_GENTLE_TARGET);
+  }
+
+  function coolSimulation(){
+    if(paused) return;
+    sim.alphaTarget(0);
+    if(sim.alpha() < 0.02){
+      sim.stop();
+    }
+  }
+
+  function beginInteraction(){
+    userInteractionDepth += 1;
+    if(paused) return;
+    sim.alphaTarget(0);
+    if(sim.alpha() < 0.001){
+      sim.alpha(0.001);
+    }
+    sim.restart();
+  }
+
+  function endInteraction(){
+    if(userInteractionDepth > 0) userInteractionDepth -= 1;
+    if(paused || userInteractionDepth > 0) return;
+    if(pendingSimWarmup){
+      warmSimulation();
+      pendingSimWarmup = false;
+      pendingGentleWarm = false;
+    } else {
+      gentleWarmSimulation();
+      pendingGentleWarm = false;
+    }
+  }
+
+  function scheduleTickUpdate(state){
+    queuedTickState = state;
+    if(!tickPending){
+      tickPending = true;
+      requestAnimationFrame(flushTick);
+    }
+  }
+
+  function flushTick(){
+    tickPending = false;
+    const state = queuedTickState;
+    queuedTickState = null;
+    if(!state) return;
+    const { linksSel, nodesSel, labelsSel } = state;
+    linksSel.attr('x1', d=>d.source.x).attr('y1', d=>d.source.y).attr('x2', d=>d.target.x).attr('y2', d=>d.target.y);
+    nodesSel.attr('transform', d=>`translate(${d.x},${d.y})`);
+    labelsSel.attr('x', d=>d.x + sizeFor(d)+4).attr('y', d=>d.y+4);
+    updateAverageVelocity();
+  }
+
+  function updateAverageVelocity(){
+    if(!renderedNodes.length) return;
+    let total = 0;
+    let count = 0;
+    for(const node of renderedNodes){
+      if(!node) continue;
+      const vx = node.vx || 0;
+      const vy = node.vy || 0;
+      total += Math.hypot(vx, vy);
+      count += 1;
+    }
+    if(count === 0) return;
+    const avg = total / count;
+    if(avg < LOW_MOTION_VELOCITY_THRESHOLD){
+      lowMotionTickCount = Math.min(lowMotionTickCount + 1, LOW_MOTION_TICKS_REQUIRED + 1);
+      if(lowMotionTickCount >= LOW_MOTION_TICKS_REQUIRED && userInteractionDepth === 0 && !pendingSimWarmup && !pendingGentleWarm){
+        coolSimulation();
+      }
+    } else {
+      lowMotionTickCount = 0;
+    }
+  }
+
+  // --- UI bindings ---
+  const statusEl = $('status');
+  const setStatus = (msg)=>{ if(statusEl) statusEl.textContent = msg || ''; };
+  const setText = (id, value)=>{ const el = $(id); if(el) el.textContent = value; };
+  const setDisplay = (id, value)=>{ const el = $(id); if(el) el.style.display = value; };
+  const setHTML = (id, value)=>{ const el = $(id); if(el) el.innerHTML = value; };
+
+  const reviveRegexList = (list)=>{
+    if(!Array.isArray(list)) return [];
+    const revived = [];
+    list.forEach(item => {
+      if(!item || typeof item.source !== 'string') return;
+      try {
+        revived.push(new RegExp(item.source, item.flags || ''));
+      } catch {
+        /* ignore invalid */
+      }
+    });
+    return revived;
+  };
+
+  function terminateGraphWorker(reason){
+    if(!graphWorker) return;
+    try { graphWorker.terminate(); } catch {}
+    graphWorker = null;
+    workerRequests.forEach(({ reject }) => {
+      try { reject(reason || new Error('Worker terminated')); } catch {}
+    });
+    workerRequests.clear();
+    workerBusyMessage = null;
+  }
+
+  function handleWorkerMessage(event){
+    const data = event.data || {};
+    const job = workerRequests.get(data.id);
+    if(!job) return;
+    workerRequests.delete(data.id);
+    const { resolve, reject, options } = job;
+    const successMessage = Object.prototype.hasOwnProperty.call(options || {}, 'successMessage')
+      ? options.successMessage
+      : ((options && options.startMessage) ? 'Graph processing complete.' : null);
+    if(data.type === 'result'){
+      if(successMessage != null){
+        setStatus(successMessage);
+      }
+      workerBusyMessage = null;
+      resolve(data.result);
+      return;
+    }
+    const errorInfo = data.error || {};
+    const err = new Error(errorInfo.message || 'Worker error');
+    if(errorInfo.stack) err.stack = String(errorInfo.stack);
+    const prefix = options?.errorPrefix || 'Graph processing failed';
+    setStatus(`${prefix}: ${err.message}`);
+    workerBusyMessage = null;
+    reject(err);
+  }
+
+  function handleWorkerError(event){
+    const err = event?.error instanceof Error ? event.error : new Error(event?.message || 'Worker error');
+    setStatus(`Graph worker crashed: ${err.message || err}`);
+    terminateGraphWorker(err);
+  }
+
+  function ensureGraphWorker(){
+    if(graphWorker) return graphWorker;
+    try {
+      graphWorker = new Worker('js/graph-worker.js');
+      graphWorker.addEventListener('message', handleWorkerMessage);
+      graphWorker.addEventListener('error', handleWorkerError);
+      return graphWorker;
+    } catch (err) {
+      setStatus(`Failed to start graph worker: ${err.message || err}`);
+      throw err;
+    }
+  }
+
+  function requestGraphProcessing(payload, options = {}){
+    const worker = ensureGraphWorker();
+    const id = ++workerSeq;
+    if(options.startMessage){
+      workerBusyMessage = options.startMessage;
+      setStatus(options.startMessage);
+    }
+    return new Promise((resolve, reject) => {
+      workerRequests.set(id, { resolve, reject, options });
+      try {
+        worker.postMessage({ id, type: 'process', payload });
+      } catch (err) {
+        workerRequests.delete(id);
+        const prefix = options.errorPrefix || 'Graph processing failed';
+        setStatus(`${prefix}: ${err.message || err}`);
+        workerBusyMessage = null;
+        reject(err);
+      }
+    });
+  }
+
+  window.addEventListener('beforeunload', () => terminateGraphWorker());
+  const tokenMeta = document.querySelector('meta[name="nurox-token"]');
+  const viewerToken = new URLSearchParams(window.location.search).get('token') || tokenMeta?.content || '';
+  const viewerHeaders = viewerToken ? { 'Authorization': `Bearer ${viewerToken}` } : {};
+  const inViewerMode = !!viewerToken;
+  const viewerControls = $('viewerControls');
+  const viewerRootInput = $('crawlRoot');
+  const viewerRootBrowseBtn = $('crawlRootBrowse');
+  const viewerRootPicker = $('crawlRootPicker');
+  const viewerRootPickerNote = $('crawlRootPickerNote');
+  const viewerClearInput = $('crawlClear');
+  const viewerLangList = $('crawlLangList');
+  const viewerStatusNote = $('viewerStatus');
+  const startCrawlBtn = $('startCrawl');
+  const loadViewerGraphBtn = $('loadViewerGraph');
+  let viewerRootFromPicker = false;
+  const looksLikeFilesystemPath = (raw)=>{
+    if(raw == null) return false;
+    const value = String(raw).trim();
+    if(!value) return false;
+    const lower = value.toLowerCase();
+    if(lower.includes('fakepath')) return false;
+    if(value === '.' || value === '..') return true;
+    if(value.startsWith('./') || value.startsWith('../') || value.startsWith('~/')) return true;
+    if(value.startsWith('/') || value.startsWith('\\')) return true;
+    if(/^[a-zA-Z]:[\\/]/.test(value)) return true;
+    if(value.includes('/') || value.includes('\\')) return true;
+    return false;
+  };
+  const LAST_ROOT_KEY = 'nurox:nexus:lastCrawlRoot';
+  const LAST_LANGS_KEY = 'nurox:nexus:lastCrawlLangs';
+  const loadLastCrawlRoot = ()=>{ try{ return localStorage.getItem(LAST_ROOT_KEY) || ''; }catch{ return ''; } };
+  const saveLastCrawlRoot = (value)=>{ try{ localStorage.setItem(LAST_ROOT_KEY, value); }catch{} };
+  const loadLastCrawlLangs = ()=>{
+    try {
+      const raw = localStorage.getItem(LAST_LANGS_KEY);
+      if(!raw) return [];
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)){
+        return parsed.map(item => String(item)).filter(Boolean);
+      }
+    } catch {}
+    return [];
+  };
+  const saveLastCrawlLangs = (values)=>{
+    try {
+      const unique = Array.from(new Set((values || []).map(v => String(v).trim()).filter(Boolean)));
+      localStorage.setItem(LAST_LANGS_KEY, JSON.stringify(unique));
+    } catch {}
+  };
+  let viewerLangSelection = new Set(loadLastCrawlLangs());
+  const persistViewerLangSelection = ()=>{
+    if(!viewerLangList) return;
+    const checkboxes = Array.from(viewerLangList.querySelectorAll('input[type="checkbox"]'));
+    const selected = checkboxes.filter(el => el.checked && !el.disabled).map(el => el.value);
+    const available = new Set(checkboxes.map(el => el.value));
+    const previous = new Set(viewerLangSelection);
+    const extras = Array.from(previous).filter(lang => !available.has(lang));
+    viewerLangSelection = new Set([...selected, ...extras]);
+    saveLastCrawlLangs(Array.from(viewerLangSelection));
+  };
+  const setViewerStatus = (msg)=>{ if(viewerStatusNote) viewerStatusNote.textContent = msg || ''; };
+  const toggleViewerBusy = (busy)=>{
+    if(startCrawlBtn) startCrawlBtn.disabled = busy;
+    if(loadViewerGraphBtn) loadViewerGraphBtn.disabled = busy;
+    if(viewerControls) viewerControls.setAttribute('aria-busy', busy ? 'true' : 'false');
+  };
+  const persistViewerRoot = ()=>{
+    if(viewerRootInput){
+      saveLastCrawlRoot(viewerRootInput.value.trim());
+    }
+  };
+  const updateViewerRootValue = (value, opts = {})=>{
+    if(!viewerRootInput) return;
+    const normalized = typeof value === 'string' ? value.trim() : '';
+    const fromPicker = opts.fromPicker === true;
+    if(fromPicker) viewerRootFromPicker = true;
+
+    viewerRootInput.value = normalized;
+    viewerRootInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+    if(!normalized){
+      if(fromPicker){
+        setViewerStatus('Unable to determine folder path from picker. Paste the path manually.');
+        if(viewerRootPickerNote) viewerRootPickerNote.hidden = false;
+        viewerRootInput.focus();
+      }
+      return;
+    }
+
+    const looksLikePath = looksLikeFilesystemPath(normalized);
+    if(fromPicker && !looksLikePath){
+      setViewerStatus('Browser pickers can\'t share the full folder path. Paste the actual project path manually.');
+      if(viewerRootPickerNote) viewerRootPickerNote.hidden = false;
+      viewerRootInput.focus();
+      return;
+    }
+
+    if(viewerRootPickerNote && viewerRootPickerNote.hidden === false && looksLikePath){
+      viewerRootPickerNote.hidden = true;
+    }
+  };
+  if(viewerRootInput){
+    const savedRoot = loadLastCrawlRoot();
+    if(savedRoot){
+      viewerRootInput.value = savedRoot;
+      viewerRootFromPicker = false;
+    }
+    viewerRootInput.addEventListener('input', ()=>{
+      viewerRootFromPicker = false;
+      if(viewerRootPickerNote) viewerRootPickerNote.hidden = true;
+    });
+    viewerRootInput.addEventListener('change', persistViewerRoot);
+    viewerRootInput.addEventListener('blur', persistViewerRoot);
+  }
+  if(viewerLangList){
+    viewerLangList.addEventListener('change', (event)=>{
+      if(event.target && event.target.matches('input[type="checkbox"]')){
+        persistViewerLangSelection();
+      }
+    });
+  }
+  const extractFullPathFromHandle = (handle)=>{
+    if(!handle || typeof handle !== 'object') return '';
+    const candidates = [];
+    const pushCandidate = (value)=>{
+      if(typeof value === 'string' && value.trim()){
+        candidates.push(value.trim());
+      }
+    };
+    // Common non-standard properties exposed by desktop shells / polyfills.
+    pushCandidate(handle.path);
+    pushCandidate(handle.fullPath);
+    pushCandidate(handle.fsPath);
+    // Some implementations expose path segments instead of a joined path.
+    if(Array.isArray(handle.pathSegments) && handle.pathSegments.length){
+      pushCandidate(handle.pathSegments.join('/'));
+    }
+    // WebKit-style relative paths sometimes appear on file handles.
+    pushCandidate(handle.webkitRelativePath);
+    if(candidates.length === 0){
+      return typeof handle.name === 'string' ? handle.name : '';
+    }
+    // Prefer the longest candidate since it is most likely to represent the full path.
+    candidates.sort((a, b)=>b.length - a.length);
+    let best = candidates[0];
+    // Normalise redundant separators without losing platform style.
+    const looksWindows = /\\/.test(best) && !/\//.test(best);
+    if(looksWindows){
+      best = best.replace(/\\+/g, '\\');
+    } else {
+      best = best.replace(/\/+/g, '/');
+    }
+    return best;
+  };
+
+  if(viewerRootBrowseBtn){
+    viewerRootBrowseBtn.addEventListener('click', async ()=>{
+      viewerRootFromPicker = true;
+      try {
+        if(window.showDirectoryPicker){
+          try {
+            const handle = await window.showDirectoryPicker();
+            if(handle){
+              const handlePath = extractFullPathFromHandle(handle);
+              updateViewerRootValue(handlePath, { fromPicker: true });
+            }
+            return;
+          } catch (pickerErr) {
+            if(pickerErr?.name === 'AbortError'){
+              return;
+            }
+            console.error('Unable to open directory picker', pickerErr);
+          }
+        }
+        if(viewerRootPicker){
+          viewerRootPicker.value = '';
+          viewerRootPicker.click();
+          if(viewerRootPickerNote){
+            viewerRootPickerNote.hidden = false;
+          }
+          return;
+        }
+      } catch (err) {
+        if(err?.name !== 'AbortError'){
+          console.error('Unable to browse for crawl root', err);
+        }
+      }
+      if(viewerRootInput){
+        viewerRootInput.focus();
+      }
+    });
+  }
+  if(viewerRootPicker){
+    if(viewerRootPickerNote && typeof window.showDirectoryPicker === 'function'){
+      viewerRootPickerNote.hidden = true;
+    } else if(viewerRootPickerNote){
+      viewerRootPickerNote.hidden = false;
+    }
+    viewerRootPicker.addEventListener('change', ()=>{
+      viewerRootFromPicker = true;
+      const files = viewerRootPicker.files;
+      if(!files || files.length === 0) return;
+      const primary = files[0];
+      let folderPath = '';
+      if(primary){
+        const filePath = typeof primary.path === 'string' ? primary.path : '';
+        const relativeRaw = typeof primary.webkitRelativePath === 'string' ? primary.webkitRelativePath : '';
+        const normalizedRelative = relativeRaw.replace(/\\+/g, '/').replace(/^\.\/?/, '');
+        if(filePath){
+          const normalizedFilePath = filePath.replace(/\\+/g, '/');
+          if(normalizedRelative && normalizedFilePath.endsWith(normalizedRelative)){
+            let prefix = normalizedFilePath.slice(0, normalizedFilePath.length - normalizedRelative.length);
+            const originalPrefix = prefix;
+            if(prefix.endsWith('/')){
+              prefix = prefix.slice(0, -1);
+            }
+            if(!prefix && originalPrefix.startsWith('/')){
+              prefix = '/';
+            }
+            if(/^[A-Za-z]:$/.test(prefix) && originalPrefix.endsWith('/')){
+              prefix = originalPrefix;
+            }
+            if(prefix){
+              const usesBackslash = filePath.includes('\\') && !filePath.includes('/');
+              folderPath = usesBackslash ? prefix.replace(/\//g, '\\') : prefix;
+            }
+          }
+          if(!folderPath){
+            folderPath = filePath.replace(/[\\/][^\\/]*$/, '');
+          }
+        }
+        if(!folderPath && normalizedRelative){
+          const firstSlash = normalizedRelative.indexOf('/');
+          folderPath = firstSlash > 0 ? normalizedRelative.slice(0, firstSlash) : normalizedRelative;
+        }
+        if(!folderPath){
+          folderPath = primary.name || '';
+        }
+      }
+      updateViewerRootValue(folderPath.trim(), { fromPicker: true });
+    });
+  }
+  if(viewerControls){
+    viewerControls.hidden = false;
+    viewerControls.removeAttribute('hidden');
+    viewerControls.dataset.viewerAvailable = inViewerMode ? 'true' : 'false';
+    if(!inViewerMode){
+      setViewerStatus('Desktop viewer not detected — launch the viewer app to enable crawlers.');
+    }
+  }
+  if(startCrawlBtn){ startCrawlBtn.addEventListener('click', startViewerCrawl); }
+  if(loadViewerGraphBtn){ loadViewerGraphBtn.addEventListener('click', handleViewerGraphLoad); }
+  if(inViewerMode){
+    initViewerPanel();
+  }
+  function getSelectedViewerLanguages(){
+    if(!viewerLangList) return Array.from(viewerLangSelection);
+    const selected = Array.from(viewerLangList.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+    if(selected.length === 0 && viewerLangSelection.size > 0){
+      return Array.from(viewerLangSelection);
+    }
+    return selected;
+  }
+
+  async function refreshViewerLanguages(){
+    if(!inViewerMode || !viewerLangList) return false;
+    try {
+      const resp = await fetch('/api/languages', { headers: viewerHeaders, cache: 'no-store' });
+      let data;
+      try {
+        data = await resp.json();
+      } catch (err) {
+        throw new Error('Invalid /api/languages response');
+      }
+      if(!resp.ok){
+        const errMsg = data?.error ? String(data.error) : `HTTP ${resp.status}`;
+        throw new Error(errMsg);
+      }
+      const entries = Object.entries(data?.languages || {}).sort((a,b)=> a[0].localeCompare(b[0]));
+      viewerLangList.innerHTML = '';
+      if(entries.length === 0){
+        const empty = document.createElement('div');
+        empty.className = 'status-note';
+        empty.textContent = 'No crawlers detected.';
+        viewerLangList.appendChild(empty);
+      } else {
+        const hasStoredSelection = viewerLangSelection.size > 0;
+        entries.forEach(([name, meta]) => {
+          const info = meta || {};
+          const available = info.available === true;
+          const label = document.createElement('label');
+          label.className = 'lang-option';
+          label.dataset.available = available ? 'true' : 'false';
+          if(info.path){ label.title = `Executable: ${info.path}`; }
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.value = name;
+          checkbox.disabled = !available;
+          const shouldCheck = hasStoredSelection ? viewerLangSelection.has(name) : available;
+          checkbox.checked = available && shouldCheck;
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'lang-name';
+          nameSpan.textContent = name;
+          const metaSpan = document.createElement('span');
+          metaSpan.className = 'lang-meta';
+          metaSpan.textContent = available ? 'Available' : 'Missing';
+          label.appendChild(checkbox);
+          label.appendChild(nameSpan);
+          label.appendChild(metaSpan);
+          viewerLangList.appendChild(label);
+        });
+        persistViewerLangSelection();
+      }
+      return true;
+    } catch (err) {
+      viewerLangList.innerHTML = '';
+      const note = document.createElement('div');
+      note.className = 'status-note';
+      note.textContent = 'Unable to reach crawler list.';
+      viewerLangList.appendChild(note);
+      if(!viewerStatusNote || !viewerStatusNote.textContent){
+        setViewerStatus(`Failed to load languages: ${err.message || err}`);
+      }
+      return false;
+    }
+  }
+
+  async function initViewerPanel(){
+    if(!inViewerMode || !viewerControls) return;
+    try {
+      const ready = await refreshViewerLanguages();
+      if(ready && (!viewerStatusNote || !viewerStatusNote.textContent)){
+        setViewerStatus('Select languages and start a crawl.');
+      }
+    } catch (err) {
+      setViewerStatus(`Viewer init failed: ${err.message || err}`);
+    }
+  }
+
+  async function startViewerCrawl(){
+    if(!inViewerMode){
+      setViewerStatus('Viewer API not detected.');
+      return;
+    }
+    const root = viewerRootInput ? viewerRootInput.value.trim() : '';
+    const languages = getSelectedViewerLanguages();
+    if(!root){
+      setViewerStatus('Enter a folder path to crawl.');
+      if(viewerRootInput) viewerRootInput.focus();
+      return;
+    }
+    if(root.toLowerCase().includes('fakepath')){
+      setViewerStatus('The selected folder path looks like a browser placeholder. Paste the actual filesystem path.');
+      if(viewerRootPickerNote) viewerRootPickerNote.hidden = false;
+      if(viewerRootInput) viewerRootInput.focus();
+      return;
+    }
+    if(viewerRootFromPicker && !looksLikeFilesystemPath(root)){
+      setViewerStatus('Browser pickers cannot provide the full folder path. Paste the absolute project path manually.');
+      if(viewerRootPickerNote) viewerRootPickerNote.hidden = false;
+      if(viewerRootInput) viewerRootInput.focus();
+      return;
+    }
+    if(languages.length === 0){
+      setViewerStatus('Select at least one language to crawl.');
+      return;
+    }
+    saveLastCrawlLangs(languages);
+    viewerLangSelection = new Set(languages);
+    toggleViewerBusy(true);
+    setStatus('Starting crawl…');
+    setViewerStatus('Starting crawl…');
+    try {
+      saveLastCrawlRoot(root);
+      const body = { root, languages, clear: viewerClearInput ? !!viewerClearInput.checked : true };
+      const resp = await fetch('/api/crawl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...viewerHeaders },
+        body: JSON.stringify(body)
+      });
+      let data = {};
+      try {
+        data = await resp.json();
+      } catch (_) {}
+      if(!resp.ok){
+        const errKey = data?.error;
+        let errMsg = errKey ? String(errKey) : `HTTP ${resp.status}`;
+        if(errKey === 'root_not_found') errMsg = 'Folder not found';
+        throw new Error(errMsg);
+      }
+      let counts;
+      try {
+        counts = await loadGraphFromViewer();
+      } catch (loadErr) {
+        setViewerStatus(`Crawl finished but graph load failed: ${loadErr.message || loadErr}`);
+        setStatus(`Graph load failed: ${loadErr.message || loadErr}`);
+        return;
+      }
+      const nodesReported = typeof data.nodes === 'number' ? data.nodes : counts?.nodes;
+      const edgesReported = typeof data.edges === 'number' ? data.edges : counts?.edges;
+      setViewerStatus(`Crawl complete — loaded ${nodesReported ?? counts.nodes} nodes and ${edgesReported ?? counts.edges} edges.`);
+    } catch (err) {
+      setViewerStatus(`Crawl failed: ${err.message || err}`);
+      setStatus(`Crawl failed: ${err.message || err}`);
+    } finally {
+      toggleViewerBusy(false);
+    }
+  }
+
+  async function handleViewerGraphLoad(){
+    if(!inViewerMode){
+      setViewerStatus('Viewer API not detected.');
+      return;
+    }
+    toggleViewerBusy(true);
+    setViewerStatus('Loading graph from viewer…');
+    try {
+      const counts = await loadGraphFromViewer();
+      setViewerStatus(`Loaded ${counts.nodes} nodes and ${counts.edges} edges from viewer.`);
+    } catch (err) {
+      setViewerStatus(`Load failed: ${err.message || err}`);
+      setStatus(`Load failed: ${err.message || err}`);
+    } finally {
+      toggleViewerBusy(false);
+    }
+  }
+
+  const colorModeEl = $('colorMode');
+  const nodeId = (ref)=> typeof ref === 'object' && ref !== null ? ref.id : ref;
+  const isFileProtocol = window.location.protocol === 'file:';
+  const bindSlider = (id, key, outId) => { const el = $(id); const out = $(outId);
+    const update = ()=>{ cfg[key] = id==='linkStr'? parseFloat(el.value) : parseInt(el.value,10); out.textContent = el.value; if(key==='charge'){ sim.force('charge').strength(cfg.charge); } if(key==='linkDist'){ sim.force('link').distance(cfg.linkDist); } if(key==='linkStr'){ sim.force('link').strength(cfg.linkStr); } if(paused){ pendingSimWarmup = true; } else { warmSimulation(); pendingSimWarmup = false; pendingGentleWarm = false; } };
+    el.addEventListener('input', update); update(); };
+  bindSlider('charge','charge','chargeVal');
+  bindSlider('linkDist','linkDist','linkDistVal');
+  bindSlider('linkStr','linkStr','linkStrVal');
+  $('minDegree').addEventListener('input', e=>{ cfg.minDegree = parseInt(e.target.value,10); $('minDegreeVal').textContent = cfg.minDegree; render({ reheat: true }); });
+  $('showDisconnectedOnly').addEventListener('change', e=>{ cfg.showDisconnectedOnly = e.target.checked; render({ reheat: true }); });
+  $('showDynamicOnly').addEventListener('change', e=>{ cfg.showDynamicOnly = e.target.checked; render({ reheat: true }); });
+  $('showDeferredOnly').addEventListener('change', e=>{ cfg.showDeferredOnly = e.target.checked; render({ reheat: true }); });
+  $('hideExternals').addEventListener('change', e=>{ cfg.hideExternals = e.target.checked; render({ reheat: true }); });
+  $('hideDynamic').addEventListener('change', e=>{ cfg.hideDynamic = e.target.checked; render({ reheat: true }); });
+  if(colorModeEl){
+    colorModeEl.setAttribute('aria-label','Color mode');
+    colorModeEl.addEventListener('change', ()=> {
+      renderedNodes.forEach(node => {
+        if(!node || node.id == null) return;
+        refreshNodeFill(node.id);
+      });
+      updateHighlights();
+    });
+  }
+  if(profileSelect){
+    profileSelect.addEventListener('change', (e)=>{
+      const idx = parseInt(e.target.value, 10);
+      currentProfileIndex = Number.isNaN(idx) ? 0 : Math.max(0, Math.min(idx, profiles.length-1));
+      render({ reheat: true });
+      updateProfileLegend();
+      const active = profiles[currentProfileIndex];
+      setStatus(`Profile: ${active?.name || 'default'}`);
+    });
+  }
+  $('openJson').addEventListener('click', ()=> $('fileInput').click());
+  $('fileInput').addEventListener('change', async (e)=>{
+    const input = e.target;
+    const f = input.files[0];
+    if(!f) return;
+    try {
+      const text = await f.text();
+      const parsed = JSON.parse(text);
+      await loadGraph(parsed);
+      setStatus(`Loaded ${f.name}`);
+    } catch(err) {
+      console.error('Failed to load graph file', err);
+      setStatus(`Failed to load ${f.name}`);
+    } finally {
+      input.value = '';
+    }
+  });
+  ['dragenter','dragover'].forEach(ev => {
+    window.addEventListener(ev, (e)=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    }, false);
+  });
+  window.addEventListener('drop', async (e)=>{
+    e.preventDefault();
+    const f = e.dataTransfer?.files?.[0];
+    if(!f) return;
+    try{
+      const txt = await f.text();
+      await loadGraph(JSON.parse(txt));
+      setStatus(`Loaded ${f.name}`);
+    }catch(err){
+      console.error(err);
+      setStatus(`Failed to load ${f?.name||'drop'}`);
+    }
+  }, false);
+  $('resetView').addEventListener('click', ()=>{ svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity); });
+  $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; if(paused){ sim.stop(); } else { warmSimulation(); pendingSimWarmup = false; pendingGentleWarm = false; } lowMotionTickCount = 0; });
+  $('exportSbom').addEventListener('click', exportSbom);
+  const toggleSidebarBtn = $('toggleSidebar');
+  const sidebarLatch = $('sidebarLatch');
+  const sidebarEl = $('sidebar');
+  const updateSidebarState = () => {
+    const collapsed = document.body.classList.contains('sidebar-collapsed');
+    if(toggleSidebarBtn){
+      toggleSidebarBtn.textContent = collapsed ? 'Show Sidebar ▶' : 'Hide Sidebar ◀';
+      toggleSidebarBtn.setAttribute('aria-expanded', (!collapsed).toString());
+    }
+    if(sidebarLatch){
+      const icon = sidebarLatch.querySelector('.icon');
+      const label = sidebarLatch.querySelector('.label');
+      sidebarLatch.setAttribute('aria-expanded', (!collapsed).toString());
+      sidebarLatch.setAttribute('title', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+      if(icon){ icon.textContent = collapsed ? '▶' : '◀'; }
+      if(label){ label.textContent = collapsed ? 'Expand' : 'Collapse'; }
+    }
+    if(sidebarEl){
+      sidebarEl.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
+    }
+  };
+  const toggleSidebar = () => {
+    document.body.classList.toggle('sidebar-collapsed');
+    updateSidebarState();
+  };
+  if(toggleSidebarBtn){
+    toggleSidebarBtn.addEventListener('click', toggleSidebar);
+  }
+  if(sidebarLatch){
+    sidebarLatch.addEventListener('click', toggleSidebar);
+  }
+  updateSidebarState();
+
+  const helpModal = $('helpModal');
+  const helpFrame = $('helpFrame');
+  const helpLink = $('helpLink');
+  const helpClose = $('helpClose');
+  let lastFocusedEl = null;
+  const openHelp = () => {
+    if(!helpModal) return;
+    if(helpModal.hasAttribute('hidden')){
+      lastFocusedEl = document.activeElement;
+      helpModal.removeAttribute('hidden');
+      helpModal.setAttribute('aria-hidden', 'false');
+      if(helpFrame && !helpFrame.getAttribute('src')){
+        helpFrame.setAttribute('src', 'help.html');
+      }
+      if(helpClose){
+        helpClose.focus();
+      }
+    }
+  };
+  const closeHelp = () => {
+    if(!helpModal) return;
+    if(!helpModal.hasAttribute('hidden')){
+      helpModal.setAttribute('hidden', '');
+      helpModal.setAttribute('aria-hidden', 'true');
+      if(lastFocusedEl && typeof lastFocusedEl.focus === 'function'){
+        lastFocusedEl.focus();
+      }
+    }
+  };
+  if(helpLink){
+    helpLink.addEventListener('click', (e)=>{
+      e.preventDefault();
+      openHelp();
+    });
+  }
+  if(helpClose){
+    helpClose.addEventListener('click', closeHelp);
+  }
+  if(helpModal){
+    helpModal.addEventListener('click', (e)=>{
+      if(e.target === helpModal){
+        closeHelp();
+      }
+    });
+  }
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){ closeHelp(); }
+  });
+
+  const searchEl = $('search');
+  let searchTimer = null;
+  let lastQuery = '';
+  let lastHits = [];
+  let lastIndex = -1;
+
+  function runSearch(q){
+    const hay = filtered.nodes;
+    lastHits = hay.filter(n => n.id.toLowerCase().includes(q));
+    lastIndex = -1;
+    if(lastHits.length){
+      nextHit();
+    } else {
+      setStatus(`No matches for "${q}"`);
+    }
+  }
+  function nextHit(){
+    if(!lastHits.length) return;
+    lastIndex = (lastIndex + 1) % lastHits.length;
+    const hit = lastHits[lastIndex];
+    selectNode(hit);
+    focusOn(hit);
+    highlight(hit);
+    setStatus(`Match ${lastIndex+1}/${lastHits.length}: ${hit.id}`);
+  }
+  if(searchEl){
+    searchEl.addEventListener('input', (e)=>{
+      const q = e.target.value.trim().toLowerCase();
+      clearTimeout(searchTimer);
+      if(!q){
+        lastHits = [];
+        lastIndex = -1;
+        lastQuery = '';
+        setStatus('');
+        return;
+      }
+      searchTimer = setTimeout(()=>{
+        if(q && q!==lastQuery){
+          lastQuery=q;
+          runSearch(q);
+        }
+      }, 150);
+    });
+    searchEl.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+        if(searchEl.value.trim()){
+          if(lastHits.length){
+            nextHit();
+          } else {
+            runSearch(searchEl.value.trim().toLowerCase());
+          }
+        }
+      }
+    });
+  }
+  window.addEventListener('keydown', (e)=>{
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='f'){ e.preventDefault(); $('search').focus(); $('search').select(); }
+    if(e.key.toLowerCase()==='h'){ showLabels = !showLabels; labelG.style('display', showLabels? null : 'none'); }
+    if(e.key.toLowerCase()==='l'){ dimLinks = !dimLinks; updateHighlights(); }
+    if(e.code==='Space'){ e.preventDefault(); $('pause').click(); }
+  });
+
+  // --- Helpers ---
+  function sizeFor(d){
+    // Prefer degree if available; fallback to 6-10 range
+    const deg = (d.inDeg || 0) + (d.outDeg || 0);
+    return 4 + Math.min(24, Math.sqrt(deg)*3 + (d.sizeLOC? Math.min(16, Math.log2(d.sizeLOC+1)) : 0));
+  }
+  function stateClass(d){
+    const status = primaryStatusFor(d) || 'disconnected_all_profiles';
+    return `status_${status.replace(/[^a-z0-9_]/g,'_')}`;
+  }
+  function fmt(x){ return x==null? '—' : x; }
+  function isExternal(d){ return d.type==='external' || (d.package && d.package.includes('node_modules')); }
+  function escapeRegExp(str){ return String(str).replace(/[.*+?^${}()|\[\]\\]/g,'\\$&'); }
+  function hashToColor(str){
+    // deterministic soft hues from strings (for packages)
+    let h = 0; for (let i=0;i<str.length;i++) h = (h*31 + str.charCodeAt(i))>>>0;
+    const hue = h % 360;
+    return `hsl(${hue} 60% 55%)`;
+  }
+  function getNodeColor(d){
+    const mode = colorModeEl ? colorModeEl.value : 'state';
+    const primary = primaryStatusFor(d);
+    if(mode === 'type'){
+      if(d.type === 'external') return '#3b2f5a';
+      return STATUS_META[primary]?.color || '#5a667e';
+    }
+    if(mode === 'degree'){
+      const deg = (d.inDeg||0)+(d.outDeg||0);
+      // map 0..maxDeg -> LCH-ish ramp via HSL
+      const max = Math.max(1, filtered.nodes.reduce((m,n)=>Math.max(m,(n.inDeg||0)+(n.outDeg||0)),0));
+      const t = Math.min(1, deg/max);
+      const hue = 210 - 210*t;   // blue->red
+      const sat = 60 + 20*t;
+      const light = 35 + 20*t;
+      return `hsl(${hue} ${sat}% ${light}%)`;
+    }
+    if(mode === 'package'){
+      return d.package ? hashToColor(String(d.package)) :
+        (d.type==='external' ? '#3b2f5a' : '#5a667e');
+    }
+    // default: state colors (matches CSS)
+    if(d.type === 'external') return '#3b2f5a';
+    return STATUS_META[primary]?.color || '#5a667e';
+  }
+
+  const PIN_KEY = 'nurox:nexus:pins';
+  function loadPins(){
+    try{ return JSON.parse(localStorage.getItem(PIN_KEY)||'{}'); }catch{ return {}; }
+  }
+  function savePins(pins){ try{ localStorage.setItem(PIN_KEY, JSON.stringify(pins)); }catch{} }
+  let pins = loadPins();
+
+  function clearGraph(){
+    sim.stop();
+    graph = { nodes: [], edges: [] };
+    filtered = { nodes: [], edges: [] };
+    entrypoints = [];
+    profiles = [{ name: 'default', flags: {} }];
+    profileResults = [];
+    currentProfileIndex = 0;
+    keepRuleConfig = [];
+    compiledKeepRules = [];
+    rawGraphData = null;
+    selectedNode = null;
+    linkG.selectAll('*').remove();
+    nodeG.selectAll('*').remove();
+    labelG.selectAll('*').remove();
+    setText('nCount', 0);
+    setText('eCount', 0);
+    setText('uCount', 0);
+    setText('xCount', 0);
+    setText('dCount', 0);
+    setText('pureLeaves', 0);
+    setText('sideFx', 0);
+    setText('unusedAttached', 0);
+    setText('maxDeg', 0);
+    setDisplay('selNone','block');
+    setDisplay('sel','none');
+    setHTML('neighbors','');
+    if(profileSelect){ profileSelect.innerHTML = ''; profileSelect.style.display = 'none'; }
+    if(entrypointsList){ entrypointsList.innerHTML = ''; }
+    if(entrypointsNote){ entrypointsNote.textContent = ''; }
+    if(profileLegend){ profileLegend.innerHTML = ''; }
+    if(keepRuleBtn){ keepRuleBtn.style.display = 'none'; }
+    if(keepRuleNote){ keepRuleNote.textContent = ''; }
+  }
+
+  const captureNodePositions = ()=>{
+    const map = new Map();
+    graph.nodes.forEach(node => {
+      if(!node || node.id == null) return;
+      map.set(node.id, {
+        x: node.x,
+        y: node.y,
+        vx: node.vx,
+        vy: node.vy,
+        fx: node.fx,
+        fy: node.fy
+      });
+    });
+    return map;
+  };
+
+  function convertProfileResults(rawList){
+    if(!Array.isArray(rawList)) return [];
+    return rawList.map(item => ({
+      profile: item.profile,
+      reachableAll: new Set(item.reachableAll || []),
+      reachableNoDeferred: new Set(item.reachableNoDeferred || []),
+      reachableNoDynamic: new Set(item.reachableNoDynamic || []),
+      reachableRuntime: new Set(item.reachableRuntime || []),
+      reachableTest: new Set(item.reachableTest || []),
+      reachableBuild: new Set(item.reachableBuild || [])
+    }));
+  }
+
+  function applyProcessedGraph(result, previousPositions){
+    const fallbackProfile = { name: 'default', flags: {} };
+    const processed = result && typeof result === 'object' ? result : {};
+    const newGraph = processed.graph && typeof processed.graph === 'object'
+      ? processed.graph
+      : { nodes: [], edges: [] };
+    const positionSource = previousPositions instanceof Map ? previousPositions : null;
+    if(positionSource){
+      newGraph.nodes.forEach(node => {
+        const stored = positionSource.get(node.id);
+        if(!stored) return;
+        if(typeof stored.x === 'number') node.x = stored.x;
+        if(typeof stored.y === 'number') node.y = stored.y;
+        if(typeof stored.vx === 'number') node.vx = stored.vx;
+        if(typeof stored.vy === 'number') node.vy = stored.vy;
+        if(typeof stored.fx === 'number' && typeof stored.fy === 'number'){
+          node.fx = stored.fx;
+          node.fy = stored.fy;
+        }
+      });
+    }
+    graph = newGraph;
+    entrypoints = Array.isArray(processed.entrypoints) ? processed.entrypoints.slice() : [];
+    profiles = Array.isArray(processed.profiles) && processed.profiles.length
+      ? processed.profiles
+      : [fallbackProfile];
+    compiledKeepRules = reviveRegexList(processed.compiledKeepRules);
+    profileResults = convertProfileResults(processed.profileResults);
+    currentProfileIndex = 0;
+    pins = loadPins();
+    graph.nodes.forEach(node => {
+      const pin = pins[node.id];
+      if(pin && typeof pin.x === 'number' && typeof pin.y === 'number'){
+        node.fx = pin.x;
+        node.fy = pin.y;
+        if(typeof node.x !== 'number') node.x = pin.x;
+        if(typeof node.y !== 'number') node.y = pin.y;
+      }
+    });
+    updateProfileSelect();
+    updateProfileLegend();
+    updateEntrypointsPanel();
+  }
+
+  async function requestAndApplyGraph(rawGraph, options = {}, previousPositions){
+    const payload = {
+      rawGraph,
+      keepRuleConfig,
+      localKeepRules
+    };
+    const result = await requestGraphProcessing(payload, options);
+    applyProcessedGraph(result, previousPositions);
+    paused = false;
+    $('pause').textContent = 'Pause ⏸';
+    render({ reheat: true });
+    return result;
+  }
+
+  async function loadGraph(gjson){
+    if(!gjson || typeof gjson !== 'object'){
+      throw new Error('Graph payload missing or invalid');
+    }
+    clearGraph();
+    rawGraphData = gjson;
+    keepRuleConfig = Array.isArray(gjson.keepRules) ? gjson.keepRules : [];
+    localKeepRules = loadLocalKeepRules();
+    compileKeepRules();
+    try {
+      await requestAndApplyGraph(gjson, { startMessage: 'Processing graph…' });
+    } catch (err) {
+      clearGraph();
+      throw err;
+    }
+  }
+
+  async function loadGraphFromViewer(){
+    if(!inViewerMode){
+      throw new Error('Viewer API not detected');
+    }
+    let resp;
+    try {
+      resp = await fetch('/api/graph', { headers: viewerHeaders, cache: 'no-store' });
+    } catch (err) {
+      throw new Error(`Request failed: ${err.message || err}`);
+    }
+    let data;
+    try {
+      data = await resp.json();
+    } catch (err) {
+      throw new Error('Invalid graph payload');
+    }
+    if(!resp.ok){
+      const errMsg = data?.error ? String(data.error) : `HTTP ${resp.status}`;
+      throw new Error(errMsg);
+    }
+    if(!data || typeof data !== 'object'){
+      throw new Error('Graph payload missing');
+    }
+    await loadGraph(data);
+    const nodesCount = Array.isArray(data.nodes) ? data.nodes.length : (typeof data.nodes?.length === 'number' ? data.nodes.length : 0);
+    const edgesCount = Array.isArray(data.edges) ? data.edges.length : (typeof data.edges?.length === 'number' ? data.edges.length : 0);
+    setStatus(`Loaded graph from viewer (${nodesCount} nodes, ${edgesCount} edges)`);
+    return { nodes: nodesCount, edges: edgesCount };
+  }
+
+  function applyFilters(){
+    const profile = profiles[currentProfileIndex] || profiles[0];
+    const nodes = graph.nodes.filter(n=>{
+      const statuses = statusesFor(n);
+      if(cfg.showDisconnectedOnly && !statuses.includes('disconnected_all_profiles')) return false;
+      if(cfg.showDynamicOnly && !statuses.includes('dynamic_only')) return false;
+      if(cfg.showDeferredOnly && !statuses.includes('deferred_only')) return false;
+      if(cfg.hideExternals && isExternal(n)) return false;
+      if(cfg.minDegree>0 && ((n.inDeg||0)+(n.outDeg||0)) < cfg.minDegree) return false;
+      return true;
+    });
+    const keep = new Set(nodes.map(n=>n.id));
+    const edges = graph.edges.filter(e=>{
+      if(!isEdgeActiveInProfile(e, profile)) return false;
+      if(cfg.hideDynamic && isDynamicEdge(e)) return false;
+      return keep.has(nodeId(e.source)) && keep.has(nodeId(e.target));
+    });
+    filtered = { nodes, edges };
+  }
+
+  function loadLocalKeepRules(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(KEEP_RULE_KEY)||'[]');
+      return Array.isArray(raw) ? raw : [];
+    }catch{
+      return [];
+    }
+  }
+
+  function saveLocalKeepRules(rules){
+    try{ localStorage.setItem(KEEP_RULE_KEY, JSON.stringify(rules)); }catch{}
+  }
+
+  function compileKeepRules(){
+    compiledKeepRules = compileKeepRulesHelper(keepRuleConfig, localKeepRules);
+  }
+
+  function matchesKeepRule(id){
+    if(!id) return false;
+    return compiledKeepRules.some(re => {
+      try{ return re.test(id); }catch{return false; }
+    });
+  }
+
+  async function addKeepRule(id){
+    if(!id) return;
+    if(matchesKeepRule(id)) return;
+    const pattern = { regex: `^${escapeRegExp(id)}$` };
+    localKeepRules.push(pattern);
+    saveLocalKeepRules(localKeepRules);
+    compileKeepRules();
+    if(!rawGraphData){
+      setStatus('No graph loaded.');
+      return;
+    }
+    try {
+      await requestAndApplyGraph(rawGraphData, { startMessage: 'Reprocessing graph…' }, captureNodePositions());
+      setStatus(`Added keepRule for ${id}`);
+    } catch (err) {
+      console.error('Failed to reprocess graph with keepRule', err);
+      setStatus(`Failed to apply keepRule: ${err.message || err}`);
+    }
+  }
+
+
+  function updateProfileSelect(){
+    if(!profileSelect) return;
+    profileSelect.innerHTML = profiles.map((p, idx)=>`<option value="${idx}">${escapeHtml(p.name)}</option>`).join('');
+    profileSelect.value = String(currentProfileIndex);
+    profileSelect.style.display = profiles.length > 1 ? '' : 'none';
+  }
+
+  function updateProfileLegend(){
+    if(!profileLegend) return;
+    const profile = profiles[currentProfileIndex] || profiles[0];
+    const rows = [`<div class="label">Profile: ${escapeHtml(profile?.name || 'default')}</div>`];
+    STATUS_ORDER.forEach(status => {
+      const meta = STATUS_META[status];
+      if(!meta) return;
+      const note = STATUS_NOTES[status] || '';
+      rows.push(`<div class="row"><span class="badge" data-status="${status}"><span class="dot"></span>${escapeHtml(meta.label)}</span><span>${escapeHtml(note)}</span></div>`);
+    });
+    profileLegend.innerHTML = rows.join('');
+  }
+
+  function updateEntrypointsPanel(){
+    if(!entrypointsList) return;
+    const idMap = new Map(graph.nodes.map(n=>[n.id,n]));
+    const entries = entrypoints.map(id => {
+      const node = idMap.get(id);
+      const missing = !node;
+      const btn = node ? `<button type="button" data-id="${escapeHtml(id)}">Focus</button>` : '';
+      return `<div class="entry ${missing?'missing':''}"><span class="mono">${escapeHtml(id)}</span>${btn ? ` · ${btn}` : ''}</div>`;
+    });
+    if(entries.length === 0){
+      entrypointsList.innerHTML = '<div style="color:var(--muted);">No entrypoints detected.</div>';
+      if(entrypointsNote) entrypointsNote.textContent = 'Using best-guess graph roots.';
+    } else {
+      entrypointsList.innerHTML = entries.join('');
+      if(entrypointsNote){
+        const missingCount = entrypoints.filter(id => !idMap.has(id)).length;
+        entrypointsNote.textContent = missingCount ? `${missingCount} entrypoint${missingCount>1?'s':''} missing from graph.` : '';
+      }
+    }
+    entrypointsList.querySelectorAll('button[data-id]').forEach(btn => {
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-id');
+        const node = graph.nodes.find(n=>n.id===id);
+        if(node){ selectNode(node); focusOn(node); highlight(node); }
+      });
+    });
+  }
+
+  function render(options = {}){
+    const opts = (options && typeof options === 'object') ? options : {};
+    const reheat = opts.reheat !== undefined ? opts.reheat : true;
+    const gentle = opts.gentle === true;
+    if(reheat) pendingSimWarmup = true;
+    if(gentle) pendingGentleWarm = true;
+    if(renderPending) return;
+    renderPending = true;
+    requestAnimationFrame(()=>{
+      renderPending = false;
+      performRender();
+    });
+  }
+
+  function performRender(){
+    applyFilters();
+
+    function summarizeFiltered(){
+      const summary = {
+        nodes: {
+          total: 0,
+          reachableCurrent: 0,
+          disconnected: 0,
+          dynamicOnly: 0,
+          pureLeaves: 0,
+          sideEffects: 0,
+          unusedAttached: 0,
+          maxDegree: 0
+        },
+        edges: {
+          total: 0,
+          dynamic: 0
+        }
+      };
+
+      filtered.nodes.forEach(n => {
+        summary.nodes.total += 1;
+
+        const statuses = statusesFor(n);
+        const degree = (n.inDeg || 0) + (n.outDeg || 0);
+
+        if(statuses.includes('reachable_current')) summary.nodes.reachableCurrent += 1;
+        if(statuses.includes('disconnected_all_profiles')) summary.nodes.disconnected += 1;
+        if(statuses.includes('dynamic_only')) summary.nodes.dynamicOnly += 1;
+        if(degree === 1 && !statuses.includes('reachable_current')) summary.nodes.pureLeaves += 1;
+        if(n.hasSideEffects === true) summary.nodes.sideEffects += 1;
+        if(statuses.includes('disconnected_all_profiles') && degree > 0) summary.nodes.unusedAttached += 1;
+        if(degree > summary.nodes.maxDegree) summary.nodes.maxDegree = degree;
+      });
+
+      filtered.edges.forEach(e => {
+        summary.edges.total += 1;
+        if(isDynamicEdge(e)) summary.edges.dynamic += 1;
+      });
+
+      return summary;
+    }
+
+    const summary = summarizeFiltered();
+
+    // HUD counts
+    setText('nCount', summary.nodes.total);
+    setText('eCount', summary.edges.total);
+    setText('uCount', summary.nodes.reachableCurrent);
+    setText('xCount', summary.nodes.disconnected);
+    setText('dCount', summary.nodes.dynamicOnly);
+
+    // Insights
+    setText('pureLeaves', summary.nodes.pureLeaves);
+    setText('sideFx', summary.nodes.sideEffects);
+    setText('unusedAttached', summary.nodes.unusedAttached);
+    setText('maxDeg', summary.nodes.maxDegree);
+
+    // JOINs
+    const links = linkG.selectAll('line').data(filtered.edges, d=>d.id || `${nodeId(d.source)}=>${nodeId(d.target)}:${d.kind||''}`);
+    links.exit().remove();
+    const linksEnter = links.enter().append('line')
+      .attr('class', d=> 'link '+((d.kind==='dynamic'||d.certainty==='heuristic')?'dynamic':''))
+      .attr('opacity', dimLinks? .25 : 1);
+    const linksSel = linksEnter.merge(links);
+    edgeElements = linksSel.nodes();
+    renderedEdges = filtered.edges.slice();
+
+    const nodes = nodeG.selectAll('g.node').data(filtered.nodes, d=>d.id);
+    nodes.exit().remove();
+    const nodesEnter = nodes.enter().append('g').attr('class', d=>`node ${stateClass(d)} ${isExternal(d)?'external':''}`)
+      .call(d3.drag()
+        .on('start', (e,d)=>{ beginInteraction(); d.fx = d.x; d.fy = d.y; if(latestTickContext) scheduleTickUpdate(latestTickContext); })
+        .on('drag', (e,d)=>{ d.fx = e.x; d.fy = e.y; if(latestTickContext) scheduleTickUpdate(latestTickContext); })
+        .on('end', (e,d)=>{ endInteraction(); pins[d.id] = {x: d.fx ?? d.x, y: d.fy ?? d.y}; savePins(pins); if(latestTickContext) scheduleTickUpdate(latestTickContext); }))
+      .on('click', (e,d)=> selectNode(d))
+      .on('dblclick', (e,d)=>{ d.fx = null; d.fy = null; delete pins[d.id]; savePins(pins); })
+    ;
+
+    nodesEnter.append('circle')
+      .attr('r', d=> sizeFor(d))
+      .attr('class','halo')
+      .style('fill', d => getNodeColor(d));
+    const nodesSel = nodesEnter.merge(nodes);
+    nodesSel.attr('class', d=>`node ${stateClass(d)} ${isExternal(d)?'external':''}`);
+    nodesSel.select('circle').style('fill', d => getNodeColor(d));
+    nodeElements = nodesSel.nodes();
+    nodeCircleElements = nodeElements.map(el => el.querySelector('circle'));
+    renderedNodes = filtered.nodes.slice();
+    nodeIndexById.clear();
+    renderedNodes.forEach((node, idx) => {
+      if(node && node.id != null) nodeIndexById.set(node.id, idx);
+    });
+
+    const labels = labelG.selectAll('text').data(filtered.nodes, d=>d.id);
+    labels.exit().remove();
+    const labelsEnter = labels.enter().append('text').attr('class','label').text(d=> labelFor(d));
+    const labelsSel = labelsEnter.merge(labels);
+    labelElements = labelsSel.nodes();
+    labelG.style('display', showLabels? null : 'none');
+
+    if(activeHighlight){
+      rebuildHighlightSet();
+    } else {
+      highlightedNodeIds.clear();
+    }
+    appliedHighlightIds = new Set();
+    updateHighlights();
+
+    // Sim data
+    const tickContext = { linksSel, nodesSel, labelsSel };
+    latestTickContext = tickContext;
+    sim.nodes(filtered.nodes).on('tick', ()=> scheduleTickUpdate(tickContext));
+    sim.force('link').links(filtered.edges);
+    scheduleTickUpdate(tickContext);
+    if(!paused && userInteractionDepth === 0){
+      if(pendingSimWarmup){
+        warmSimulation();
+        pendingSimWarmup = false;
+        pendingGentleWarm = false;
+      } else if(pendingGentleWarm){
+        gentleWarmSimulation();
+        pendingGentleWarm = false;
+      }
+    }
+
+    if(selectedNode){
+      const match = filtered.nodes.find(n=>n.id===selectedNode.id);
+      if(match){
+        if(match !== selectedNode) selectedNode = match;
+        selectNode(match);
+      } else {
+        selectedNode = null;
+        setDisplay('selNone','block');
+        setDisplay('sel','none');
+        setHTML('neighbors','');
+      }
+    }
+  }
+
+  function labelFor(d){
+    const id = d.id || '';
+    // Shorten common path prefixes
+    return id.replace(/^.*(?=src\/|lib\/|app\/)/,'').replace(/^\/?/,'');
+  }
+
+  function selectNode(n){
+    selectedNode = n;
+    setDisplay('selNone','none');
+    setDisplay('sel','block');
+    $('#selId').textContent = n.id || '';
+    $('#selType').textContent = n.type || 'file';
+    $('#selState').innerHTML = `<div class="badge-group">${badgesHtml(statusesFor(n), n)}</div>`;
+    $('#selPkg').textContent = n.package || '—';
+    $('#selLoc').textContent = fmt(n.sizeLOC);
+    $('#selDeg').textContent = (n.inDeg||0)+(n.outDeg||0);
+    $('#selProfiles').innerHTML = profileSummaryHtml(n);
+
+    if(keepRuleBtn){
+      keepRuleBtn.style.display = matchesKeepRule(n.id) ? 'none' : 'block';
+      keepRuleBtn.onclick = ()=>{ addKeepRule(n.id); };
+    }
+    if(keepRuleNote){
+      const notes = [];
+      if(matchesKeepRule(n.id)) notes.push('Kept via keepRule');
+      if(hasDynamicEvidence(n)) notes.push('Dynamic load evidence present');
+      keepRuleNote.textContent = notes.join(' · ');
+    }
+
+    // neighbors list
+    const neighIds = new Set();
+    filtered.edges.forEach(e=>{
+      const src = nodeId(e.source);
+      const tgt = nodeId(e.target);
+      if(src===n.id) neighIds.add(tgt);
+      if(tgt===n.id) neighIds.add(src);
+    });
+    const neigh = filtered.nodes.filter(x=> neighIds.has(x.id)).sort((a,b)=> ((b.inDeg+b.outDeg) - (a.inDeg+a.outDeg)) );
+    const cont = d3.select('#neighbors');
+    const items = cont.selectAll('.item').data(neigh, d=>d.id);
+    items.exit().remove();
+    const enter = items.enter().append('div').attr('class','item').text(d=> labelFor(d)).on('click', (_,d)=>{ selectNode(d); focusOn(d); highlight(d); });
+    enter.merge(items);
+
+    highlight(n);
+  }
+
+  function highlight(n){
+    const focus = new Set([n.id]);
+    filtered.edges.forEach(e=>{
+      const src = nodeId(e.source);
+      const tgt = nodeId(e.target);
+      if(src===n.id) focus.add(tgt);
+      if(tgt===n.id) focus.add(src);
+    });
+    for(let i=0;i<nodeElements.length;i+=1){
+      const nodeEl = nodeElements[i];
+      const nodeData = renderedNodes[i];
+      if(!nodeEl || !nodeData) continue;
+      nodeEl.setAttribute('opacity', focus.has(nodeData.id) ? 1 : .25);
+    }
+    for(let i=0;i<edgeElements.length;i+=1){
+      const edgeEl = edgeElements[i];
+      const edgeData = renderedEdges[i];
+      if(!edgeEl || !edgeData) continue;
+      const src = nodeId(edgeData.source);
+      const tgt = nodeId(edgeData.target);
+      edgeEl.setAttribute('opacity', (src===n.id || tgt===n.id) ? 1 : (dimLinks ? .15 : .25));
+    }
+    for(let i=0;i<labelElements.length;i+=1){
+      const labelEl = labelElements[i];
+      const nodeData = renderedNodes[i];
+      if(!labelEl || !nodeData) continue;
+      labelEl.setAttribute('opacity', focus.has(nodeData.id) ? 1 : .15);
+    }
+    if(activeHighlight) updateHighlights();
+  }
+
+  function focusOn(n){
+    const t = d3.zoomTransform(svg.node());
+    const scale = t.k;
+    const x = (n.x*scale*-1) + (svg.node().clientWidth/2);
+    const y = (n.y*scale*-1) + (svg.node().clientHeight/2);
+    svg.transition().duration(350).call(zoom.translateTo, n.x, n.y);
+  }
+
+  function exportSbom(){
+    const onlyFiltered = !!($('exportFiltered') && $('exportFiltered').checked);
+    const nodes = onlyFiltered ? filtered.nodes : graph.nodes;
+    if(!nodes.length){
+      setStatus('No graph data to export');
+      return;
+    }
+
+    const headers = ['id','statusPrimary','statuses','type','package','sizeLOC','hasSideEffects','external','inDegree','outDegree','degree'];
+    const escape = (value) => {
+      const v = value == null ? '' : String(value);
+      if(/[",\n]/.test(v)){
+        return '"' + v.replace(/"/g,'""') + '"';
+      }
+      return v;
+    };
+
+    const rows = [headers.join(',')];
+    rows.push(...nodes.map(n => {
+      const inDeg = n.inDeg || 0;
+      const outDeg = n.outDeg || 0;
+      const degree = inDeg + outDeg;
+      const external = isExternal(n);
+      const statuses = statusesFor(n);
+      const values = [
+        n.id || '',
+        primaryStatusFor(n),
+        statuses.join('|'),
+        n.type || '',
+        n.package || '',
+        n.sizeLOC ?? '',
+        n.hasSideEffects ?? '',
+        external,
+        inDeg,
+        outDeg,
+        degree
+      ];
+      return values.map(escape).join(',');
+    }));
+
+    const legendDescriptions = {
+      id: 'Node identifier (typically path or package name)',
+      statusPrimary: 'Primary status classification for the node',
+      statuses: 'All status labels applied to the node (pipe-delimited)',
+      type: 'Node type (for example, file or package)',
+      package: 'Package name associated with the node',
+      sizeLOC: 'Lines of code attributed to the node',
+      hasSideEffects: 'Whether the node is marked as having side effects',
+      external: 'True if the node represents an external dependency',
+      inDegree: 'Number of incoming edges referencing the node',
+      outDegree: 'Number of outgoing edges from the node',
+      degree: 'Total graph degree (inDegree + outDegree)'
+    };
+
+    rows.push('');
+    rows.push(['Legend', 'Description'].map(escape).join(','));
+    headers.forEach(header => {
+      const description = legendDescriptions[header] || '';
+      rows.push([header, description].map(escape).join(','));
+    });
+
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'graph-sbom.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setStatus('SBOM CSV exported');
+  }
+
+  // Demo placeholder: minimal tiny graph so the page shows something if no file is loaded
+  const demo = { nodes:[
+    {id:'src/main.ts', state:'used', type:'file', sizeLOC: 120},
+    {id:'src/util/math.ts', state:'used', type:'file', sizeLOC: 60},
+    {id:'src/components/Chart.tsx', state:'used', type:'file', sizeLOC: 200},
+    {id:'src/legacy/oldHelper.js', state:'unused', type:'file', sizeLOC: 40},
+    {id:'node_modules/react/index.js', state:'used', type:'external' }
+  ], edges:[
+    {source:'src/main.ts', target:'src/util/math.ts', kind:'import'},
+    {source:'src/main.ts', target:'src/components/Chart.tsx', kind:'import'},
+    {source:'src/components/Chart.tsx', target:'node_modules/react/index.js', kind:'import'}
+  ]};
+
+  async function tryAutoLoad(){
+    const params = new URLSearchParams(window.location.search);
+    const autoTarget = params.get('load') || params.get('graph') || 'jsNuroxDependencies.json';
+
+    if(inViewerMode){
+      try {
+        const counts = await loadGraphFromViewer();
+        if(viewerStatusNote){
+          if((counts.nodes || counts.edges)){
+            setViewerStatus(`Loaded ${counts.nodes} nodes and ${counts.edges} edges from viewer.`);
+          } else {
+            setViewerStatus('No crawl results yet — start a crawl below.');
+          }
+        }
+        return;
+      } catch (err) {
+        if(viewerStatusNote){
+          setViewerStatus(`Viewer graph unavailable: ${err.message || err}`);
+        }
+        // Continue to fallback below
+      }
+    }
+
+    if(isFileProtocol){
+      await loadGraph(demo);
+      setStatus('Local file mode — use “Load graph.json” to open your data.');
+      return;
+    }
+    try {
+      const resp = await fetch(autoTarget, { cache: 'no-cache' });
+      if(!resp.ok) throw new Error(`Missing ${autoTarget} (${resp.status})`);
+      const data = await resp.json();
+      await loadGraph(data);
+      setStatus(`Loaded ${autoTarget}`);
+    } catch(err) {
+      console.warn('Falling back to demo graph', err);
+      await loadGraph(demo);
+      setStatus('Demo graph loaded — click “Load graph.json” or drop a JSON file onto the canvas.');
+    }
+  }
+
+  tryAutoLoad();
+});
+</script>
+</body>
+</html>
