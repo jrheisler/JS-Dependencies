@@ -421,22 +421,82 @@ window.addEventListener('DOMContentLoaded', () => {
   const profileLegend = $('profileLegend');
   const keepRuleBtn = $('markKeepRule');
   const keepRuleNote = $('keepRuleNote');
+  const highlightedNodeIds = new Set();
+  let appliedHighlightIds = new Set();
+  const nodeIndexById = new Map();
+  let nodeElements = [];
+  let nodeCircleElements = [];
+  let renderedNodes = [];
+  let edgeElements = [];
+  let renderedEdges = [];
+  let labelElements = [];
 
   function shouldHighlightNode(d){
-    if(!activeHighlight) return false;
+    return highlightedNodeIds.has(d.id);
+  }
+
+  function highlightById(id){
+    const idx = nodeIndexById.get(id);
+    if(idx == null) return;
+    const nodeEl = nodeElements[idx];
+    if(nodeEl) nodeEl.classList.add('highlighted');
+    const circle = nodeCircleElements[idx];
+    if(circle) circle.style.fill = '#ff47d8';
+  }
+
+  function clearHighlightById(id){
+    const idx = nodeIndexById.get(id);
+    if(idx == null) return;
+    const nodeEl = nodeElements[idx];
+    if(nodeEl) nodeEl.classList.remove('highlighted');
+    const circle = nodeCircleElements[idx];
+    if(circle){
+      const nodeData = renderedNodes[idx];
+      if(nodeData) circle.style.fill = getNodeColor(nodeData);
+    }
+  }
+
+  function refreshNodeFill(id){
+    const idx = nodeIndexById.get(id);
+    if(idx == null) return;
+    const circle = nodeCircleElements[idx];
+    if(!circle) return;
+    const nodeData = renderedNodes[idx];
+    if(!nodeData) return;
+    circle.style.fill = highlightedNodeIds.has(id) ? '#ff47d8' : getNodeColor(nodeData);
+  }
+
+  function rebuildHighlightSet(){
+    highlightedNodeIds.clear();
+    if(!activeHighlight) return;
     switch(activeHighlight){
       case 'all':
-        return true;
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null) highlightedNodeIds.add(n.id);
+        });
+        break;
       case 'reachable':
-        return statusesFor(d).includes('reachable_current');
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null && statusesFor(n).includes('reachable_current')) highlightedNodeIds.add(n.id);
+        });
+        break;
       case 'disconnected':
-        return statusesFor(d).includes('disconnected_all_profiles');
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null && statusesFor(n).includes('disconnected_all_profiles')) highlightedNodeIds.add(n.id);
+        });
+        break;
       case 'dynamic':
-        return statusesFor(d).includes('dynamic_only');
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null && statusesFor(n).includes('dynamic_only')) highlightedNodeIds.add(n.id);
+        });
+        break;
       case 'edges':
-        return ((d.inDeg || 0) + (d.outDeg || 0)) > 0;
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null && ((n.inDeg || 0) + (n.outDeg || 0)) > 0) highlightedNodeIds.add(n.id);
+        });
+        break;
       default:
-        return false;
+        break;
     }
   }
 
@@ -449,18 +509,38 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateHighlights(){
-    const nodesSel = nodeG.selectAll('g.node');
-    nodesSel.classed('highlighted', d => shouldHighlightNode(d));
-    nodesSel.select('circle').style('fill', d => shouldHighlightNode(d) ? '#ff47d8' : getNodeColor(d));
-    const edgesSel = linkG.selectAll('line');
+    const prev = appliedHighlightIds;
+    const removals = [];
+    prev.forEach(id => {
+      if(!highlightedNodeIds.has(id) || !nodeIndexById.has(id)) removals.push(id);
+    });
+    removals.forEach(id => {
+      if(!nodeIndexById.has(id)) highlightedNodeIds.delete(id);
+      clearHighlightById(id);
+    });
+
+    const additions = [];
+    highlightedNodeIds.forEach(id => {
+      if(!prev.has(id) && nodeIndexById.has(id)) additions.push(id);
+    });
+    additions.forEach(id => highlightById(id));
+
+    appliedHighlightIds = new Set(highlightedNodeIds);
+
     const highlightEdges = activeHighlight === 'edges';
-    edgesSel.classed('highlighted', highlightEdges);
-    edgesSel.attr('opacity', highlightEdges ? 1 : (dimLinks ? .25 : 1));
+    const edgeOpacity = highlightEdges ? 1 : (dimLinks ? .25 : 1);
+    edgeElements.forEach(el => {
+      if(!el) return;
+      el.classList.toggle('highlighted', highlightEdges);
+      el.setAttribute('opacity', edgeOpacity);
+    });
   }
 
   function setHighlightFilter(next){
     const target = next || null;
-    activeHighlight = (target && activeHighlight === target) ? null : target;
+    const nextActive = (target && activeHighlight === target) ? null : target;
+    activeHighlight = nextActive;
+    rebuildHighlightSet();
     updateMetricState();
     updateHighlights();
   }
@@ -935,7 +1015,10 @@ window.addEventListener('DOMContentLoaded', () => {
   if(colorModeEl){
     colorModeEl.setAttribute('aria-label','Color mode');
     colorModeEl.addEventListener('change', ()=> {
-      nodeG.selectAll('g.node').select('circle').style('fill', d => getNodeColor(d));
+      renderedNodes.forEach(node => {
+        if(!node || node.id == null) return;
+        refreshNodeFill(node.id);
+      });
       updateHighlights();
     });
   }
@@ -1763,6 +1846,8 @@ window.addEventListener('DOMContentLoaded', () => {
       .attr('class', d=> 'link '+((d.kind==='dynamic'||d.certainty==='heuristic')?'dynamic':''))
       .attr('opacity', dimLinks? .25 : 1);
     const linksSel = linksEnter.merge(links);
+    edgeElements = linksSel.nodes();
+    renderedEdges = filtered.edges.slice();
 
     const nodes = nodeG.selectAll('g.node').data(filtered.nodes, d=>d.id);
     nodes.exit().remove();
@@ -1782,13 +1867,27 @@ window.addEventListener('DOMContentLoaded', () => {
     const nodesSel = nodesEnter.merge(nodes);
     nodesSel.attr('class', d=>`node ${stateClass(d)} ${isExternal(d)?'external':''}`);
     nodesSel.select('circle').style('fill', d => getNodeColor(d));
+    nodeElements = nodesSel.nodes();
+    nodeCircleElements = nodeElements.map(el => el.querySelector('circle'));
+    renderedNodes = filtered.nodes.slice();
+    nodeIndexById.clear();
+    renderedNodes.forEach((node, idx) => {
+      if(node && node.id != null) nodeIndexById.set(node.id, idx);
+    });
 
     const labels = labelG.selectAll('text').data(filtered.nodes, d=>d.id);
     labels.exit().remove();
     const labelsEnter = labels.enter().append('text').attr('class','label').text(d=> labelFor(d));
     const labelsSel = labelsEnter.merge(labels);
+    labelElements = labelsSel.nodes();
     labelG.style('display', showLabels? null : 'none');
 
+    if(activeHighlight){
+      rebuildHighlightSet();
+    } else {
+      highlightedNodeIds.clear();
+    }
+    appliedHighlightIds = new Set();
     updateHighlights();
 
     // Sim data
@@ -1871,13 +1970,26 @@ window.addEventListener('DOMContentLoaded', () => {
       if(src===n.id) focus.add(tgt);
       if(tgt===n.id) focus.add(src);
     });
-    d3.selectAll('g.node').attr('opacity', d=> focus.has(d.id)? 1 : .25);
-    d3.selectAll('line.link').attr('opacity', d=> {
-      const src = nodeId(d.source);
-      const tgt = nodeId(d.target);
-      return (src===n.id || tgt===n.id)? 1 : (dimLinks? .15 : .25);
-    });
-    d3.selectAll('text.label').attr('opacity', d=> focus.has(d.id)? 1 : .15);
+    for(let i=0;i<nodeElements.length;i+=1){
+      const nodeEl = nodeElements[i];
+      const nodeData = renderedNodes[i];
+      if(!nodeEl || !nodeData) continue;
+      nodeEl.setAttribute('opacity', focus.has(nodeData.id) ? 1 : .25);
+    }
+    for(let i=0;i<edgeElements.length;i+=1){
+      const edgeEl = edgeElements[i];
+      const edgeData = renderedEdges[i];
+      if(!edgeEl || !edgeData) continue;
+      const src = nodeId(edgeData.source);
+      const tgt = nodeId(edgeData.target);
+      edgeEl.setAttribute('opacity', (src===n.id || tgt===n.id) ? 1 : (dimLinks ? .15 : .25));
+    }
+    for(let i=0;i<labelElements.length;i+=1){
+      const labelEl = labelElements[i];
+      const nodeData = renderedNodes[i];
+      if(!labelEl || !nodeData) continue;
+      labelEl.setAttribute('opacity', focus.has(nodeData.id) ? 1 : .15);
+    }
     if(activeHighlight) updateHighlights();
   }
 
