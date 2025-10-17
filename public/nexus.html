@@ -566,25 +566,30 @@ window.addEventListener('DOMContentLoaded', () => {
     const normalized = typeof value === 'string' ? value.trim() : '';
     const fromPicker = opts.fromPicker === true;
     if(fromPicker) viewerRootFromPicker = true;
-    if(normalized){
-      if(fromPicker && !looksLikeFilesystemPath(normalized)){
-        setViewerStatus('Browser pickers can\'t share the full folder path. Paste the actual project path manually.');
+
+    viewerRootInput.value = normalized;
+    viewerRootInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+    if(!normalized){
+      if(fromPicker){
+        setViewerStatus('Unable to determine folder path from picker. Paste the path manually.');
         if(viewerRootPickerNote) viewerRootPickerNote.hidden = false;
         viewerRootInput.focus();
-        return;
       }
-      if(viewerRootPickerNote && viewerRootPickerNote.hidden === false && looksLikeFilesystemPath(normalized)){
-        viewerRootPickerNote.hidden = true;
-      }
+      return;
     }
-    if(!normalized && fromPicker){
-      setViewerStatus('Unable to determine folder path from picker. Paste the path manually.');
+
+    const looksLikePath = looksLikeFilesystemPath(normalized);
+    if(fromPicker && !looksLikePath){
+      setViewerStatus('Browser pickers can\'t share the full folder path. Paste the actual project path manually.');
       if(viewerRootPickerNote) viewerRootPickerNote.hidden = false;
       viewerRootInput.focus();
       return;
     }
-    viewerRootInput.value = normalized;
-    viewerRootInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+    if(viewerRootPickerNote && viewerRootPickerNote.hidden === false && looksLikePath){
+      viewerRootPickerNote.hidden = true;
+    }
   };
   if(viewerRootInput){
     const savedRoot = loadLastCrawlRoot();
