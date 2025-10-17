@@ -25,5 +25,9 @@ automatically when the files are served from the same directory (e.g. using
 If the JSON file is unavailable, the viewer falls back to a small built-in demo
 graph so the UI still renders.
 
+The prebuilt Nurox Viewer executable in `public/` ships with
+`jsNuroxDependencies.json` alongside it so that the app opens with the bundled
+sample graph even when launched directly from that directory.
+
 You can also use the **Load graph.json** button in the header to supply any
 compatible graph JSON file manually.
