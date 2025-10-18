@@ -558,16 +558,65 @@
     }
     exportSources.forEach(source => ingestExports(exportsById, source));
 
+    const NODE_EXPORT_ID_KEYS = [
+      'id',
+      'absPath',
+      'path',
+      'file',
+      'module',
+      'source',
+      'resolvedPath',
+      'realPath',
+      'canonicalPath',
+      'uri'
+    ];
+    const collectCandidateIds = (from, target)=>{
+      if(!from) return;
+      if(typeof from === 'string'){ target.add(from); return; }
+      if(Array.isArray(from)){ from.forEach(value => collectCandidateIds(value, target)); }
+      if(typeof from === 'object'){
+        NODE_EXPORT_ID_KEYS.forEach(key => {
+          if(Object.prototype.hasOwnProperty.call(from, key)){
+            collectCandidateIds(from[key], target);
+          }
+        });
+      }
+    };
+
     graph.nodes.forEach(node => {
-      if(!node || typeof node.id !== 'string') return;
+      if(!node || (typeof node !== 'object')) return;
       const direct = normalizeExportGroups(node.exports);
       let collected = null;
-      const trimmedId = node.id.trim();
-      const canonicalId = canonicalExportId(node.id);
-      if(canonicalId) collected = exportsById.get(canonicalId);
-      if(!collected && trimmedId && trimmedId !== canonicalId){
-        collected = exportsById.get(trimmedId) || null;
+      const candidates = new Set();
+      NODE_EXPORT_ID_KEYS.forEach(key => collectCandidateIds(node[key], candidates));
+      if(node.meta && typeof node.meta === 'object'){
+        NODE_EXPORT_ID_KEYS.forEach(key => collectCandidateIds(node.meta[key], candidates));
       }
+      if(candidates.size === 0 && typeof node.id === 'string'){
+        candidates.add(node.id);
+      }
+
+      for(const candidate of candidates){
+        if(typeof candidate !== 'string') continue;
+        const canonical = canonicalExportId(candidate);
+        if(canonical && exportsById.has(canonical)){
+          collected = exportsById.get(canonical);
+          break;
+        }
+      }
+
+      if(!collected){
+        for(const candidate of candidates){
+          if(typeof candidate !== 'string') continue;
+          const trimmed = candidate.trim();
+          if(!trimmed) continue;
+          if(exportsById.has(trimmed)){
+            collected = exportsById.get(trimmed);
+            break;
+          }
+        }
+      }
+
       const merged = mergeExportGroupMaps(direct, collected);
       if(merged){
         node.exports = merged;
