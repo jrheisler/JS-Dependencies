@@ -332,6 +332,11 @@ _FileFacts _extractFacts(String filePath, String text) {
       .join('\n');
   final lines = sanitized.split('\n');
 
+  bool hasDefaultExport() {
+    final existing = exportSets['default'];
+    return existing != null && existing.isNotEmpty;
+  }
+
   final reImportSide =
       RegExp(r'''^\s*import\s+['"]([^'"]+)['"]\s*;?\s*$''');
   final reImportFull =
@@ -527,6 +532,56 @@ _FileFacts _extractFacts(String filePath, String text) {
       }
     }
   }
+
+  if (!hasDefaultExport()) {
+    final reDefaultFuncMulti =
+        RegExp(r'export\s+default\s+(?:async\s+)?function(?:\s+([A-Za-z0-9_\$]+))?', multiLine: true);
+    for (final match in reDefaultFuncMulti.allMatches(sanitized)) {
+      final name = match.group(1);
+      if (name != null && name.isNotEmpty) {
+        addExport('functions', name);
+        addExport('default', 'function ' + name);
+      } else {
+        addExport('default', 'function');
+      }
+    }
+  }
+
+  if (!hasDefaultExport()) {
+    final reDefaultClassMulti =
+        RegExp(r'export\s+default\s+(?:abstract\s+)?class(?:\s+([A-Za-z0-9_\$]+))?', multiLine: true);
+    for (final match in reDefaultClassMulti.allMatches(sanitized)) {
+      final name = match.group(1);
+      if (name != null && name.isNotEmpty) {
+        addExport('classes', name);
+        addExport('default', 'class ' + name);
+      } else {
+        addExport('default', 'class');
+      }
+    }
+  }
+
+  if (!hasDefaultExport()) {
+    final reDefaultIdentMulti =
+        RegExp(r'export\s+default\s+([A-Za-z0-9_\$]+)', multiLine: true);
+    for (final match in reDefaultIdentMulti.allMatches(sanitized)) {
+      final ident = match.group(1);
+      if (ident == null || ident.isEmpty) continue;
+      if (ident == 'function' || ident == 'class') continue;
+      addExport('default', ident);
+    }
+  }
+
+  if (!hasDefaultExport()) {
+    final reDefaultExpr =
+        RegExp(r'export\s+default\s+([\s\S]+?)(?:;|\n{2,})', multiLine: true);
+    for (final match in reDefaultExpr.allMatches(sanitized)) {
+      final snippet = match.group(1) ?? '';
+      if (snippet.trim().isEmpty) continue;
+      addExport('default', _summarizeDefaultExport(snippet));
+    }
+  }
+
   final reNamedBlock = RegExp(r'export\s*{\s*([^}]*)\s*}', multiLine: true);
   for (final match in reNamedBlock.allMatches(sanitized)) {
     final rawList = match.group(1)!;
