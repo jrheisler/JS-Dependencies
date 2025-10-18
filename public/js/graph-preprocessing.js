@@ -365,6 +365,29 @@
   const EXPORT_SKIP_KEYS = new Set([...EXPORT_ID_KEYS, ...EXPORT_GROUP_KEYS, 'meta', 'summary', 'stats', 'count', 'type', 'kind', 'category', 'description']);
   const visitedExportContainers = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
 
+  function canonicalExportId(id){
+    if(typeof id !== 'string') return null;
+    let value = id.trim();
+    if(!value) return null;
+    if(value.startsWith('\\\\?\\')) value = value.substring(4);
+    const hadUncPrefix = value.startsWith('\\') || value.startsWith('\\/') || value.startsWith('//');
+    let normalized = value.replace(/\\/g, '/');
+    if(hadUncPrefix && !normalized.startsWith('//')){
+      normalized = '//' + normalized.replace(/^\/+/, '');
+    }
+    if(normalized.startsWith('//')){
+      const body = normalized.slice(2).replace(/\/{2,}/g, '/');
+      normalized = '//' + body;
+    } else {
+      normalized = normalized.replace(/\/{2,}/g, '/');
+    }
+    const drive = normalized.match(/^([a-zA-Z]):\//);
+    if(drive){
+      normalized = drive[1].toUpperCase() + normalized.substring(1);
+    }
+    return normalized;
+  }
+
   function cloneExportEntry(entry){
     if(entry == null) return null;
     if(Array.isArray(entry)){
@@ -431,11 +454,12 @@
   }
 
   function recordExports(exportsById, id, groups){
-    if(typeof id !== 'string' || !id.trim()) return;
+    const canonical = canonicalExportId(id);
+    if(!canonical) return;
     const normalized = normalizeExportGroups(groups);
     if(!normalized) return;
-    const existing = exportsById.get(id);
-    exportsById.set(id, mergeExportGroupMaps(existing, normalized));
+    const existing = exportsById.get(canonical);
+    exportsById.set(canonical, mergeExportGroupMaps(existing, normalized));
   }
 
   function ingestExports(exportsById, container){
@@ -525,7 +549,13 @@
     graph.nodes.forEach(node => {
       if(!node || typeof node.id !== 'string') return;
       const direct = normalizeExportGroups(node.exports);
-      const collected = exportsById.get(node.id);
+      let collected = null;
+      const trimmedId = node.id.trim();
+      const canonicalId = canonicalExportId(node.id);
+      if(canonicalId) collected = exportsById.get(canonicalId);
+      if(!collected && trimmedId && trimmedId !== canonicalId){
+        collected = exportsById.get(trimmedId) || null;
+      }
       const merged = mergeExportGroupMaps(direct, collected);
       if(merged){
         node.exports = merged;
