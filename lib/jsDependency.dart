@@ -59,7 +59,12 @@ void main(List<String> args) async {
   final factsByPath = <String, _FileFacts>{};
   for (final f in files) {
     final text = await File(f).readAsString();
-    factsByPath[f] = _extractFacts(f, text);
+    final facts = _extractFacts(f, text);
+    stderr.writeln(facts.path);
+    if (facts.path.endsWith('Auth.js')) {
+      stderr.writeln('Auth.js exports: ${facts.exports}');
+    }
+    factsByPath[f] = facts;
   }
 
   // Build edges + external nodes
