@@ -2180,13 +2180,105 @@ window.addEventListener('DOMContentLoaded', () => {
     return 'graph.json';
   }
 
+  function safeCloneJson(value){
+    if(value == null) return value;
+    if(typeof structuredClone === 'function'){
+      try {
+        return structuredClone(value);
+      } catch (err) {
+        console.warn('structuredClone failed for export payload, falling back to JSON clone', err);
+      }
+    }
+    if(typeof value === 'object'){
+      try {
+        return JSON.parse(JSON.stringify(value));
+      } catch (err) {
+        console.warn('JSON clone failed for export payload', err);
+      }
+    }
+    return value;
+  }
+
+  function collectExportsFromNodes(nodes){
+    if(!Array.isArray(nodes)) return null;
+    const exportsById = {};
+    let count = 0;
+    nodes.forEach(node => {
+      if(!node || typeof node.id !== 'string') return;
+      const groups = node.exports;
+      if(!groups || typeof groups !== 'object') return;
+      const keys = Object.keys(groups);
+      if(!keys.length) return;
+      exportsById[node.id] = safeCloneJson(groups) || groups;
+      count++;
+    });
+    return count ? exportsById : null;
+  }
+
+  function sanitizeNodesForExport(nodes, exportsIndex){
+    if(!Array.isArray(nodes)) return [];
+    return nodes.map(node => {
+      if(!node || typeof node !== 'object') return node;
+      let cloned = safeCloneJson(node);
+      if(!cloned || typeof cloned !== 'object' || cloned === node){
+        cloned = { ...node };
+      }
+      const id = typeof cloned.id === 'string' ? cloned.id : (typeof node.id === 'string' ? node.id : null);
+      if(id && exportsIndex && exportsIndex[id]){
+        cloned.exports = safeCloneJson(exportsIndex[id]) || exportsIndex[id];
+      }
+      delete cloned.vx;
+      delete cloned.vy;
+      delete cloned.x;
+      delete cloned.y;
+      delete cloned.index;
+      return cloned;
+    });
+  }
+
+  function sanitizeEdgesForExport(edges){
+    if(!Array.isArray(edges)) return [];
+    return edges.map(edge => {
+      if(!edge || typeof edge !== 'object') return edge;
+      let cloned = safeCloneJson(edge);
+      if(!cloned || typeof cloned !== 'object' || cloned === edge){
+        cloned = { ...edge };
+      }
+      delete cloned.index;
+      return cloned;
+    });
+  }
+
   function exportGraphJson(){
     if(!rawGraphData){
       setStatus('No graph data to export');
       return;
     }
     try {
-      const serialized = JSON.stringify(rawGraphData, null, 2);
+      const exportsIndex = collectExportsFromNodes(graph?.nodes);
+      let payload = safeCloneJson(rawGraphData);
+      if(!payload || typeof payload !== 'object') payload = {};
+      if(Array.isArray(payload.nodes)){
+        payload.nodes = sanitizeNodesForExport(payload.nodes, exportsIndex);
+      } else if(Array.isArray(graph?.nodes)){
+        payload.nodes = sanitizeNodesForExport(graph.nodes, exportsIndex);
+      } else {
+        payload.nodes = [];
+      }
+      if(Array.isArray(payload.edges)){
+        payload.edges = sanitizeEdgesForExport(payload.edges);
+      } else if(Array.isArray(graph?.edges)){
+        payload.edges = sanitizeEdgesForExport(graph.edges);
+      } else {
+        payload.edges = [];
+      }
+      if(exportsIndex){
+        const existing = payload.exports && typeof payload.exports === 'object'
+          ? safeCloneJson(payload.exports) || {}
+          : {};
+        payload.exports = { ...existing, ...exportsIndex };
+      }
+      const serialized = JSON.stringify(payload, null, 2);
       const blob = new Blob([serialized], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
