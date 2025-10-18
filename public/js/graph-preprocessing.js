@@ -373,6 +373,34 @@
       edges: normalizedEdges
     };
 
+    const exportsById = {};
+    if(rawGraph.exports && typeof rawGraph.exports === 'object'){
+      Object.entries(rawGraph.exports).forEach(([id, groups]) => {
+        if(typeof id !== 'string' || !groups || typeof groups !== 'object') return;
+        const normalized = {};
+        Object.entries(groups).forEach(([kind, list]) => {
+          if(!Array.isArray(list) || list.length === 0) return;
+          normalized[kind] = list.map(item => String(item));
+        });
+        if(Object.keys(normalized).length){
+          exportsById[id] = normalized;
+        }
+      });
+    }
+    graph.nodes.forEach(node => {
+      if(!node || typeof node.id !== 'string') return;
+      const exported = exportsById[node.id];
+      if(!exported) return;
+      const clone = {};
+      Object.entries(exported).forEach(([kind, values]) => {
+        if(!Array.isArray(values) || values.length === 0) return;
+        clone[kind] = values.slice();
+      });
+      if(Object.keys(clone).length){
+        node.exports = clone;
+      }
+    });
+
     computeDegrees(graph);
     inferUsageStates(graph);
     const entrypoints = normalizeEntrypoints(rawGraph, graph);

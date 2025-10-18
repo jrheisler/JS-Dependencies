@@ -147,6 +147,11 @@
     .list .item { background: #0d1220; padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,.06); cursor: pointer; }
     .list .item:hover { border-color: rgba(255,255,255,.2); }
 
+    .exports-grid { display: grid; gap: 8px; max-height: 200px; overflow: auto; }
+    .exports-group { background: #0d1220; border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: 8px; }
+    .exports-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
+    .exports-symbol { font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-word; color: var(--text); }
+
     .kbd { background: #111526; border: 1px solid rgba(255,255,255,.15); border-bottom-color: rgba(0,0,0,.3); padding: 2px 6px; border-radius: 6px; font-size: 12px; }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(3,5,12,0.88); display: flex; align-items: center; justify-content: center; padding: 4vh 4vw; z-index: 1000; }
@@ -256,6 +261,11 @@
         <div>
           <div style="color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;">Neighbors</div>
           <div class="list" id="neighbors"></div>
+        </div>
+        <div class="hr" id="exportsDivider" style="display:none;"></div>
+        <div id="exportsGroup" style="display:none;">
+          <div style="color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;">Exports</div>
+          <div class="exports-grid" id="exportsList"></div>
         </div>
         <button type="button" id="markKeepRule" class="btn-inline">False positive? Keep this node</button>
         <div class="status-note" id="keepRuleNote"></div>
@@ -452,6 +462,34 @@ window.addEventListener('DOMContentLoaded', () => {
       return `<span class="badge" data-status="${badgeStatus}" data-quiet="true"><span class="dot"></span>${escapeHtml(p.name)}</span>`;
     }).filter(Boolean);
     return chips.length ? `<div class="badge-group">${chips.join('')}</div>` : '—';
+  }
+
+  const EXPORT_LABELS = {
+    functions: 'Functions',
+    classes: 'Classes',
+    variables: 'Variables',
+    types: 'Types',
+    interfaces: 'Interfaces',
+    enums: 'Enums',
+    named: 'Named exports',
+    default: 'Default export'
+  };
+
+  function renderExportsList(exports){
+    if(!exports || typeof exports !== 'object') return '';
+    const groups = Object.entries(exports)
+      .map(([kind, values]) => {
+        const list = Array.isArray(values) ? values.map(v => String(v)).filter(Boolean) : [];
+        return { kind, label: EXPORT_LABELS[kind] || kind.replace(/_/g,' '), values: list };
+      })
+      .filter(group => group.values.length);
+    groups.sort((a,b) => a.label.localeCompare(b.label));
+    if(!groups.length) return '';
+    return groups.map(group => {
+      const items = group.values.slice().sort((a,b) => a.localeCompare(b))
+        .map(value => `<div class="exports-symbol">${escapeHtml(value)}</div>`).join('');
+      return `<div class="exports-group"><div class="exports-title">${escapeHtml(group.label)}</div>${items}</div>`;
+    }).join('');
   }
 
   const svg = d3.select('#svg');
@@ -1524,6 +1562,9 @@ window.addEventListener('DOMContentLoaded', () => {
     setDisplay('selNone','block');
     setDisplay('sel','none');
     setHTML('neighbors','');
+    setDisplay('exportsGroup','none');
+    setDisplay('exportsDivider','none');
+    setHTML('exportsList','');
     if(profileSelect){ profileSelect.innerHTML = ''; profileSelect.style.display = 'none'; }
     if(entrypointsList){ entrypointsList.innerHTML = ''; }
     if(entrypointsNote){ entrypointsNote.textContent = ''; }
@@ -1944,6 +1985,9 @@ window.addEventListener('DOMContentLoaded', () => {
     selectedNode = n;
     setDisplay('selNone','none');
     setDisplay('sel','block');
+    setDisplay('exportsGroup','none');
+    setDisplay('exportsDivider','none');
+    setHTML('exportsList','');
     $('#selId').textContent = n.id || '';
     $('#selType').textContent = n.type || 'file';
     $('#selState').innerHTML = `<div class="badge-group">${badgesHtml(statusesFor(n), n)}</div>`;
@@ -1977,6 +2021,13 @@ window.addEventListener('DOMContentLoaded', () => {
     items.exit().remove();
     const enter = items.enter().append('div').attr('class','item').text(d=> labelFor(d)).on('click', (_,d)=>{ selectNode(d); focusOn(d); highlight(d); });
     enter.merge(items);
+
+    const exportsMarkup = renderExportsList(n?.exports);
+    if(exportsMarkup){
+      setHTML('exportsList', exportsMarkup);
+      setDisplay('exportsGroup','block');
+      setDisplay('exportsDivider','block');
+    }
 
     highlight(n);
   }

@@ -150,11 +150,23 @@ void main(List<String> args) async {
   }
 
   // Output
+  final normalizedExports = <String, Map<String, List<String>>>{};
+  factsByPath.forEach((path, facts) {
+    if (facts.exports.isEmpty) return;
+    normalizedExports[_normalize(path)] = {
+      for (final entry in facts.exports.entries)
+        entry.key: List<String>.from(entry.value),
+    };
+  });
+
   final outPath = _join(cwd, 'jsDependencies.json');
   final out = {
     'nodes': nodes.map((n) => n.toJson()).toList(),
     'edges': normalizedEdges.map((e) => e.toJson()).toList(),
   };
+  if (normalizedExports.isNotEmpty) {
+    out['exports'] = normalizedExports;
+  }
   await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
 
   // Stats (mirrors javaDependency.dart)
@@ -211,7 +223,8 @@ class _FileFacts {
   final String path;
   final List<_ImportFact> imports;
   final bool hasSideEffectImport;
-  _FileFacts(this.path, this.imports, this.hasSideEffectImport);
+  final Map<String, List<String>> exports;
+  _FileFacts(this.path, this.imports, this.hasSideEffectImport, this.exports);
 }
 
 // -------- crawl & parse --------
@@ -232,6 +245,19 @@ Future<List<String>> _collectSourceFiles(String root) async {
 _FileFacts _extractFacts(String filePath, String text) {
   final imports = <_ImportFact>[];
   bool sideEffectOnly = false;
+  final exportSets = <String, Set<String>>{};
+
+  void addExport(String kind, String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return;
+    exportSets.putIfAbsent(kind, () => <String>{}).add(trimmed);
+  }
+
+  void addExports(String kind, Iterable<String> names) {
+    for (final n in names) {
+      addExport(kind, n);
+    }
+  }
 
   final noBlock = text.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
   final lines = noBlock.split('\n');
@@ -241,9 +267,20 @@ _FileFacts _extractFacts(String filePath, String text) {
   final reSideEffect = RegExp(r'''^\s*import\s+['"]([^'"]+)['"]''');
   final reRequire = RegExp(r'''require\s*\(\s*['"]([^'"]+)['"]\s*\)''');
   final reDynImport = RegExp(r'''import\s*\(\s*['"]([^'"]+)['"]\s*\)''');
+  final reDefaultFunc = RegExp(r'''^\s*export\s+default\s+(?:async\s+)?function(?:\s+([A-Za-z0-9_\$]+))?''');
+  final reFunc = RegExp(r'''^\s*export\s+(?:async\s+)?function\s+([A-Za-z0-9_\$]+)''');
+  final reDefaultClass = RegExp(r'''^\s*export\s+default\s+(?:abstract\s+)?class(?:\s+([A-Za-z0-9_\$]+))?''');
+  final reClass = RegExp(r'''^\s*export\s+(?:abstract\s+)?class\s+([A-Za-z0-9_\$]+)''');
+  final reVar = RegExp(r'''^\s*export\s+(?:const|let|var)\s+(.+)''');
+  final reType = RegExp(r'''^\s*export\s+type\s+([A-Za-z0-9_\$]+)''');
+  final reInterface = RegExp(r'''^\s*export\s+interface\s+([A-Za-z0-9_\$]+)''');
+  final reEnum = RegExp(r'''^\s*export\s+enum\s+([A-Za-z0-9_\$]+)''');
+  final reNamed = RegExp(r'''^\s*export\s*{\s*([^}]+)\s*}''');
+  final reDefaultIdentifier = RegExp(r'''^\s*export\s+default\s+([A-Za-z0-9_\$]+)''');
 
   for (var raw in lines) {
     final line = raw.replaceFirst(RegExp(r'//.*$'), '');
+    final trimmed = line.trim();
 
     final m1 = reImport.firstMatch(line);
     if (m1 != null) {
@@ -266,10 +303,109 @@ _FileFacts _extractFacts(String filePath, String text) {
     for (final m in reDynImport.allMatches(line)) {
       imports.add(_ImportFact(m.group(1)!, 'dynamic'));
     }
-  }
-  return _FileFacts(filePath, imports, sideEffectOnly);
-}
 
+    if (trimmed.startsWith('export')) {
+      final defaultFunc = reDefaultFunc.firstMatch(trimmed);
+      if (defaultFunc != null) {
+        final name = defaultFunc.group(1);
+        if (name != null && name.isNotEmpty) {
+          addExport('functions', name);
+          addExport('default', 'function ' + name);
+        } else {
+          addExport('default', 'function');
+        }
+        continue;
+      }
+
+      final func = reFunc.firstMatch(trimmed);
+      if (func != null) {
+        addExport('functions', func.group(1)!);
+        continue;
+      }
+
+      final defaultClass = reDefaultClass.firstMatch(trimmed);
+      if (defaultClass != null) {
+        final name = defaultClass.group(1);
+        if (name != null && name.isNotEmpty) {
+          addExport('classes', name);
+          addExport('default', 'class ' + name);
+        } else {
+          addExport('default', 'class');
+        }
+        continue;
+      }
+
+      final classMatch = reClass.firstMatch(trimmed);
+      if (classMatch != null) {
+        addExport('classes', classMatch.group(1)!);
+        continue;
+      }
+
+      final typeMatch = reType.firstMatch(trimmed);
+      if (typeMatch != null) {
+        addExport('types', typeMatch.group(1)!);
+        continue;
+      }
+
+      final interfaceMatch = reInterface.firstMatch(trimmed);
+      if (interfaceMatch != null) {
+        addExport('interfaces', interfaceMatch.group(1)!);
+        continue;
+      }
+
+      final enumMatch = reEnum.firstMatch(trimmed);
+      if (enumMatch != null) {
+        addExport('enums', enumMatch.group(1)!);
+        continue;
+      }
+
+      final namedMatch = reNamed.firstMatch(trimmed);
+      if (namedMatch != null) {
+        final rawList = namedMatch.group(1)!;
+        final symbols = rawList
+            .split(',')
+            .map((part) => part.trim())
+            .where((part) => part.isNotEmpty)
+            .map((part) {
+          final asMatch = RegExp(r'\bas\s+([A-Za-z0-9_\$]+)', caseSensitive: false)
+              .firstMatch(part);
+          if (asMatch != null) {
+            return asMatch.group(1)!;
+          }
+          final ident = RegExp(r'[A-Za-z0-9_\$]+').firstMatch(part);
+          return ident?.group(0) ?? '';
+        }).where((symbol) => symbol.isNotEmpty);
+        addExports('named', symbols);
+        continue;
+      }
+
+      final defaultIdent = reDefaultIdentifier.firstMatch(trimmed);
+      if (defaultIdent != null) {
+        addExport('default', defaultIdent.group(1)!);
+        continue;
+      }
+
+      final varMatch = reVar.firstMatch(trimmed);
+      if (varMatch != null) {
+        final decl = varMatch.group(1) ?? '';
+        final names = decl
+            .split(',')
+            .map((part) => part.trim())
+            .map((part) {
+          final ident = RegExp(r'[A-Za-z0-9_\$]+').firstMatch(part);
+          return ident?.group(0) ?? '';
+        }).where((name) => name.isNotEmpty);
+        addExports('variables', names);
+        continue;
+      }
+    }
+  }
+  final exports = {
+    for (final entry in exportSets.entries)
+      entry.key: entry.value.toList()..sort((a, b) => a.compareTo(b))
+  };
+  return _FileFacts(filePath, imports, sideEffectOnly, exports);
+}
 // -------- resolution --------
 String? _resolveSpecifier(String cwd, String fromFile, String spec) {
   if (!(spec.startsWith('./') || spec.startsWith('../'))) return null;
