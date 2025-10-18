@@ -288,6 +288,7 @@ _FileFacts _extractFacts(String filePath, String text) {
   final reInterface = RegExp(r'''^\s*export\s+interface\s+([A-Za-z0-9_\$]+)''');
   final reEnum = RegExp(r'''^\s*export\s+enum\s+([A-Za-z0-9_\$]+)''');
   final reDefaultIdentifier = RegExp(r'''^\s*export\s+default\s+([A-Za-z0-9_\$]+)''');
+  final reDefaultFallback = RegExp(r'''^\s*export\s+default\b(.*)$''');
   final reCommonJsProp = RegExp(r'''^(?:module\.)?exports\.([A-Za-z0-9_\$]+)''');
   final reCommonJsBracket =
       RegExp(r'''^(?:module\.)?exports\[['"]([^'"]+)['"]\]''');
@@ -399,6 +400,13 @@ _FileFacts _extractFacts(String filePath, String text) {
           return ident?.group(0) ?? '';
         }).where((name) => name.isNotEmpty);
         addExports('variables', names);
+        continue;
+      }
+
+      final defaultFallback = reDefaultFallback.firstMatch(trimmed);
+      if (defaultFallback != null) {
+        final summary = _summarizeDefaultExport(defaultFallback.group(1) ?? '');
+        addExport('default', summary);
         continue;
       }
     }
@@ -627,4 +635,20 @@ Future<int> _estimateLOC(String file) async {
   } catch (_) {
     return 0;
   }
+}
+
+String _summarizeDefaultExport(String raw) {
+  var expr = raw.trim();
+  if (expr.isEmpty) return 'expression';
+  if (expr.endsWith(';')) {
+    expr = expr.substring(0, expr.length - 1).trim();
+    if (expr.isEmpty) return 'expression';
+  }
+  if (expr.startsWith('{')) return '{...}';
+  if (expr.startsWith('[')) return '[...]';
+  if (expr.startsWith('(')) return '(...)';
+  if (expr.startsWith('function')) return 'function';
+  if (expr.startsWith('class')) return 'class';
+  final ident = RegExp(r'[A-Za-z0-9_\$]+').firstMatch(expr)?.group(0);
+  return ident ?? 'expression';
 }
