@@ -244,6 +244,14 @@ Future<List<String>> _collectSourceFiles(String root) async {
 
 _FileFacts _extractFacts(String filePath, String text) {
   final imports = <_ImportFact>[];
+  void addImport(String spec, String kind) {
+    for (final existing in imports) {
+      if (existing.specifier == spec && existing.kind == kind) {
+        return;
+      }
+    }
+    imports.add(_ImportFact(spec, kind));
+  }
   bool sideEffectOnly = false;
   final exportSets = <String, Set<String>>{};
 
@@ -260,7 +268,11 @@ _FileFacts _extractFacts(String filePath, String text) {
   }
 
   final noBlock = text.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
-  final lines = noBlock.split('\n');
+  final sanitized = noBlock
+      .split('\n')
+      .map((line) => line.replaceFirst(RegExp(r'//.*$'), ''))
+      .join('\n');
+  final lines = sanitized.split('\n');
 
   final reImport = RegExp(r'''^\s*import\s+(?:[^'"]+from\s+)?['"]([^'"]+)['"]''');
   final reExportFrom = RegExp(r'''^\s*export\s+[^;]*\s+from\s+['"]([^'"]+)['"]''');
@@ -275,33 +287,32 @@ _FileFacts _extractFacts(String filePath, String text) {
   final reType = RegExp(r'''^\s*export\s+type\s+([A-Za-z0-9_\$]+)''');
   final reInterface = RegExp(r'''^\s*export\s+interface\s+([A-Za-z0-9_\$]+)''');
   final reEnum = RegExp(r'''^\s*export\s+enum\s+([A-Za-z0-9_\$]+)''');
-  final reNamed = RegExp(r'''^\s*export\s*{\s*([^}]+)\s*}''');
   final reDefaultIdentifier = RegExp(r'''^\s*export\s+default\s+([A-Za-z0-9_\$]+)''');
 
   for (var raw in lines) {
-    final line = raw.replaceFirst(RegExp(r'//.*$'), '');
+    final line = raw;
     final trimmed = line.trim();
 
     final m1 = reImport.firstMatch(line);
     if (m1 != null) {
       final spec = m1.group(1)!;
       final isSide = reSideEffect.hasMatch(line);
-      imports.add(_ImportFact(spec, isSide ? 'side_effect' : 'import'));
+      addImport(spec, isSide ? 'side_effect' : 'import');
       if (isSide) sideEffectOnly = true;
       continue;
     }
 
     final m2 = reExportFrom.firstMatch(line);
     if (m2 != null) {
-      imports.add(_ImportFact(m2.group(1)!, 'reexport'));
+      addImport(m2.group(1)!, 'reexport');
       continue;
     }
 
     for (final m in reRequire.allMatches(line)) {
-      imports.add(_ImportFact(m.group(1)!, 'require'));
+      addImport(m.group(1)!, 'require');
     }
     for (final m in reDynImport.allMatches(line)) {
-      imports.add(_ImportFact(m.group(1)!, 'dynamic'));
+      addImport(m.group(1)!, 'dynamic');
     }
 
     if (trimmed.startsWith('export')) {
@@ -359,26 +370,6 @@ _FileFacts _extractFacts(String filePath, String text) {
         continue;
       }
 
-      final namedMatch = reNamed.firstMatch(trimmed);
-      if (namedMatch != null) {
-        final rawList = namedMatch.group(1)!;
-        final symbols = rawList
-            .split(',')
-            .map((part) => part.trim())
-            .where((part) => part.isNotEmpty)
-            .map((part) {
-          final asMatch = RegExp(r'\bas\s+([A-Za-z0-9_\$]+)', caseSensitive: false)
-              .firstMatch(part);
-          if (asMatch != null) {
-            return asMatch.group(1)!;
-          }
-          final ident = RegExp(r'[A-Za-z0-9_\$]+').firstMatch(part);
-          return ident?.group(0) ?? '';
-        }).where((symbol) => symbol.isNotEmpty);
-        addExports('named', symbols);
-        continue;
-      }
-
       final defaultIdent = reDefaultIdentifier.firstMatch(trimmed);
       if (defaultIdent != null) {
         addExport('default', defaultIdent.group(1)!);
@@ -400,6 +391,36 @@ _FileFacts _extractFacts(String filePath, String text) {
       }
     }
   }
+  final reNamedBlock = RegExp(r'export\s*{\s*([^}]*)\s*}', multiLine: true);
+  for (final match in reNamedBlock.allMatches(sanitized)) {
+    final rawList = match.group(1)!;
+    final symbols = rawList
+        .split(',')
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty)
+        .map((part) {
+      final asMatch =
+          RegExp(r'\bas\s+([A-Za-z0-9_\$]+)', caseSensitive: false).firstMatch(part);
+      if (asMatch != null) {
+        return asMatch.group(1)!;
+      }
+      final ident = RegExp(r'[A-Za-z0-9_\$]+').firstMatch(part);
+      return ident?.group(0) ?? '';
+    }).where((symbol) => symbol.isNotEmpty);
+    addExports('named', symbols);
+  }
+
+  final reMultiReexport =
+      RegExp(r'export\s+[^;{]*\{[^}]*\}\s*from\s*["\']([^"\']+)["\']', multiLine: true);
+  for (final match in reMultiReexport.allMatches(sanitized)) {
+    addImport(match.group(1)!, 'reexport');
+  }
+  final reStarReexport =
+      RegExp(r'export\s+\*\s+from\s*["\']([^"\']+)["\']', multiLine: true);
+  for (final match in reStarReexport.allMatches(sanitized)) {
+    addImport(match.group(1)!, 'reexport');
+  }
+
   final exports = {
     for (final entry in exportSets.entries)
       entry.key: entry.value.toList()..sort((a, b) => a.compareTo(b))
