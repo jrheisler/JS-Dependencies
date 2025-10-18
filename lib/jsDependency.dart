@@ -329,9 +329,9 @@ _FileFacts _extractFacts(String filePath, String text) {
       RegExp(r'''^\s*import\s+['"]([^'"]+)['"]\s*;?\s*$''');
   final reImportFull =
       RegExp(r'''^\s*import\s+(.+?)\s+from\s+['"]([^'"]+)['"]\s*;?\s*$''');
-  final reExportFrom = RegExp(r'''^\s*export\s+[^;]*\s+from\s+['"]([^'"]+)['"]''');
   final reExportNamedFrom = RegExp(
-      r'''^\s*export\s*\{\s*([^}]*)\s*\}\s*from\s*['"]([^'"]+)['"]\s*;?\s*$''');
+      r'''^\s*export\s+(?:type\s+)?\{\s*([^}]*)\s*\}\s*from\s*['"]([^'"]+)['"]\s*;?\s*$''');
+  final reExportFrom = RegExp(r'''^\s*export\s+[^;]*\s+from\s+['"]([^'"]+)['"]''');
   final reRequire = RegExp(r'''require\s*\(\s*['"]([^'"]+)['"]\s*\)''');
   final reDynImport = RegExp(r'''import\s*\(\s*['"]([^'"]+)['"]\s*\)''');
   final reDefaultFunc = RegExp(r'''^\s*export\s+default\s+(?:async\s+)?function(?:\s+([A-Za-z0-9_\$]+))?''');
@@ -378,23 +378,43 @@ _FileFacts _extractFacts(String filePath, String text) {
       continue;
     }
 
-    final m2 = reExportFrom.firstMatch(line);
-    if (m2 != null) {
-      addImport(m2.group(1)!, 'reexport');
-      continue;
-    }
-
     final mENF = reExportNamedFrom.firstMatch(line);
     if (mENF != null) {
       final list = mENF.group(1)!;
       final spec = mENF.group(2)!;
       final parsed = _parseImportClause('{ $list }');
+      final isTypeExport = trimmed.startsWith('export type');
       addImportFact(_ImportFact(
         spec,
         'reexport',
         named: parsed.named,
         namedOriginal: parsed.namedOriginal,
       ));
+      for (var i = 0; i < parsed.named.length; i++) {
+        final alias = parsed.named[i];
+        final orig = i < parsed.namedOriginal.length ? parsed.namedOriginal[i] : alias;
+        final isType = isTypeExport || parsed.typeOnly.contains(alias);
+        if (alias == 'default') {
+          addExport('default', orig);
+          if (isType) {
+            addExport('types', orig);
+          }
+        } else if (isType) {
+          addExport('types', alias);
+        } else {
+          addExport('named', alias);
+        }
+      }
+      continue;
+    }
+
+    final m2 = reExportFrom.firstMatch(line);
+    if (m2 != null) {
+      addImport(m2.group(1)!, 'reexport');
+      final starAs = RegExp(r'^\s*export\s+\*\s+as\s+([A-Za-z0-9_\$]+)').firstMatch(trimmed);
+      if (starAs != null) {
+        addExport('named', starAs.group(1)!);
+      }
       continue;
     }
 
