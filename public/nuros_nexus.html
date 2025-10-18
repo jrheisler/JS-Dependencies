@@ -173,6 +173,7 @@
     <select id="profileSelect" class="btn" title="Switch profile" style="display:none;"></select>
     <div class="status" id="status" role="status" aria-live="polite"></div>
     <button class="btn" id="openJson">Load graph.json</button>
+    <button class="btn" id="exportJson" title="Download current graph JSON" disabled>Graph JSON</button>
     <input type="file" id="fileInput" accept="application/json" hidden />
     <button class="btn" id="exportSbom" title="Download SBOM CSV">SBOM CSV</button>
     <label class="btn" title="Export only the currently filtered nodes">
@@ -542,6 +543,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const hud = $('hud');
   const hudButtons = hud ? Array.from(hud.querySelectorAll('[data-highlight]')) : [];
   const profileSelect = $('profileSelect');
+  const exportJsonBtn = $('exportJson');
   const entrypointsList = $('entrypointsList');
   const entrypointsNote = $('entrypointsNote');
   const profileLegend = $('profileLegend');
@@ -1341,6 +1343,9 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
   $('openJson').addEventListener('click', ()=> $('fileInput').click());
+  if(exportJsonBtn){
+    exportJsonBtn.addEventListener('click', exportGraphJson);
+  }
   $('fileInput').addEventListener('change', async (e)=>{
     const input = e.target;
     const f = input.files[0];
@@ -1613,6 +1618,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if(profileLegend){ profileLegend.innerHTML = ''; }
     if(keepRuleBtn){ keepRuleBtn.style.display = 'none'; }
     if(keepRuleNote){ keepRuleNote.textContent = ''; }
+    if(exportJsonBtn){ exportJsonBtn.disabled = true; }
   }
 
   const captureNodePositions = ()=>{
@@ -1713,6 +1719,7 @@ window.addEventListener('DOMContentLoaded', () => {
     compileKeepRules();
     try {
       await requestAndApplyGraph(gjson, { startMessage: 'Processing graph…' });
+      if(exportJsonBtn){ exportJsonBtn.disabled = false; }
     } catch (err) {
       clearGraph();
       throw err;
@@ -2124,6 +2131,56 @@ window.addEventListener('DOMContentLoaded', () => {
     const x = (n.x*scale*-1) + (svg.node().clientWidth/2);
     const y = (n.y*scale*-1) + (svg.node().clientHeight/2);
     svg.transition().duration(350).call(zoom.translateTo, n.x, n.y);
+  }
+
+  function inferGraphDownloadName(data){
+    if(data && typeof data === 'object'){
+      const meta = data.meta && typeof data.meta === 'object' ? data.meta : {};
+      const candidates = [
+        meta.fileName,
+        meta.filename,
+        meta.name,
+        meta.graphName,
+        meta.graph,
+        meta.source,
+        meta.dataset
+      ].filter(value => typeof value === 'string' && value.trim());
+      for(const candidate of candidates){
+        const trimmed = candidate.trim();
+        if(!trimmed) continue;
+        const base = trimmed.split(/[\\\/]/).pop() || trimmed;
+        let sanitized = base.replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
+        if(!sanitized) continue;
+        if(!sanitized.toLowerCase().endsWith('.json')){
+          sanitized += '.json';
+        }
+        return sanitized;
+      }
+    }
+    return 'graph.json';
+  }
+
+  function exportGraphJson(){
+    if(!rawGraphData){
+      setStatus('No graph data to export');
+      return;
+    }
+    try {
+      const serialized = JSON.stringify(rawGraphData, null, 2);
+      const blob = new Blob([serialized], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = inferGraphDownloadName(rawGraphData);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setStatus('Graph JSON exported');
+    } catch (err) {
+      console.error('Failed to export graph JSON', err);
+      setStatus(`Failed to export graph JSON: ${err.message || err}`);
+    }
   }
 
   function exportSbom(){

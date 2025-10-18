@@ -117,6 +117,7 @@
           <tbody>
             <tr><td><strong>Title / Status</strong></td><td>Branding plus live announcements for load outcomes.</td></tr>
             <tr><td><strong>Load graph</strong></td><td>Open a local JSON graph file or drop a <code>.json</code> anywhere on the page.</td></tr>
+            <tr><td><strong>Graph JSON</strong></td><td>Download the currently loaded dataset as a prettified <code>.json</code> file.</td></tr>
             <tr><td><strong>SBOM CSV</strong></td><td>Export a software bill of materials for the graph. Pair with the <em>Filtered only</em> checkbox to target the current view.</td></tr>
             <tr><td><strong>Filtered only</strong></td><td>Checkbox that scopes SBOM exports to nodes currently surviving filters.</td></tr>
             <tr><td><strong>Color mode</strong></td><td>Switch between <em>State</em>, <em>Type</em>, <em>Degree</em>, and <em>Package</em> color palettes.</td></tr>
@@ -308,6 +309,7 @@
       <section id="export">
         <h2>Export & Persistence</h2>
         <ul>
+          <li><strong>Graph JSON</strong> downloads the exact data currently driving the visualization for auditing or archiving.</li>
           <li><strong>SBOM CSV</strong> exports node metadata (state, type, package, LOC, degree). Use <em>Filtered only</em> to scope the export.</li>
           <li><strong>Auto‑load</strong> attempts URL param (e.g., <code>?load=graph.json</code>) or defaults to <code>jsDependencies.json</code>, falling back to a demo dataset with status messaging.</li>
           <li>Sidebar collapse state and node pin positions are saved locally to keep your layout intact.</li>
