@@ -318,6 +318,45 @@ _FileFacts _extractFacts(String filePath, String text) {
     }
   }
 
+  List<String> extractNamesFromDeclaration(String decl) {
+    const keywords = {
+      'const',
+      'let',
+      'var',
+      'enum',
+      'type',
+      'interface',
+      'default',
+      'function',
+      'class',
+      'async',
+      'abstract',
+      'declare',
+      'readonly',
+      'public',
+      'private',
+      'protected',
+      'static',
+      'get',
+      'set',
+    };
+    final results = <String>[];
+    final identPattern = RegExp(r'[A-Za-z_][\w\$]*');
+    for (final part in decl.split(',')) {
+      final cleaned = part.trim();
+      if (cleaned.isEmpty) continue;
+      final matches = identPattern.allMatches(cleaned);
+      for (final match in matches) {
+        final candidate = match.group(0)!;
+        if (!keywords.contains(candidate)) {
+          results.add(candidate);
+          break;
+        }
+      }
+    }
+    return results;
+  }
+
   final noBlock = text.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
   final sanitized = noBlock
       .replaceFirst('\ufeff', '')
@@ -464,7 +503,9 @@ _FileFacts _extractFacts(String filePath, String text) {
 
       final func = reFunc.firstMatch(trimmed);
       if (func != null) {
-        addExport('functions', func.group(1)!);
+        final name = func.group(1)!;
+        addExport('functions', name);
+        addExport('named', name);
         continue;
       }
 
@@ -482,7 +523,9 @@ _FileFacts _extractFacts(String filePath, String text) {
 
       final classMatch = reClass.firstMatch(trimmed);
       if (classMatch != null) {
-        addExport('classes', classMatch.group(1)!);
+        final name = classMatch.group(1)!;
+        addExport('classes', name);
+        addExport('named', name);
         continue;
       }
 
@@ -513,14 +556,9 @@ _FileFacts _extractFacts(String filePath, String text) {
       final varMatch = reVar.firstMatch(trimmed);
       if (varMatch != null) {
         final decl = varMatch.group(1) ?? '';
-        final names = decl
-            .split(',')
-            .map((part) => part.trim())
-            .map((part) {
-          final ident = RegExp(r'[A-Za-z0-9_\$]+').firstMatch(part);
-          return ident?.group(0) ?? '';
-        }).where((name) => name.isNotEmpty);
+        final names = extractNamesFromDeclaration(decl);
         addExports('variables', names);
+        addExports('named', names);
         continue;
       }
 
@@ -599,6 +637,32 @@ _FileFacts _extractFacts(String filePath, String text) {
       return ident?.group(0) ?? '';
     }).where((symbol) => symbol.isNotEmpty);
     addExports('named', symbols);
+  }
+
+  final reVarMulti = RegExp(r'export\s+(?:const|let|var)\s+([^;]+)', multiLine: true);
+  for (final match in reVarMulti.allMatches(sanitized)) {
+    final decl = match.group(1) ?? '';
+    final names = extractNamesFromDeclaration(decl);
+    addExports('variables', names);
+    addExports('named', names);
+  }
+
+  final reFuncMulti =
+      RegExp(r'export\s+(?:async\s+)?function\s+([A-Za-z_][\w\$]*)', multiLine: true);
+  for (final match in reFuncMulti.allMatches(sanitized)) {
+    final name = match.group(1);
+    if (name == null || name.isEmpty) continue;
+    addExport('functions', name);
+    addExport('named', name);
+  }
+
+  final reClassMulti =
+      RegExp(r'export\s+(?:abstract\s+)?class\s+([A-Za-z_][\w\$]*)', multiLine: true);
+  for (final match in reClassMulti.allMatches(sanitized)) {
+    final name = match.group(1);
+    if (name == null || name.isEmpty) continue;
+    addExport('classes', name);
+    addExport('named', name);
   }
 
   final reMultiReexport =
