@@ -1,0 +1,4999 @@
+{
+  "nodes": [
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\features\\attach-boundary\\index.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 158,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 4,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\features\\attach-boundary\\index.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 570,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 6,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\filtering.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 92,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\filtering.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\overlays.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 51,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\overlays.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\store.js",
+      "type": "file",
+      "state": "side_effect_only",
+      "lang": "js",
+      "sizeLOC": 45,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\store.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\addons.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 59,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\addons.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\init.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 74,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 1,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\init.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\overlay.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 42,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 1,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\overlay.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\simulation.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 89,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 4,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\simulation.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\timeline.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 311,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 1,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\timeline.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 1269,
+      "hasSideEffects": true,
+      "inDeg": 0,
+      "outDeg": 23,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 82,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 7,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 41,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 5,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\blockchain.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 100,
+      "hasSideEffects": false,
+      "inDeg": 2,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\blockchain.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnFilter.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 201,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnFilter.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnLegend.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 74,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnLegend.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\controls.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 560,
+      "hasSideEffects": false,
+      "inDeg": 2,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\controls.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\diagramTree.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 60,
+      "hasSideEffects": false,
+      "inDeg": 2,
+      "outDeg": 1,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\diagramTree.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\elements.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 54,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\elements.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 5,
+      "hasSideEffects": false,
+      "inDeg": 10,
+      "outDeg": 5,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\inputs.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 160,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\inputs.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\layout.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 94,
+      "hasSideEffects": false,
+      "inDeg": 4,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\layout.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\media.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 77,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\media.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\modal.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 40,
+      "hasSideEffects": false,
+      "inDeg": 2,
+      "outDeg": 1,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\modal.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\property-config.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 270,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\property-config.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\raci.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 87,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\raci.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\raciMatrix.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 104,
+      "hasSideEffects": false,
+      "inDeg": 2,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\raciMatrix.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\showProperties.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 552,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 5,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\showProperties.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\text.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 32,
+      "hasSideEffects": false,
+      "inDeg": 3,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\text.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\tokenListPanel.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 133,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\tokenListPanel.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\expression\\index.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 288,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\expression\\index.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\message-broker.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 28,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\message-broker.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\context.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 11,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\context.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\handlers.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 35,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\handlers.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\token-log.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 51,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\token-log.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 663,
+      "hasSideEffects": false,
+      "inDeg": 2,
+      "outDeg": 4,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 118,
+      "hasSideEffects": false,
+      "inDeg": 21,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 236,
+      "hasSideEffects": false,
+      "inDeg": 20,
+      "outDeg": 1,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 297,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 6,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.example.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 13,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.example.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 14,
+      "hasSideEffects": false,
+      "inDeg": 5,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\modals\\index.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 27,
+      "hasSideEffects": false,
+      "inDeg": 2,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\modals\\index.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\customReplaceMenuProvider.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 39,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\customReplaceMenuProvider.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\timeline.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 83,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 1,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\timeline.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\palette-toggle.js",
+      "type": "file",
+      "state": "side_effect_only",
+      "lang": "js",
+      "sizeLOC": 9,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 0,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\palette-toggle.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\public\\js\\timeline\\entryModal.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 134,
+      "hasSideEffects": false,
+      "inDeg": 1,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\public\\js\\timeline\\entryModal.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\canvas-background.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 23,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\canvas-background.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\exclusive-gateway.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 291,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 1,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\exclusive-gateway.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 42,
+      "hasSideEffects": false,
+      "inDeg": 23,
+      "outDeg": 2,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\inclusive-gateway.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 205,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\inclusive-gateway.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\raci-matrix.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 45,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 4,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\raci-matrix.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\raci-serialization.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 45,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\raci-serialization.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\reactive-image.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 20,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\reactive-image.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\blockchain-simulation.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 71,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 5,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\blockchain-simulation.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\boundary-events.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 115,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\boundary-events.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\delivery-gateway.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 68,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\delivery-gateway.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-based-gateway.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 75,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-based-gateway.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-handlers.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 222,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-handlers.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-autoselect.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 32,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-autoselect.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-conditional.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 75,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-conditional.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-default.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 130,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 4,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-default.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.multiple.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 30,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.multiple.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 51,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\flow-markers.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 28,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\flow-markers.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-expression-failure.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 50,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-expression-failure.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-gateway-missing-direction.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 61,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-gateway-missing-direction.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-split-join.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 101,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-split-join.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\manual-resume.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 37,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\manual-resume.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow-concurrency.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 69,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow-concurrency.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 104,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\start-events.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 83,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\start-events.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\subprocess.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 127,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\subprocess.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\timer-events.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 66,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\timer-events.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\undefined-variable.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 50,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\undefined-variable.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\unsafe-expression.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 51,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\unsafe-expression.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\theme-connection.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 14,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\theme-connection.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\theme-highlight.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 66,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 4,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\theme-highlight.test.js"
+    },
+    {
+      "id": "C:\\source\\BPMN-Client-ESM\\test\\theme.test.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 15,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 3,
+      "absPath": "C:\\source\\BPMN-Client-ESM\\test\\theme.test.js"
+    },
+    {
+      "id": "bpmn-js/lib/features/modeling/util/ModelingUtil",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "bpmn-js",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "bpmn-js/lib/util/ModelUtil",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "bpmn-js",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "inherits-browser",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "inherits-browser",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "diagram-js/lib/features/rules/RuleProvider",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "diagram-js",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "firebase/firestore",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "firebase",
+      "inDeg": 6,
+      "outDeg": 0
+    },
+    {
+      "id": "bpmn-js/lib/features/snapping",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "bpmn-js",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "diagram-js/lib/features/grid-snapping",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "diagram-js",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "firebase/auth",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "firebase",
+      "inDeg": 4,
+      "outDeg": 0
+    },
+    {
+      "id": "firebase/app",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "firebase",
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "bpmn-js/lib/features/popup-menu/ReplaceMenuProvider.js",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "bpmn-js",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "bpmn-js/lib/util/ModelUtil.js",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "bpmn-js",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "node:test",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "node:test",
+      "inDeg": 30,
+      "outDeg": 0
+    },
+    {
+      "id": "node:assert/strict",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "node:assert",
+      "inDeg": 30,
+      "outDeg": 0
+    },
+    {
+      "id": "bpmn-moddle",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "bpmn-moddle",
+      "inDeg": 2,
+      "outDeg": 0
+    },
+    {
+      "id": "node:crypto",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "node:crypto",
+      "inDeg": 1,
+      "outDeg": 0
+    },
+    {
+      "id": "node:fs/promises",
+      "type": "external",
+      "state": "used",
+      "lang": "js",
+      "package": "node:fs",
+      "inDeg": 2,
+      "outDeg": 0
+    }
+  ],
+  "edges": [
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\features\\attach-boundary\\index.js",
+      "target": "bpmn-js/lib/features/modeling/util/ModelingUtil",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\features\\attach-boundary\\index.js",
+      "target": "bpmn-js/lib/util/ModelUtil",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\features\\attach-boundary\\index.js",
+      "target": "inherits-browser",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\features\\attach-boundary\\index.js",
+      "target": "diagram-js/lib/features/rules/RuleProvider",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\layout.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js",
+      "target": "firebase/firestore",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\filtering.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnFilter.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\filtering.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnLegend.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\addons.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\addons.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\overlays.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\addons.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\filtering.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\init.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\overlay.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\simulation.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\simulation.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\tokenListPanel.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\simulation.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\simulation.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\blockchain.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\timeline.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\customReplaceMenuProvider.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\raciMatrix.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\showProperties.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\diagramTree.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\modals\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "bpmn-js/lib/features/snapping",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "diagram-js/lib/features/grid-snapping",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\store.js",
+      "kind": "side_effect",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\palette-toggle.js",
+      "kind": "side_effect",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\layout.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "firebase/firestore",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\init.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\overlay.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\timeline.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\timeline.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\addons.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\timeline\\entryModal.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\modal.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js",
+      "target": "firebase/auth",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js",
+      "target": "firebase/firestore",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\modals\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth.js",
+      "target": "firebase/auth",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnFilter.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnFilter.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnLegend.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnLegend.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\controls.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\controls.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\controls.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\text.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\diagramTree.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\elements.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\elements.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\layout.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\elements.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\text.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\elements.js",
+      "kind": "reexport",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\text.js",
+      "kind": "reexport",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\inputs.js",
+      "kind": "reexport",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\media.js",
+      "kind": "reexport",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\controls.js",
+      "kind": "reexport",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\inputs.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\inputs.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\layout.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\layout.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\diagramTree.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\media.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\media.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\modal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\showProperties.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\showProperties.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\showProperties.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\controls.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\showProperties.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\layout.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\showProperties.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\property-config.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\text.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\text.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\tokenListPanel.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\tokenListPanel.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\context.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\handlers.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\token-log.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\modal.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js",
+      "target": "firebase/firestore",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.example.js",
+      "target": "firebase/app",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.example.js",
+      "target": "firebase/auth",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.example.js",
+      "target": "firebase/firestore",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js",
+      "target": "firebase/app",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js",
+      "target": "firebase/auth",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js",
+      "target": "firebase/firestore",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\modals\\index.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\modals\\index.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\modals\\index.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\customReplaceMenuProvider.js",
+      "target": "bpmn-js/lib/features/popup-menu/ReplaceMenuProvider.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\customReplaceMenuProvider.js",
+      "target": "bpmn-js/lib/util/ModelUtil.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\timeline.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\timeline\\entryModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\public\\js\\timeline\\entryModal.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\canvas-background.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\canvas-background.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\canvas-background.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "dynamic",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\exclusive-gateway.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js",
+      "kind": "dynamic",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation.js",
+      "kind": "dynamic",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\inclusive-gateway.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\inclusive-gateway.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\inclusive-gateway.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\raci-matrix.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\raci-matrix.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\raci-matrix.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\raciMatrix.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\raci-matrix.test.js",
+      "target": "bpmn-moddle",
+      "kind": "dynamic",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\raci-serialization.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\raci-serialization.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\raci-serialization.test.js",
+      "target": "bpmn-moddle",
+      "kind": "dynamic",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\reactive-image.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\reactive-image.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\reactive-image.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "kind": "dynamic",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\blockchain-simulation.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\blockchain-simulation.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\blockchain-simulation.test.js",
+      "target": "node:crypto",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\blockchain-simulation.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\blockchain-simulation.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\blockchain.js",
+      "kind": "dynamic",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\boundary-events.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\boundary-events.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\boundary-events.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\delivery-gateway.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\delivery-gateway.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\delivery-gateway.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-based-gateway.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-based-gateway.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-based-gateway.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-handlers.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-handlers.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-handlers.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-autoselect.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-autoselect.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-autoselect.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-conditional.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-conditional.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-conditional.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-default.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-default.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-default.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-default.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.multiple.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.multiple.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.multiple.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\flow-markers.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\flow-markers.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\flow-markers.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-expression-failure.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-expression-failure.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-expression-failure.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-gateway-missing-direction.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-gateway-missing-direction.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-gateway-missing-direction.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-split-join.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-split-join.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-split-join.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\manual-resume.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\manual-resume.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\manual-resume.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow-concurrency.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow-concurrency.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow-concurrency.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\start-events.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\start-events.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\start-events.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\subprocess.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\subprocess.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\subprocess.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\timer-events.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\timer-events.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\timer-events.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\undefined-variable.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\undefined-variable.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\undefined-variable.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\unsafe-expression.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\unsafe-expression.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\simulation\\unsafe-expression.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\theme-connection.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\theme-connection.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\theme-connection.test.js",
+      "target": "node:fs/promises",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\theme-highlight.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\theme-highlight.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\theme-highlight.test.js",
+      "target": "node:fs/promises",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\theme-highlight.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "dynamic",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\theme.test.js",
+      "target": "node:test",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\theme.test.js",
+      "target": "node:assert/strict",
+      "kind": "import",
+      "certainty": "static"
+    },
+    {
+      "source": "C:\\source\\BPMN-Client-ESM\\test\\theme.test.js",
+      "target": "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js",
+      "kind": "dynamic",
+      "certainty": "static"
+    }
+  ],
+  "exports": {
+    "C:\\source\\BPMN-Client-ESM\\public\\features\\attach-boundary\\index.js": {
+      "default": [
+        "{...}"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js": {
+      "functions": [
+        "openAddOnChooserModal"
+      ],
+      "named": [
+        "openAddOnChooserModal"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\filtering.js": {
+      "functions": [
+        "initAddOnFiltering"
+      ],
+      "named": [
+        "initAddOnFiltering"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\overlays.js": {
+      "functions": [
+        "initAddOnOverlays"
+      ],
+      "named": [
+        "initAddOnOverlays"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\addons.js": {
+      "functions": [
+        "initializeAddOnServices",
+        "setupAvatarMenu"
+      ],
+      "named": [
+        "initializeAddOnServices",
+        "setupAvatarMenu"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\init.js": {
+      "functions": [
+        "createHiddenFileInput",
+        "setupPageScaffolding"
+      ],
+      "named": [
+        "createHiddenFileInput",
+        "setupPageScaffolding"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\overlay.js": {
+      "variables": [
+        "Business",
+        "Condition",
+        "Equipment",
+        "Information",
+        "Lifecycle",
+        "Material",
+        "Measurement",
+        "Requirement",
+        "Role",
+        "System",
+        "Tool",
+        "typeIcons"
+      ],
+      "named": [
+        "Business",
+        "Condition",
+        "Equipment",
+        "Information",
+        "Lifecycle",
+        "Material",
+        "Measurement",
+        "Requirement",
+        "Role",
+        "System",
+        "Tool",
+        "attachOverlay",
+        "createOverlay",
+        "setupCanvasLayout",
+        "typeIcons"
+      ],
+      "functions": [
+        "attachOverlay",
+        "createOverlay",
+        "setupCanvasLayout"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\simulation.js": {
+      "functions": [
+        "bootstrapSimulation"
+      ],
+      "named": [
+        "bootstrapSimulation"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\timeline.js": {
+      "functions": [
+        "setupTimeline"
+      ],
+      "named": [
+        "setupTimeline"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js": {
+      "functions": [
+        "reactiveLoginModal"
+      ],
+      "named": [
+        "reactiveLoginModal"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\auth.js": {
+      "variables": [
+        "currentUser",
+        "logUser"
+      ],
+      "named": [
+        "authMenuOption",
+        "currentUser",
+        "logUser"
+      ],
+      "functions": [
+        "authMenuOption"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\blockchain.js": {
+      "classes": [
+        "Block",
+        "Blockchain"
+      ],
+      "named": [
+        "Block",
+        "Blockchain"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnFilter.js": {
+      "functions": [
+        "createAddOnFilterPanel"
+      ],
+      "named": [
+        "createAddOnFilterPanel",
+        "selectedSubtype",
+        "selectedType"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnLegend.js": {
+      "functions": [
+        "createAddOnLegend"
+      ],
+      "named": [
+        "createAddOnLegend"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\controls.js": {
+      "functions": [
+        "avatarDropdown",
+        "gridView",
+        "openFlowSelectionModal",
+        "reactiveButton",
+        "showConfirmationDialog",
+        "showToast",
+        "toggleSwitch"
+      ],
+      "named": [
+        "avatarDropdown",
+        "gridView",
+        "openFlowSelectionModal",
+        "reactiveButton",
+        "showConfirmationDialog",
+        "showToast",
+        "toggleSwitch"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\diagramTree.js": {
+      "variables": [
+        "onSelect",
+        "togglePanel",
+        "treeStream"
+      ],
+      "named": [
+        "createTreeContainer",
+        "getSelectedId",
+        "onSelect",
+        "setOnSelect",
+        "setSelectedId",
+        "setTogglePanel",
+        "togglePanel",
+        "treeStream"
+      ],
+      "functions": [
+        "createTreeContainer",
+        "getSelectedId",
+        "setOnSelect",
+        "setSelectedId",
+        "setTogglePanel"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\elements.js": {
+      "functions": [
+        "conditional",
+        "headerContainer",
+        "reactiveElement"
+      ],
+      "named": [
+        "conditional",
+        "headerContainer",
+        "reactiveElement"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js": {
+      "reexports": [
+        "./controls.js",
+        "./elements.js",
+        "./inputs.js",
+        "./media.js",
+        "./text.js"
+      ],
+      "starReexports": [
+        "./controls.js",
+        "./elements.js",
+        "./inputs.js",
+        "./media.js",
+        "./text.js"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\inputs.js": {
+      "functions": [
+        "dropdownStream",
+        "editText",
+        "editableDropdown",
+        "fileInput"
+      ],
+      "named": [
+        "dropdownStream",
+        "editText",
+        "editableDropdown",
+        "fileInput"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\layout.js": {
+      "functions": [
+        "column",
+        "container",
+        "divider",
+        "row"
+      ],
+      "named": [
+        "column",
+        "container",
+        "divider",
+        "row"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\media.js": {
+      "functions": [
+        "avatarImage",
+        "createDiagramOverlay",
+        "reactiveImage"
+      ],
+      "named": [
+        "avatarImage",
+        "createDiagramOverlay",
+        "reactiveImage"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\modal.js": {
+      "functions": [
+        "createModal"
+      ],
+      "named": [
+        "createModal"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\property-config.js": {
+      "variables": [
+        "BPMN_PROPERTY_MAP",
+        "FIELD_DEFINITIONS",
+        "accountable",
+        "actualDuration",
+        "array",
+        "assignee",
+        "availability",
+        "bpmn",
+        "calledElement",
+        "categoryValueRef",
+        "changeOverTime",
+        "conditionExpression",
+        "consulted",
+        "costEstimate",
+        "creator",
+        "documentation",
+        "downTime",
+        "estimatedDuration",
+        "implementation",
+        "informed",
+        "inputMappings",
+        "inputQuality",
+        "itemSubjectRef",
+        "key",
+        "kpiNotes",
+        "label",
+        "leadTime",
+        "outputMappings",
+        "outputQuality",
+        "ownerRole",
+        "perCompleteAccurate",
+        "processOwner",
+        "processRef",
+        "responsible",
+        "script",
+        "scriptFormat",
+        "text",
+        "textarea",
+        "upTime",
+        "variables"
+      ],
+      "named": [
+        "BPMN_PROPERTY_MAP",
+        "FIELD_DEFINITIONS",
+        "accountable",
+        "actualDuration",
+        "array",
+        "assignee",
+        "availability",
+        "bpmn",
+        "calledElement",
+        "categoryValueRef",
+        "changeOverTime",
+        "conditionExpression",
+        "consulted",
+        "costEstimate",
+        "creator",
+        "documentation",
+        "downTime",
+        "estimatedDuration",
+        "implementation",
+        "informed",
+        "inputMappings",
+        "inputQuality",
+        "itemSubjectRef",
+        "key",
+        "kpiNotes",
+        "label",
+        "leadTime",
+        "outputMappings",
+        "outputQuality",
+        "ownerRole",
+        "perCompleteAccurate",
+        "processOwner",
+        "processRef",
+        "responsible",
+        "script",
+        "scriptFormat",
+        "text",
+        "textarea",
+        "upTime",
+        "variables"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\raci.js": {
+      "variables": [
+        "RACI_FIELDS",
+        "accountable",
+        "consulted",
+        "informed"
+      ],
+      "named": [
+        "RACI_FIELDS",
+        "accountable",
+        "attachRaciMruHandlers",
+        "consulted",
+        "createRaciDatalist",
+        "getRaciFieldValue",
+        "informed",
+        "updateRaciAssignments"
+      ],
+      "functions": [
+        "attachRaciMruHandlers",
+        "createRaciDatalist",
+        "getRaciFieldValue",
+        "updateRaciAssignments"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\raciMatrix.js": {
+      "functions": [
+        "collectData",
+        "createRaciMatrix"
+      ],
+      "named": [
+        "collectData",
+        "createRaciMatrix"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\showProperties.js": {
+      "functions": [
+        "hideSidebar",
+        "showProperties"
+      ],
+      "named": [
+        "hideSidebar",
+        "showProperties"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\text.js": {
+      "functions": [
+        "reactiveText",
+        "text"
+      ],
+      "named": [
+        "reactiveText",
+        "text"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\tokenListPanel.js": {
+      "functions": [
+        "createTokenListPanel"
+      ],
+      "named": [
+        "createTokenListPanel"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\expression\\index.js": {
+      "functions": [
+        "evaluate"
+      ],
+      "named": [
+        "evaluate",
+        "safeEval"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\message-broker.js": {
+      "functions": [
+        "createMessageBroker"
+      ],
+      "named": [
+        "createMessageBroker"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\context.js": {
+      "functions": [
+        "createContextHelpers"
+      ],
+      "named": [
+        "createContextHelpers"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\handlers.js": {
+      "functions": [
+        "createHandlerManager"
+      ],
+      "named": [
+        "createHandlerManager"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation\\token-log.js": {
+      "functions": [
+        "createTokenLogHelpers"
+      ],
+      "named": [
+        "createTokenLogHelpers"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation.js": {
+      "functions": [
+        "createSimulation"
+      ],
+      "named": [
+        "createSimulation"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\stream.js": {
+      "classes": [
+        "Stream"
+      ],
+      "named": [
+        "Stream",
+        "derived",
+        "fieldStream",
+        "intervalStream",
+        "observeDOMRemoval",
+        "timeoutStream"
+      ],
+      "functions": [
+        "derived",
+        "fieldStream",
+        "intervalStream",
+        "observeDOMRemoval",
+        "timeoutStream"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js": {
+      "variables": [
+        "currentTheme",
+        "fonts",
+        "themesLoaded"
+      ],
+      "named": [
+        "applyTheme",
+        "applyThemeToPage",
+        "currentTheme",
+        "fonts",
+        "themeToggleButton",
+        "themedThemeSelector",
+        "themesLoaded"
+      ],
+      "functions": [
+        "applyTheme",
+        "applyThemeToPage",
+        "themeToggleButton",
+        "themedThemeSelector"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js": {
+      "functions": [
+        "openDiagramPickerModal",
+        "promptDiagramMetadata",
+        "selectVersionModal"
+      ],
+      "named": [
+        "openDiagramPickerModal",
+        "promptDiagramMetadata",
+        "selectVersionModal"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.example.js": {
+      "variables": [
+        "auth",
+        "db"
+      ],
+      "named": [
+        "auth",
+        "db"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js": {
+      "variables": [
+        "auth",
+        "db"
+      ],
+      "named": [
+        "auth",
+        "db"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\modals\\index.js": {
+      "named": [
+        "openAddOnChooserModal",
+        "openDiagramPickerModal",
+        "promptDiagramMetadata",
+        "reactiveLoginModal",
+        "selectVersionModal"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\customReplaceMenuProvider.js": {
+      "classes": [
+        "CustomReplaceMenuProvider"
+      ],
+      "named": [
+        "CustomReplaceMenuProvider"
+      ],
+      "default": [
+        "{...}"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\timeline.js": {
+      "variables": [
+        "selectedTimelineEntryId",
+        "timelineEntries"
+      ],
+      "named": [
+        "addTimelineEntry",
+        "clearTimelineEntries",
+        "getTimelineEntry",
+        "removeTimelineEntry",
+        "selectTimelineEntry",
+        "selectedTimelineEntryId",
+        "setTimelineEntries",
+        "spaceTimelineEntriesEvenly",
+        "timelineEntries",
+        "updateTimelineEntry"
+      ],
+      "functions": [
+        "addTimelineEntry",
+        "clearTimelineEntries",
+        "getTimelineEntry",
+        "removeTimelineEntry",
+        "selectTimelineEntry",
+        "setTimelineEntries",
+        "spaceTimelineEntriesEvenly",
+        "updateTimelineEntry"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\timeline\\entryModal.js": {
+      "functions": [
+        "promptTimelineEntryMetadata"
+      ],
+      "named": [
+        "promptTimelineEntryMetadata"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\test\\helpers\\exclusive-gateway.js": {
+      "functions": [
+        "buildAllFalseExclusiveGatewayDiagram",
+        "buildAutoResumeExclusiveGatewayDiagram",
+        "buildBasicExclusiveGatewayDiagram",
+        "buildContextChoiceExclusiveGatewayDiagram",
+        "buildSingleViableExclusiveGatewayDiagram",
+        "setupFlowSelectionTestEnvironment"
+      ],
+      "named": [
+        "buildAllFalseExclusiveGatewayDiagram",
+        "buildAutoResumeExclusiveGatewayDiagram",
+        "buildBasicExclusiveGatewayDiagram",
+        "buildContextChoiceExclusiveGatewayDiagram",
+        "buildSingleViableExclusiveGatewayDiagram",
+        "setupFlowSelectionTestEnvironment"
+      ]
+    },
+    "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js": {
+      "named": [
+        "createSimulationInstance",
+        "loadSimulation"
+      ]
+    }
+  },
+  "imports": {
+    "C:\\source\\BPMN-Client-ESM\\public\\features\\attach-boundary\\index.js": [
+      {
+        "kind": "import",
+        "spec": "bpmn-js/lib/features/modeling/util/ModelingUtil",
+        "named": [
+          "isAny"
+        ],
+        "namedOriginal": [
+          "isAny"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "bpmn-js/lib/util/ModelUtil",
+        "named": [
+          "is"
+        ],
+        "namedOriginal": [
+          "is"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "inherits-browser",
+        "default": "inherits"
+      },
+      {
+        "kind": "import",
+        "spec": "diagram-js/lib/features/rules/RuleProvider",
+        "default": "RuleProvider"
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\chooserModal.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../components/index.js",
+        "named": [
+          "editText",
+          "reactiveButton",
+          "dropdownStream",
+          "showConfirmationDialog",
+          "showToast"
+        ],
+        "namedOriginal": [
+          "editText",
+          "reactiveButton",
+          "dropdownStream",
+          "showConfirmationDialog",
+          "showToast"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../components/layout.js",
+        "named": [
+          "column",
+          "row"
+        ],
+        "namedOriginal": [
+          "column",
+          "row"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../firebase.js",
+        "named": [
+          "db"
+        ],
+        "namedOriginal": [
+          "db"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "firebase/firestore",
+        "named": [
+          "collection",
+          "doc",
+          "getDoc",
+          "addDoc",
+          "updateDoc",
+          "arrayUnion",
+          "arrayRemove",
+          "serverTimestamp"
+        ],
+        "namedOriginal": [
+          "collection",
+          "doc",
+          "getDoc",
+          "addDoc",
+          "updateDoc",
+          "arrayUnion",
+          "arrayRemove",
+          "serverTimestamp"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\addons\\filtering.js": [
+      {
+        "kind": "import",
+        "spec": "../components/addOnFilter.js",
+        "named": [
+          "createAddOnFilterPanel",
+          "selectedType",
+          "selectedSubtype"
+        ],
+        "namedOriginal": [
+          "createAddOnFilterPanel",
+          "selectedType",
+          "selectedSubtype"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../components/addOnLegend.js",
+        "named": [
+          "createAddOnLegend"
+        ],
+        "namedOriginal": [
+          "createAddOnLegend"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\addons.js": [
+      {
+        "kind": "import",
+        "spec": "../components/index.js",
+        "named": [
+          "avatarDropdown"
+        ],
+        "namedOriginal": [
+          "avatarDropdown"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../addons/overlays.js",
+        "named": [
+          "initAddOnOverlays"
+        ],
+        "namedOriginal": [
+          "initAddOnOverlays"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../addons/filtering.js",
+        "named": [
+          "initAddOnFiltering"
+        ],
+        "namedOriginal": [
+          "initAddOnFiltering"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\init.js": [
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "applyThemeToPage"
+        ],
+        "namedOriginal": [
+          "applyThemeToPage"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\overlay.js": [
+      {
+        "kind": "import",
+        "spec": "../components/index.js",
+        "named": [
+          "createDiagramOverlay"
+        ],
+        "namedOriginal": [
+          "createDiagramOverlay"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\simulation.js": [
+      {
+        "kind": "import",
+        "spec": "../core/simulation.js",
+        "named": [
+          "createSimulation"
+        ],
+        "namedOriginal": [
+          "createSimulation"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../components/tokenListPanel.js",
+        "named": [
+          "createTokenListPanel"
+        ],
+        "namedOriginal": [
+          "createTokenListPanel"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../components/index.js",
+        "named": [
+          "openFlowSelectionModal"
+        ],
+        "namedOriginal": [
+          "openFlowSelectionModal"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../blockchain.js",
+        "named": [
+          "Blockchain"
+        ],
+        "namedOriginal": [
+          "Blockchain"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app\\timeline.js": [
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\app.js": [
+      {
+        "kind": "import",
+        "spec": "./modules/customReplaceMenuProvider.js",
+        "default": "customReplaceModule"
+      },
+      {
+        "kind": "import",
+        "spec": "./components/raciMatrix.js",
+        "named": [
+          "createRaciMatrix"
+        ],
+        "namedOriginal": [
+          "createRaciMatrix"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./components/index.js",
+        "named": [
+          "reactiveButton",
+          "dropdownStream",
+          "showToast"
+        ],
+        "namedOriginal": [
+          "reactiveButton",
+          "dropdownStream",
+          "showToast"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./components/showProperties.js",
+        "named": [
+          "showProperties",
+          "hideSidebar"
+        ],
+        "namedOriginal": [
+          "showProperties",
+          "hideSidebar"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./components/diagramTree.js",
+        "named": [
+          "treeStream",
+          "setSelectedId",
+          "setOnSelect",
+          "togglePanel"
+        ],
+        "namedOriginal": [
+          "treeStream",
+          "setSelectedId",
+          "setOnSelect",
+          "togglePanel"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./auth.js",
+        "named": [
+          "logUser",
+          "currentUser",
+          "authMenuOption"
+        ],
+        "namedOriginal": [
+          "logUser",
+          "currentUser",
+          "authMenuOption"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./modals/index.js",
+        "named": [
+          "openDiagramPickerModal",
+          "promptDiagramMetadata",
+          "selectVersionModal"
+        ],
+        "namedOriginal": [
+          "openDiagramPickerModal",
+          "promptDiagramMetadata",
+          "selectVersionModal"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./core/theme.js",
+        "named": [
+          "currentTheme",
+          "applyThemeToPage",
+          "themedThemeSelector"
+        ],
+        "namedOriginal": [
+          "currentTheme",
+          "applyThemeToPage",
+          "themedThemeSelector"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "bpmn-js/lib/features/snapping",
+        "default": "BpmnSnapping"
+      },
+      {
+        "kind": "import",
+        "spec": "diagram-js/lib/features/grid-snapping",
+        "default": "GridSnappingModule"
+      },
+      {
+        "kind": "side_effect",
+        "spec": "./addons/store.js"
+      },
+      {
+        "kind": "side_effect",
+        "spec": "./palette-toggle.js"
+      },
+      {
+        "kind": "import",
+        "spec": "./components/layout.js",
+        "named": [
+          "row"
+        ],
+        "namedOriginal": [
+          "row"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./firebase.js",
+        "named": [
+          "db"
+        ],
+        "namedOriginal": [
+          "db"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "firebase/firestore",
+        "named": [
+          "doc",
+          "collection",
+          "updateDoc",
+          "setDoc",
+          "addDoc",
+          "getDoc",
+          "Timestamp",
+          "arrayUnion"
+        ],
+        "namedOriginal": [
+          "doc",
+          "collection",
+          "updateDoc",
+          "setDoc",
+          "addDoc",
+          "getDoc",
+          "Timestamp",
+          "arrayUnion"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./app/init.js",
+        "named": [
+          "setupPageScaffolding",
+          "createHiddenFileInput"
+        ],
+        "namedOriginal": [
+          "setupPageScaffolding",
+          "createHiddenFileInput"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./app/overlay.js",
+        "named": [
+          "typeIcons",
+          "createOverlay",
+          "setupCanvasLayout",
+          "attachOverlay"
+        ],
+        "namedOriginal": [
+          "typeIcons",
+          "createOverlay",
+          "setupCanvasLayout",
+          "attachOverlay"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./app/timeline.js",
+        "named": [
+          "setupTimeline"
+        ],
+        "namedOriginal": [
+          "setupTimeline"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./modules/timeline.js",
+        "named": [
+          "timelineEntries",
+          "setTimelineEntries",
+          "updateTimelineEntry",
+          "spaceTimelineEntriesEvenly",
+          "removeTimelineEntry"
+        ],
+        "namedOriginal": [
+          "timelineEntries",
+          "setTimelineEntries",
+          "updateTimelineEntry",
+          "spaceTimelineEntriesEvenly",
+          "removeTimelineEntry"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./app/addons.js",
+        "named": [
+          "initializeAddOnServices",
+          "setupAvatarMenu"
+        ],
+        "namedOriginal": [
+          "initializeAddOnServices",
+          "setupAvatarMenu"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./app/simulation.js",
+        "named": [
+          "bootstrapSimulation"
+        ],
+        "namedOriginal": [
+          "bootstrapSimulation"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./timeline/entryModal.js",
+        "named": [
+          "promptTimelineEntryMetadata"
+        ],
+        "namedOriginal": [
+          "promptTimelineEntryMetadata"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\auth\\loginModal.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../components/modal.js",
+        "named": [
+          "createModal"
+        ],
+        "namedOriginal": [
+          "createModal"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../components/index.js",
+        "named": [
+          "editText",
+          "reactiveButton"
+        ],
+        "namedOriginal": [
+          "editText",
+          "reactiveButton"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../firebase.js",
+        "named": [
+          "auth",
+          "db"
+        ],
+        "namedOriginal": [
+          "auth",
+          "db"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "firebase/auth",
+        "named": [
+          "signInWithEmailAndPassword",
+          "createUserWithEmailAndPassword"
+        ],
+        "namedOriginal": [
+          "signInWithEmailAndPassword",
+          "createUserWithEmailAndPassword"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "firebase/firestore",
+        "named": [
+          "doc",
+          "setDoc",
+          "serverTimestamp"
+        ],
+        "namedOriginal": [
+          "doc",
+          "setDoc",
+          "serverTimestamp"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\auth.js": [
+      {
+        "kind": "import",
+        "spec": "./core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./modals/index.js",
+        "named": [
+          "reactiveLoginModal"
+        ],
+        "namedOriginal": [
+          "reactiveLoginModal"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./firebase.js",
+        "named": [
+          "auth"
+        ],
+        "namedOriginal": [
+          "auth"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "firebase/auth",
+        "named": [
+          "signOut"
+        ],
+        "namedOriginal": [
+          "signOut"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./components/index.js",
+        "named": [
+          "showToast"
+        ],
+        "namedOriginal": [
+          "showToast"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnFilter.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\addOnLegend.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\controls.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "Stream",
+          "observeDOMRemoval"
+        ],
+        "namedOriginal": [
+          "Stream",
+          "observeDOMRemoval"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme",
+          "applyTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme",
+          "applyTheme"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./text.js",
+        "named": [
+          "reactiveText"
+        ],
+        "namedOriginal": [
+          "reactiveText"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\diagramTree.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\elements.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "observeDOMRemoval"
+        ],
+        "namedOriginal": [
+          "observeDOMRemoval"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./layout.js",
+        "named": [
+          "container"
+        ],
+        "namedOriginal": [
+          "container"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./text.js",
+        "named": [
+          "reactiveText"
+        ],
+        "namedOriginal": [
+          "reactiveText"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\index.js": [
+      {
+        "kind": "reexport",
+        "spec": "./elements.js"
+      },
+      {
+        "kind": "reexport",
+        "spec": "./text.js"
+      },
+      {
+        "kind": "reexport",
+        "spec": "./inputs.js"
+      },
+      {
+        "kind": "reexport",
+        "spec": "./media.js"
+      },
+      {
+        "kind": "reexport",
+        "spec": "./controls.js"
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\inputs.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "observeDOMRemoval"
+        ],
+        "namedOriginal": [
+          "observeDOMRemoval"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme",
+          "applyTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme",
+          "applyTheme"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\layout.js": [
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./diagramTree.js",
+        "named": [
+          "createTreeContainer",
+          "setTogglePanel"
+        ],
+        "namedOriginal": [
+          "createTreeContainer",
+          "setTogglePanel"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\media.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "observeDOMRemoval"
+        ],
+        "namedOriginal": [
+          "observeDOMRemoval"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme",
+          "applyTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme",
+          "applyTheme"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\modal.js": [
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\showProperties.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./controls.js",
+        "named": [
+          "reactiveButton",
+          "showConfirmationDialog"
+        ],
+        "namedOriginal": [
+          "reactiveButton",
+          "showConfirmationDialog"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./layout.js",
+        "named": [
+          "divider",
+          "row"
+        ],
+        "namedOriginal": [
+          "divider",
+          "row"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./property-config.js",
+        "named": [
+          "BPMN_PROPERTY_MAP",
+          "FIELD_DEFINITIONS"
+        ],
+        "namedOriginal": [
+          "BPMN_PROPERTY_MAP",
+          "FIELD_DEFINITIONS"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\text.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "observeDOMRemoval"
+        ],
+        "namedOriginal": [
+          "observeDOMRemoval"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme",
+          "applyTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme",
+          "applyTheme"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\components\\tokenListPanel.js": [
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "observeDOMRemoval"
+        ],
+        "namedOriginal": [
+          "observeDOMRemoval"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\simulation.js": [
+      {
+        "kind": "import",
+        "spec": "./stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./simulation/context.js",
+        "named": [
+          "createContextHelpers"
+        ],
+        "namedOriginal": [
+          "createContextHelpers"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./simulation/handlers.js",
+        "named": [
+          "createHandlerManager"
+        ],
+        "namedOriginal": [
+          "createHandlerManager"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "./simulation/token-log.js",
+        "named": [
+          "createTokenLogHelpers"
+        ],
+        "namedOriginal": [
+          "createTokenLogHelpers"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\core\\theme.js": [
+      {
+        "kind": "import",
+        "spec": "./stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\diagrams\\modals.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../components/modal.js",
+        "named": [
+          "createModal"
+        ],
+        "namedOriginal": [
+          "createModal"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../components/index.js",
+        "named": [
+          "reactiveButton",
+          "dropdownStream",
+          "showConfirmationDialog",
+          "showToast"
+        ],
+        "namedOriginal": [
+          "reactiveButton",
+          "dropdownStream",
+          "showConfirmationDialog",
+          "showToast"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../firebase.js",
+        "named": [
+          "db"
+        ],
+        "namedOriginal": [
+          "db"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "firebase/firestore",
+        "named": [
+          "doc",
+          "getDoc",
+          "updateDoc",
+          "deleteDoc",
+          "arrayRemove"
+        ],
+        "namedOriginal": [
+          "doc",
+          "getDoc",
+          "updateDoc",
+          "deleteDoc",
+          "arrayRemove"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.example.js": [
+      {
+        "kind": "import",
+        "spec": "firebase/app",
+        "named": [
+          "initializeApp"
+        ],
+        "namedOriginal": [
+          "initializeApp"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "firebase/auth",
+        "named": [
+          "getAuth"
+        ],
+        "namedOriginal": [
+          "getAuth"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "firebase/firestore",
+        "named": [
+          "getFirestore"
+        ],
+        "namedOriginal": [
+          "getFirestore"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\firebase.js": [
+      {
+        "kind": "import",
+        "spec": "firebase/app",
+        "named": [
+          "initializeApp"
+        ],
+        "namedOriginal": [
+          "initializeApp"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "firebase/auth",
+        "named": [
+          "getAuth"
+        ],
+        "namedOriginal": [
+          "getAuth"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "firebase/firestore",
+        "named": [
+          "getFirestore"
+        ],
+        "namedOriginal": [
+          "getFirestore"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\modals\\index.js": [
+      {
+        "kind": "import",
+        "spec": "../auth/loginModal.js",
+        "named": [
+          "reactiveLoginModal"
+        ],
+        "namedOriginal": [
+          "reactiveLoginModal"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../diagrams/modals.js",
+        "named": [
+          "openDiagramPickerModal",
+          "promptDiagramMetadata",
+          "selectVersionModal"
+        ],
+        "namedOriginal": [
+          "openDiagramPickerModal",
+          "promptDiagramMetadata",
+          "selectVersionModal"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../addons/chooserModal.js",
+        "named": [
+          "openAddOnChooserModal"
+        ],
+        "namedOriginal": [
+          "openAddOnChooserModal"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\customReplaceMenuProvider.js": [
+      {
+        "kind": "import",
+        "spec": "bpmn-js/lib/features/popup-menu/ReplaceMenuProvider.js",
+        "default": "ReplaceMenuProvider"
+      },
+      {
+        "kind": "import",
+        "spec": "bpmn-js/lib/util/ModelUtil.js",
+        "named": [
+          "is"
+        ],
+        "namedOriginal": [
+          "is"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\modules\\timeline.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\public\\js\\timeline\\entryModal.js": [
+      {
+        "kind": "import",
+        "spec": "../core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../core/theme.js",
+        "named": [
+          "currentTheme"
+        ],
+        "namedOriginal": [
+          "currentTheme"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\canvas-background.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "dynamic",
+        "spec": "../public/js/core/theme.js"
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\helpers\\exclusive-gateway.js": [
+      {
+        "kind": "import",
+        "spec": "../../public/js/core/stream.js",
+        "named": [
+          "Stream"
+        ],
+        "namedOriginal": [
+          "Stream"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\helpers\\simulation.js": [
+      {
+        "kind": "dynamic",
+        "spec": "../../public/js/core/stream.js"
+      },
+      {
+        "kind": "dynamic",
+        "spec": "../../public/js/core/simulation.js"
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\inclusive-gateway.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "./helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\raci-matrix.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../public/js/components/raciMatrix.js",
+        "named": [
+          "collectData"
+        ],
+        "namedOriginal": [
+          "collectData"
+        ]
+      },
+      {
+        "kind": "dynamic",
+        "spec": "bpmn-moddle"
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\raci-serialization.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "dynamic",
+        "spec": "bpmn-moddle"
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\reactive-image.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "dynamic",
+        "spec": "../public/js/components/index.js"
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\blockchain-simulation.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "node:crypto",
+        "default": "crypto"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "loadSimulation",
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "loadSimulation",
+          "createSimulationInstance"
+        ]
+      },
+      {
+        "kind": "dynamic",
+        "spec": "../../public/js/blockchain.js"
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\boundary-events.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\delivery-gateway.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-based-gateway.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\event-handlers.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-autoselect.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-conditional.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway-default.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../../public/js/components/index.js",
+        "named": [
+          "openFlowSelectionModal"
+        ],
+        "namedOriginal": [
+          "openFlowSelectionModal"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.multiple.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\exclusive-gateway.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\flow-markers.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-expression-failure.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-gateway-missing-direction.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\inclusive-split-join.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\manual-resume.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow-concurrency.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\message-flow.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\start-events.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\subprocess.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\timer-events.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\undefined-variable.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\simulation\\unsafe-expression.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "../helpers/simulation.js",
+        "named": [
+          "createSimulationInstance"
+        ],
+        "namedOriginal": [
+          "createSimulationInstance"
+        ]
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\theme-connection.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "node:fs/promises",
+        "default": "fs"
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\theme-highlight.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "import",
+        "spec": "node:fs/promises",
+        "default": "fs"
+      },
+      {
+        "kind": "dynamic",
+        "spec": "../public/js/core/theme.js"
+      }
+    ],
+    "C:\\source\\BPMN-Client-ESM\\test\\theme.test.js": [
+      {
+        "kind": "import",
+        "spec": "node:test",
+        "named": [
+          "test"
+        ],
+        "namedOriginal": [
+          "test"
+        ]
+      },
+      {
+        "kind": "import",
+        "spec": "node:assert/strict",
+        "default": "assert"
+      },
+      {
+        "kind": "dynamic",
+        "spec": "../public/js/core/theme.js"
+      }
+    ]
+  }
+}
