@@ -438,6 +438,7 @@ _FileFacts _extractFacts(String filePath, String text) {
       final spec = mENF.group(2)!;
       final parsed = _parseImportClause('{ $list }');
       final isTypeExport = trimmed.startsWith('export type');
+      addExport('reexports', spec);
       addImportFact(_ImportFact(
         spec,
         'reexport',
@@ -464,10 +465,18 @@ _FileFacts _extractFacts(String filePath, String text) {
 
     final m2 = reExportFrom.firstMatch(line);
     if (m2 != null) {
-      addImport(m2.group(1)!, 'reexport');
+      final spec = m2.group(1)!;
+      addImport(spec, 'reexport');
+      addExport('reexports', spec);
       final starAs = RegExp(r'^\s*export\s+\*\s+as\s+([A-Za-z0-9_\$]+)').firstMatch(trimmed);
       if (starAs != null) {
         addExport('named', starAs.group(1)!);
+      }
+      if (RegExp(r'^\s*export\s+\*\s+').hasMatch(trimmed)) {
+        addExport('starReexports', spec);
+      }
+      if (RegExp(r'^\s*export\s+default\b').hasMatch(trimmed)) {
+        addExport('default', 'from ' + spec);
       }
       continue;
     }
@@ -668,12 +677,17 @@ _FileFacts _extractFacts(String filePath, String text) {
   final reMultiReexport =
       RegExp(r'''export\s+[^;{]*\{[^}]*\}\s*from\s*['"]([^'"]+)['"]''', multiLine: true);
   for (final match in reMultiReexport.allMatches(sanitized)) {
-    addImport(match.group(1)!, 'reexport');
+    final spec = match.group(1)!;
+    addImport(spec, 'reexport');
+    addExport('reexports', spec);
   }
   final reStarReexport =
       RegExp(r'''export\s+\*\s+from\s*['"]([^'"]+)['"]''', multiLine: true);
   for (final match in reStarReexport.allMatches(sanitized)) {
-    addImport(match.group(1)!, 'reexport');
+    final spec = match.group(1)!;
+    addImport(spec, 'reexport');
+    addExport('reexports', spec);
+    addExport('starReexports', spec);
   }
   final reModuleObject =
       RegExp(r'module\.exports\s*=\s*{([\s\S]*?)}', multiLine: true, dotAll: true);
