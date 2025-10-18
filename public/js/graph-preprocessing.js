@@ -466,12 +466,25 @@
   }
 
   function recordExports(exportsById, id, groups){
-    const canonical = canonicalExportId(id);
-    if(!canonical) return;
+    if(id == null) return;
     const normalized = normalizeExportGroups(groups);
     if(!normalized) return;
-    const existing = exportsById.get(canonical);
-    exportsById.set(canonical, mergeExportGroupMaps(existing, normalized));
+
+    const store = (key)=>{
+      if(!key) return;
+      const existing = exportsById.get(key);
+      exportsById.set(key, mergeExportGroupMaps(existing, normalized));
+    };
+
+    const canonical = canonicalExportId(id);
+    if(canonical) store(canonical);
+
+    if(typeof id === 'string'){
+      const trimmed = id.trim();
+      if(trimmed && trimmed !== canonical){
+        store(trimmed);
+      }
+    }
   }
 
   function ingestExports(exportsById, container){
