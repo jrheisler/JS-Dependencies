@@ -477,12 +477,56 @@ window.addEventListener('DOMContentLoaded', () => {
     default: 'Default export'
   };
 
+  function collectExportSymbol(entry){
+    if(entry == null) return '';
+    if(Array.isArray(entry)){
+      return entry.map(collectExportSymbol).filter(Boolean).join(', ');
+    }
+    if(typeof entry === 'string') return entry.trim();
+    if(typeof entry === 'number' || typeof entry === 'boolean') return String(entry);
+    if(typeof entry === 'object'){
+      const preferredKeys = ['name','symbol','exported','as','local','alias','value','key','member'];
+      for(const key of preferredKeys){
+        if(typeof entry[key] === 'string' && entry[key].trim()){
+          return entry[key].trim();
+        }
+      }
+      const stringValue = Object.values(entry).find(v => typeof v === 'string' && v.trim());
+      if(stringValue) return stringValue.trim();
+      try {
+        return JSON.stringify(entry);
+      } catch (err) {
+        return String(entry);
+      }
+    }
+    return String(entry);
+  }
+
+  function flattenExportValues(values){
+    const out = [];
+    const stack = Array.isArray(values) ? values.slice() : [values];
+    while(stack.length){
+      const value = stack.shift();
+      if(value == null) continue;
+      if(Array.isArray(value)){
+        stack.push(...value);
+        continue;
+      }
+      const symbol = collectExportSymbol(value);
+      if(symbol && symbol.trim()){
+        out.push(symbol.trim());
+      }
+    }
+    return out;
+  }
+
   function renderExportsList(exports){
     if(!exports || typeof exports !== 'object') return '';
     const groups = Object.entries(exports)
       .map(([kind, values]) => {
-        const list = Array.isArray(values) ? values.map(v => String(v)).filter(Boolean) : [];
-        return { kind, label: EXPORT_LABELS[kind] || kind.replace(/_/g,' '), values: list };
+        const list = flattenExportValues(values);
+        const unique = Array.from(new Set(list));
+        return { kind, label: EXPORT_LABELS[kind] || kind.replace(/_/g,' '), values: unique };
       })
       .filter(group => group.values.length);
     groups.sort((a,b) => a.label.localeCompare(b.label));
@@ -496,35 +540,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function exportSymbolsSummary(exports){
     if(!exports || typeof exports !== 'object') return '';
-    const collectFromEntry = (entry) => {
-      if(entry == null) return null;
-      if(typeof entry === 'string') return entry;
-      if(typeof entry === 'number' || typeof entry === 'boolean') return String(entry);
-      if(typeof entry === 'object'){
-        const preferredKeys = ['name','symbol','exported','as','local'];
-        for(const key of preferredKeys){
-          if(entry[key] && typeof entry[key] === 'string' && entry[key].trim()){
-            return entry[key];
-          }
-        }
-        const stringValue = Object.values(entry).find(v => typeof v === 'string' && v.trim());
-        if(stringValue) return stringValue;
-        try {
-          return JSON.stringify(entry);
-        } catch (err) {
-          return String(entry);
-        }
-      }
-      return String(entry);
-    };
-
     const symbols = [];
     Object.values(exports).forEach(values => {
-      if(!Array.isArray(values)) return;
-      values.forEach(entry => {
-        const symbol = collectFromEntry(entry);
-        if(symbol && String(symbol).trim()){
-          symbols.push(String(symbol).trim());
+      flattenExportValues(values).forEach(symbol => {
+        if(symbol && symbol.trim()){
+          symbols.push(symbol.trim());
         }
       });
     });

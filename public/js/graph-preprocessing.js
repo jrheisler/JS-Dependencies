@@ -360,6 +360,148 @@
     return list.map(re => ({ source: re.source, flags: re.flags }));
   }
 
+  const EXPORT_ID_KEYS = ['id', 'node', 'file', 'path', 'module'];
+  const EXPORT_GROUP_KEYS = ['groups', 'exports', 'symbols', 'values', 'items', 'members', 'entries', 'data', 'list'];
+  const EXPORT_SKIP_KEYS = new Set([...EXPORT_ID_KEYS, ...EXPORT_GROUP_KEYS, 'meta', 'summary', 'stats', 'count', 'type', 'kind', 'category', 'description']);
+  const visitedExportContainers = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
+
+  function cloneExportEntry(entry){
+    if(entry == null) return null;
+    if(Array.isArray(entry)){
+      return entry.map(cloneExportEntry).filter(value => value != null);
+    }
+    if(typeof entry === 'object'){
+      const clone = {};
+      Object.entries(entry).forEach(([key, value]) => {
+        const cloned = cloneExportEntry(value);
+        if(cloned !== null && cloned !== undefined){
+          clone[key] = cloned;
+        }
+      });
+      return clone;
+    }
+    return entry;
+  }
+
+  function listFromExportGroup(raw){
+    if(Array.isArray(raw)) return raw;
+    if(raw && typeof raw === 'object'){
+      if(Array.isArray(raw.list)) return raw.list;
+      if(Array.isArray(raw.values)) return raw.values;
+      if(Array.isArray(raw.items)) return raw.items;
+      if(Array.isArray(raw.entries)) return raw.entries;
+      if(Array.isArray(raw.members)) return raw.members;
+      if(Array.isArray(raw.data)) return raw.data;
+      return Object.values(raw);
+    }
+    if(raw == null) return [];
+    return [raw];
+  }
+
+  function normalizeExportGroups(groups){
+    if(!groups || typeof groups !== 'object') return null;
+    const normalized = {};
+    Object.entries(groups).forEach(([kind, rawList]) => {
+      const arr = listFromExportGroup(rawList)
+        .map(cloneExportEntry)
+        .filter(value => {
+          if(value == null) return false;
+          if(typeof value === 'string') return value.trim() !== '';
+          return true;
+        });
+      if(arr.length) normalized[kind] = arr;
+    });
+    return Object.keys(normalized).length ? normalized : null;
+  }
+
+  function mergeExportGroupMaps(base, addition){
+    if(!addition) return base || null;
+    const target = base ? { ...base } : {};
+    Object.entries(addition).forEach(([kind, values]) => {
+      if(!Array.isArray(values) || !values.length) return;
+      if(!target[kind]) target[kind] = [];
+      values.forEach(value => {
+        const cloned = cloneExportEntry(value);
+        if(cloned !== null && cloned !== undefined){
+          target[kind].push(cloned);
+        }
+      });
+    });
+    return Object.keys(target).length ? target : null;
+  }
+
+  function recordExports(exportsById, id, groups){
+    if(typeof id !== 'string' || !id.trim()) return;
+    const normalized = normalizeExportGroups(groups);
+    if(!normalized) return;
+    const existing = exportsById.get(id);
+    exportsById.set(id, mergeExportGroupMaps(existing, normalized));
+  }
+
+  function ingestExports(exportsById, container){
+    if(container == null) return;
+    if(typeof container === 'object'){
+      if(visitedExportContainers && visitedExportContainers.has(container)) return;
+      if(visitedExportContainers) visitedExportContainers.add(container);
+    }
+    if(Array.isArray(container)){
+      container.forEach(entry => {
+        if(entry == null) return;
+        if(Array.isArray(entry)){
+          if(entry.length >= 2 && typeof entry[0] === 'string'){
+            recordExports(exportsById, entry[0], entry[1]);
+          } else {
+            ingestExports(exportsById, entry);
+          }
+          return;
+        }
+        if(typeof entry !== 'object') return;
+        const id = EXPORT_ID_KEYS.map(key => entry[key]).find(value => typeof value === 'string' && value.trim());
+        if(id){
+          for(const key of EXPORT_GROUP_KEYS){
+            if(entry[key] && typeof entry[key] === 'object'){
+              recordExports(exportsById, id, entry[key]);
+              return;
+            }
+          }
+          const fallback = {};
+          Object.entries(entry).forEach(([key, value]) => {
+            if(EXPORT_SKIP_KEYS.has(key)) return;
+            if(Array.isArray(value) && value.length){
+              fallback[key] = value;
+            }
+          });
+          recordExports(exportsById, id, fallback);
+          return;
+        }
+        ingestExports(exportsById, entry);
+      });
+      return;
+    }
+    if(typeof container !== 'object') return;
+    const directId = EXPORT_ID_KEYS.map(key => container[key]).find(value => typeof value === 'string' && value.trim());
+    if(directId){
+      for(const key of EXPORT_GROUP_KEYS){
+        if(container[key] && typeof container[key] === 'object'){
+          recordExports(exportsById, directId, container[key]);
+          return;
+        }
+      }
+      recordExports(exportsById, directId, container);
+      return;
+    }
+    Object.entries(container).forEach(([key, value]) => {
+      if(value == null) return;
+      if(typeof key === 'string' && key.trim() && !EXPORT_SKIP_KEYS.has(key)){
+        if((typeof value === 'object' || Array.isArray(value)) && (key.includes('/') || key.includes('\\') || key.includes('.'))){
+          recordExports(exportsById, key, value);
+          return;
+        }
+      }
+      ingestExports(exportsById, value);
+    });
+  }
+
   function preprocessGraph(payload){
     const rawGraph = payload?.rawGraph || {};
     const keepRuleConfig = Array.isArray(payload?.keepRuleConfig) ? payload.keepRuleConfig : [];
@@ -373,31 +515,22 @@
       edges: normalizedEdges
     };
 
-    const exportsById = {};
-    if(rawGraph.exports && typeof rawGraph.exports === 'object'){
-      Object.entries(rawGraph.exports).forEach(([id, groups]) => {
-        if(typeof id !== 'string' || !groups || typeof groups !== 'object') return;
-        const normalized = {};
-        Object.entries(groups).forEach(([kind, list]) => {
-          if(!Array.isArray(list) || list.length === 0) return;
-          normalized[kind] = list.map(item => String(item));
-        });
-        if(Object.keys(normalized).length){
-          exportsById[id] = normalized;
-        }
-      });
+    const exportsById = new Map();
+    const exportSources = [rawGraph.exports, rawGraph.exportedSymbols];
+    if(rawGraph.symbols && typeof rawGraph.symbols === 'object'){
+      exportSources.push(rawGraph.symbols.exports, rawGraph.symbols);
     }
+    exportSources.forEach(source => ingestExports(exportsById, source));
+
     graph.nodes.forEach(node => {
       if(!node || typeof node.id !== 'string') return;
-      const exported = exportsById[node.id];
-      if(!exported) return;
-      const clone = {};
-      Object.entries(exported).forEach(([kind, values]) => {
-        if(!Array.isArray(values) || values.length === 0) return;
-        clone[kind] = values.slice();
-      });
-      if(Object.keys(clone).length){
-        node.exports = clone;
+      const direct = normalizeExportGroups(node.exports);
+      const collected = exportsById.get(node.id);
+      const merged = mergeExportGroupMaps(direct, collected);
+      if(merged){
+        node.exports = merged;
+      } else if(node.exports){
+        delete node.exports;
       }
     });
 
