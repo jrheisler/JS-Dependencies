@@ -160,7 +160,7 @@ void main(List<String> args) async {
   });
 
   final outPath = _join(cwd, 'jsDependencies.json');
-  final out = {
+  final out = <String, dynamic>{
     'nodes': nodes.map((n) => n.toJson()).toList(),
     'edges': normalizedEdges.map((e) => e.toJson()).toList(),
   };
