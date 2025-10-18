@@ -265,6 +265,7 @@
         <div class="hr" id="exportsDivider" style="display:none;"></div>
         <div id="exportsGroup" style="display:none;">
           <div style="color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;">Exports</div>
+          <div class="status-note" id="exportsEmpty" style="display:none;">No exports recorded for this node.</div>
           <div class="exports-grid" id="exportsList"></div>
         </div>
         <button type="button" id="markKeepRule" class="btn-inline">False positive? Keep this node</button>
@@ -1564,6 +1565,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setHTML('neighbors','');
     setDisplay('exportsGroup','none');
     setDisplay('exportsDivider','none');
+    setDisplay('exportsEmpty','none');
     setHTML('exportsList','');
     if(profileSelect){ profileSelect.innerHTML = ''; profileSelect.style.display = 'none'; }
     if(entrypointsList){ entrypointsList.innerHTML = ''; }
@@ -1971,6 +1973,10 @@ window.addEventListener('DOMContentLoaded', () => {
         setDisplay('selNone','block');
         setDisplay('sel','none');
         setHTML('neighbors','');
+        setDisplay('exportsGroup','none');
+        setDisplay('exportsDivider','none');
+        setDisplay('exportsEmpty','none');
+        setHTML('exportsList','');
       }
     }
   }
@@ -1987,6 +1993,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setDisplay('sel','block');
     setDisplay('exportsGroup','none');
     setDisplay('exportsDivider','none');
+    setDisplay('exportsEmpty','none');
     setHTML('exportsList','');
     $('#selId').textContent = n.id || '';
     $('#selType').textContent = n.type || 'file';
@@ -2027,6 +2034,14 @@ window.addEventListener('DOMContentLoaded', () => {
       setHTML('exportsList', exportsMarkup);
       setDisplay('exportsGroup','block');
       setDisplay('exportsDivider','block');
+      setDisplay('exportsEmpty','none');
+      setDisplay('exportsList','');
+    } else {
+      setHTML('exportsList','');
+      setDisplay('exportsGroup','block');
+      setDisplay('exportsDivider','block');
+      setDisplay('exportsEmpty','block');
+      setDisplay('exportsList','none');
     }
 
     highlight(n);
