@@ -288,6 +288,9 @@ _FileFacts _extractFacts(String filePath, String text) {
   final reInterface = RegExp(r'''^\s*export\s+interface\s+([A-Za-z0-9_\$]+)''');
   final reEnum = RegExp(r'''^\s*export\s+enum\s+([A-Za-z0-9_\$]+)''');
   final reDefaultIdentifier = RegExp(r'''^\s*export\s+default\s+([A-Za-z0-9_\$]+)''');
+  final reCommonJsProp = RegExp(r'''^(?:module\.)?exports\.([A-Za-z0-9_\$]+)''');
+  final reCommonJsBracket =
+      RegExp(r'''^(?:module\.)?exports\[['"]([^'"]+)['"]\]''');
 
   for (var raw in lines) {
     final line = raw;
@@ -313,6 +316,15 @@ _FileFacts _extractFacts(String filePath, String text) {
     }
     for (final m in reDynImport.allMatches(line)) {
       addImport(m.group(1)!, 'dynamic');
+    }
+
+    final commonJsProp = reCommonJsProp.firstMatch(trimmed);
+    if (commonJsProp != null) {
+      addExport('named', commonJsProp.group(1)!);
+    }
+    final commonJsBracket = reCommonJsBracket.firstMatch(trimmed);
+    if (commonJsBracket != null) {
+      addExport('named', commonJsBracket.group(1)!);
     }
 
     if (trimmed.startsWith('export')) {
@@ -420,6 +432,65 @@ _FileFacts _extractFacts(String filePath, String text) {
   for (final match in reStarReexport.allMatches(sanitized)) {
     addImport(match.group(1)!, 'reexport');
   }
+  final reModuleObject =
+      RegExp(r'module\.exports\s*=\s*{([\s\S]*?)}', multiLine: true, dotAll: true);
+  for (final match in reModuleObject.allMatches(sanitized)) {
+    final raw = match.group(1) ?? '';
+    final parts = raw
+        .split(RegExp(r'[;,]'))
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty)
+        .map((part) {
+      final colon = part.indexOf(':');
+      var key = colon >= 0 ? part.substring(0, colon).trim() : part;
+      if ((key.startsWith("'") && key.endsWith("'")) ||
+          (key.startsWith('"') && key.endsWith('"'))) {
+        if (key.length > 1) {
+          key = key.substring(1, key.length - 1);
+        }
+      }
+      final ident = RegExp(r'[A-Za-z0-9_\$]+').firstMatch(key);
+      return ident?.group(0) ?? '';
+    }).where((name) => name.isNotEmpty);
+    addExports('named', parts);
+  }
+
+  final reModuleDefaultFunc =
+      RegExp(r'module\.exports\s*=\s*(?:async\s+)?function(?:\s+([A-Za-z0-9_\$]+))?', multiLine: true);
+  final reModuleDefaultClass =
+      RegExp(r'module\.exports\s*=\s*(?:abstract\s+)?class(?:\s+([A-Za-z0-9_\$]+))?', multiLine: true);
+  final reModuleDefaultIdent =
+      RegExp(r'module\.exports\s*=\s*([A-Za-z0-9_\$]+)', multiLine: true);
+
+  final moduleDefaultFunc = reModuleDefaultFunc.firstMatch(sanitized);
+  if (moduleDefaultFunc != null) {
+    final name = moduleDefaultFunc.group(1);
+    if (name != null && name.isNotEmpty) {
+      addExport('functions', name);
+      addExport('default', 'function ' + name);
+    } else {
+      addExport('default', 'function');
+    }
+  }
+  final moduleDefaultClass = reModuleDefaultClass.firstMatch(sanitized);
+  if (moduleDefaultClass != null) {
+    final name = moduleDefaultClass.group(1);
+    if (name != null && name.isNotEmpty) {
+      addExport('classes', name);
+      addExport('default', 'class ' + name);
+    } else {
+      addExport('default', 'class');
+    }
+  }
+  if (moduleDefaultFunc == null && moduleDefaultClass == null) {
+    final moduleDefaultIdent = reModuleDefaultIdent.firstMatch(sanitized);
+    if (moduleDefaultIdent != null) {
+      addExport('default', moduleDefaultIdent.group(1)!);
+    } else if (RegExp(r'module\.exports\s*=', multiLine: true).hasMatch(sanitized)) {
+      addExport('default', 'module.exports');
+    }
+  }
+
   final exports = {
     for (final entry in exportSets.entries)
       entry.key: entry.value.toList()..sort((a, b) => a.compareTo(b))
