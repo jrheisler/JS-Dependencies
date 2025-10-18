@@ -2222,6 +2222,19 @@ window.addEventListener('DOMContentLoaded', () => {
     return count ? exportsById : null;
   }
 
+  function mergeExportsIndex(base, addition){
+    if(!addition || typeof addition !== 'object') return base && Object.keys(base).length ? base : null;
+    const target = base ? { ...base } : {};
+    Object.entries(addition).forEach(([id, groups]) => {
+      if(typeof id !== 'string' || !id.trim()) return;
+      if(!groups || typeof groups !== 'object') return;
+      const keys = Object.keys(groups);
+      if(!keys.length) return;
+      target[id] = safeCloneJson(groups) || groups;
+    });
+    return Object.keys(target).length ? target : null;
+  }
+
   function sanitizeNodesForExport(nodes, exportsIndex){
     if(!Array.isArray(nodes)) return [];
     return nodes.map(node => {
@@ -2262,7 +2275,18 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
-      const exportsIndex = collectExportsFromNodes(graph?.nodes);
+      let exportsIndex = collectExportsFromNodes(graph?.nodes);
+      if(!exportsIndex && rawGraphData){
+        exportsIndex = mergeExportsIndex(exportsIndex, rawGraphData.exports);
+        exportsIndex = mergeExportsIndex(exportsIndex, rawGraphData.exportedSymbols);
+        const symbolsContainer = rawGraphData.symbols;
+        if(symbolsContainer && typeof symbolsContainer === 'object'){
+          if(symbolsContainer.exports && typeof symbolsContainer.exports === 'object'){
+            exportsIndex = mergeExportsIndex(exportsIndex, symbolsContainer.exports);
+          }
+          exportsIndex = mergeExportsIndex(exportsIndex, symbolsContainer);
+        }
+      }
       let payload = safeCloneJson(rawGraphData);
       if(!payload || typeof payload !== 'object') payload = {};
       if(Array.isArray(payload.nodes)){
