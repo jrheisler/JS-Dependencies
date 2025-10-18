@@ -84,6 +84,7 @@
       <a href="#right">Right Sidebar</a>
       <a href="#interaction">Interaction & Pinning</a>
       <a href="#data">Data Handling & Filtering</a>
+      <a href="#viewer-flow">Desktop Viewer Flow</a>
       <a href="#export">Export & Persistence</a>
       <a href="#help-modal">Help Modal</a>
       <a href="#shortcuts">Keyboard Shortcuts</a>
@@ -252,6 +253,56 @@
         </table>
 
         <p>This profile-aware model mirrors <strong>real execution paths</strong> for each scenario, letting you distinguish between truly disconnected code and modules that are simply deferred, dynamic, or tied to a different profile.</p>
+      </section>
+
+      <section id="viewer-flow">
+        <h2>Desktop Viewer Flow</h2>
+        <p>This section summarises how the packaged desktop app orchestrates the HTML frontend and the language-specific crawlers that generate dependency graphs.</p>
+
+        <h3>1. Desktop Controller (<code>NuroxView.exe</code>)</h3>
+        <p>The native wrapper is compiled from <code>lib/nurox_view.dart</code>. When launched it binds an HTTP server on a random open port, loads any bundled sample graph, generates a bearer token, and opens the default browser to the local viewer URL with the token attached.</p>
+        <p><strong>Key responsibilities:</strong></p>
+        <ul>
+          <li><strong>Serving the viewer UI.</strong> Requests to <code>/</code>, <code>/nuros_nexus.html</code>, or <code>/nexus.html</code> return the viewer HTML with the token injected into a <code>&lt;meta name="nurox-token"&gt;</code> tag so the browser can authenticate later API calls.</li>
+          <li><strong>Static assets.</strong> Other non-API GET requests are treated as static asset lookups, resolved against the working directory, the script directory, and packaged <code>public/</code> folders.</li>
+          <li><strong>Graph storage.</strong> The controller keeps an in-memory graph that merges nodes and edges from crawlers, deduplicating them while preserving the richest metadata.</li>
+          <li><strong>API surface.</strong>
+            <ul>
+              <li><code>GET /api/languages</code> lists discoverable crawler executables on disk together with availability metadata.</li>
+              <li><code>POST /api/crawl</code> accepts a project root plus one or more language identifiers, runs the matching crawler executables, loads their default <code>*Dependencies.json</code> outputs, and merges them into the active graph.</li>
+              <li><code>GET /api/graph</code> returns the merged dependency graph for the frontend to render.</li>
+            </ul>
+          </li>
+        </ul>
+        <p>Authentication is enforced on every <code>/api/*</code> route: the viewer must send the bearer token that was injected into the HTML or provided via the <code>?token=</code> query parameter.</p>
+
+        <h3>2. Primary Frontend (<code>nuros_nexus.html</code>)</h3>
+        <p><code>public/nuros_nexus.html</code> hosts the D3-based graph canvas, sidebar controls, and modal help system. A bootstrap script adds a <code>&lt;base&gt;</code> tag so assets work whether the file is opened directly or served through the embedded web server.</p>
+        <p>When loaded inside the desktop viewer, the page reads the injected token or URL parameter and stores it as an Authorization header for API calls. In this “viewer mode” it enables the Local Crawl panel, letting users:</p>
+        <ol>
+          <li>Fetch the list of available crawlers via <code>GET /api/languages</code>, showing each language with availability state and executable path metadata.</li>
+          <li>Start a crawl by posting <code>{ root, languages, clear }</code> to <code>/api/crawl</code>, displaying progress and reporting merged node/edge counts when the controller responds.</li>
+          <li>Reload the current merged graph from <code>/api/graph</code>, immediately feeding it into the layout and filtering pipeline.</li>
+        </ol>
+        <p>Outside of viewer mode the UI still works for static JSON files (drag-and-drop or manual load) but the crawl controls remain disabled, guiding users to launch the desktop app.</p>
+
+        <h3>3. Legacy Shim (<code>nexus.html</code>)</h3>
+        <p><code>public/nexus.html</code> exists for backward compatibility. It immediately redirects to <code>nuros_nexus.html</code> while displaying a brief message, allowing older shortcuts or bookmarks to keep working with the renamed viewer.</p>
+
+        <h3>4. Language Crawlers</h3>
+        <p>The controller knows about eight language identifiers, each mapped to a set of executable names and a default output file. It probes the working directory, the script or packaged <code>public/</code> folders, and the system PATH until it finds a match. The expected JSON filenames are <code>jsDependencies.json</code>, <code>pyDependencies.json</code>, <code>goDependencies.json</code>, <code>rustDependencies.json</code>, <code>javaDependencies.json</code>, <code>kotlinDependencies.json</code>, <code>csharpDependencies.json</code>, and <code>dartDependencies.json</code> respectively.</p>
+        <p>Each crawler is implemented as a standalone Dart CLI in <code>lib/</code> and can be compiled to a native executable. They all follow the same broad pattern: recursively scan source files for the target language, infer imports/modules, compute reachability from entry points, and write the dependency graph in the schema that the viewer understands. The top-of-file documentation summarises what each crawler inspects:</p>
+        <ul>
+          <li><strong>JavaScript / TypeScript</strong> (<code>lib/jsDependency.dart</code>): Extracts ES module imports, resolves them to local files or external package nodes, estimates LOC, and labels nodes as used, unused, or side-effect-only based on reachability analysis.</li>
+          <li><strong>Python</strong> (<code>lib/pyDependency.dart</code>): Scans <code>.py</code> files, evaluates <code>import</code>/<code>from</code> statements, interprets <code>__main__</code> guards and packaging metadata as entry points, resolves modules to files or <code>pip:</code> externals, and marks usage state from reachability.</li>
+          <li><strong>Go</strong> (<code>lib/goDependency.dart</code>): Walks <code>.go</code> files, reads <code>go.mod</code>, resolves imports within the module or to <code>std:</code>/<code>go:</code> externals, and treats <code>package main</code> files with <code>func main()</code> as entry points.</li>
+          <li><strong>Rust</strong> (<code>lib/rustDependency.dart</code>): Parses <code>mod</code>, <code>use</code>, and <code>extern crate</code> directives, consults <code>Cargo.toml</code> for binaries and dependencies, and resolves module paths to files or <code>crate:</code> externals.</li>
+          <li><strong>Java</strong> (<code>lib/javaDependency.dart</code>): Collects packages, imports, and classes with <code>public static void main</code>, resolving imports to internal classes or Maven-style external identifiers.</li>
+          <li><strong>Kotlin</strong> (<code>lib/kotlinDependency.dart</code>): Reads package declarations and imports, infers declarations and <code>fun main</code> entry points, and expands wildcard imports to internal files when possible.</li>
+          <li><strong>C#</strong> (<code>lib/csharpDependency.dart</code>): Analyses namespaces, <code>using</code> directives, and <code>Main</code> methods to connect files and identify external references such as <code>dotnet:</code> or <code>nuget:</code> packages.</li>
+          <li><strong>Dart</strong> (<code>lib/dartDependency.dart</code>): Tracks <code>import</code>, <code>export</code>, and <code>part</code> directives, resolves <code>package:</code> URIs relative to the current project or as <code>pub:</code> externals, and detects <code>main()</code> entry points in common locations.</li>
+        </ul>
+        <p>During a crawl the controller runs each selected language sequentially, reading the emitted JSON from the project root. Missing outputs or non-zero exit codes are logged but do not stop the overall process; any successful outputs are merged into the shared graph and exposed back to the frontend.</p>
       </section>
 
       <section id="export">
