@@ -167,6 +167,23 @@ void main(List<String> args) async {
   if (normalizedExports.isNotEmpty) {
     out['exports'] = normalizedExports;
   }
+  final normalizedImports = <String, List<Map<String, dynamic>>>{};
+  factsByPath.forEach((path, facts) {
+    if (facts.imports.isEmpty) return;
+    normalizedImports[_normalize(path)] = facts.imports.map((imp) => {
+          'kind': imp.kind,
+          'spec': imp.specifier,
+          if (imp.defaultName != null) 'default': imp.defaultName,
+          if (imp.namespaceName != null) 'namespace': imp.namespaceName,
+          if (imp.named.isNotEmpty) 'named': imp.named,
+          if (imp.namedOriginal.isNotEmpty) 'namedOriginal': imp.namedOriginal,
+          if (imp.typeOnly.isNotEmpty) 'typeOnly': imp.typeOnly,
+          if (imp.isTypeOnlyImport) 'typeOnlyImport': true,
+        }).toList();
+  });
+  if (normalizedImports.isNotEmpty) {
+    out['imports'] = normalizedImports;
+  }
   await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
 
   // Stats (mirrors javaDependency.dart)
@@ -215,8 +232,27 @@ class _Edge {
 }
 
 class _ImportFact {
-  final String specifier, kind; // import | reexport | require | dynamic | side_effect
-  _ImportFact(this.specifier, this.kind);
+  final String specifier; // 'react', './x.js', etc.
+  final String kind; // import | reexport | require | dynamic | side_effect
+  final String? defaultName;
+  final String? namespaceName;
+  final List<String> named;
+  final List<String> namedOriginal;
+  final List<String> typeOnly;
+  final bool isTypeOnlyImport;
+
+  _ImportFact(
+    this.specifier,
+    this.kind, {
+    this.defaultName,
+    this.namespaceName,
+    List<String>? named,
+    List<String>? namedOriginal,
+    List<String>? typeOnly,
+    this.isTypeOnlyImport = false,
+  })  : named = named ?? const [],
+        namedOriginal = namedOriginal ?? const [],
+        typeOnly = typeOnly ?? const [];
 }
 
 class _FileFacts {
@@ -252,6 +288,21 @@ _FileFacts _extractFacts(String filePath, String text) {
     }
     imports.add(_ImportFact(spec, kind));
   }
+  void addImportFact(_ImportFact fact) {
+    for (final existing in imports) {
+      final same =
+          existing.specifier == fact.specifier &&
+          existing.kind == fact.kind &&
+          existing.defaultName == fact.defaultName &&
+          existing.namespaceName == fact.namespaceName &&
+          _listEq(existing.namedOriginal, fact.namedOriginal) &&
+          existing.isTypeOnlyImport == fact.isTypeOnlyImport;
+      if (same) {
+        return;
+      }
+    }
+    imports.add(fact);
+  }
   bool sideEffectOnly = false;
   final exportSets = <String, Set<String>>{};
 
@@ -274,9 +325,13 @@ _FileFacts _extractFacts(String filePath, String text) {
       .join('\n');
   final lines = sanitized.split('\n');
 
-  final reImport = RegExp(r'''^\s*import\s+(?:[^'"]+from\s+)?['"]([^'"]+)['"]''');
+  final reImportSide =
+      RegExp(r'''^\s*import\s+['"]([^'"]+)['"]\s*;?\s*$''');
+  final reImportFull =
+      RegExp(r'''^\s*import\s+(.+?)\s+from\s+['"]([^'"]+)['"]\s*;?\s*$''');
   final reExportFrom = RegExp(r'''^\s*export\s+[^;]*\s+from\s+['"]([^'"]+)['"]''');
-  final reSideEffect = RegExp(r'''^\s*import\s+['"]([^'"]+)['"]''');
+  final reExportNamedFrom = RegExp(
+      r'''^\s*export\s*\{\s*([^}]*)\s*\}\s*from\s*['"]([^'"]+)['"]\s*;?\s*$''');
   final reRequire = RegExp(r'''require\s*\(\s*['"]([^'"]+)['"]\s*\)''');
   final reDynImport = RegExp(r'''import\s*\(\s*['"]([^'"]+)['"]\s*\)''');
   final reDefaultFunc = RegExp(r'''^\s*export\s+default\s+(?:async\s+)?function(?:\s+([A-Za-z0-9_\$]+))?''');
@@ -297,18 +352,49 @@ _FileFacts _extractFacts(String filePath, String text) {
     final line = raw;
     final trimmed = line.trim();
 
-    final m1 = reImport.firstMatch(line);
-    if (m1 != null) {
-      final spec = m1.group(1)!;
-      final isSide = reSideEffect.hasMatch(line);
-      addImport(spec, isSide ? 'side_effect' : 'import');
-      if (isSide) sideEffectOnly = true;
+    final mSide = reImportSide.firstMatch(line);
+    if (mSide != null) {
+      final spec = mSide.group(1)!;
+      addImportFact(_ImportFact(spec, 'side_effect'));
+      sideEffectOnly = true;
+      continue;
+    }
+
+    final mFull = reImportFull.firstMatch(line);
+    if (mFull != null) {
+      final clause = mFull.group(1)!.trim();
+      final spec = mFull.group(2)!;
+      final parsed = _parseImportClause(clause);
+      addImportFact(_ImportFact(
+        spec,
+        'import',
+        defaultName: parsed.defaultName,
+        namespaceName: parsed.namespaceName,
+        named: parsed.named,
+        namedOriginal: parsed.namedOriginal,
+        typeOnly: parsed.typeOnly,
+        isTypeOnlyImport: parsed.isTypeOnlyImport,
+      ));
       continue;
     }
 
     final m2 = reExportFrom.firstMatch(line);
     if (m2 != null) {
       addImport(m2.group(1)!, 'reexport');
+      continue;
+    }
+
+    final mENF = reExportNamedFrom.firstMatch(line);
+    if (mENF != null) {
+      final list = mENF.group(1)!;
+      final spec = mENF.group(2)!;
+      final parsed = _parseImportClause('{ $list }');
+      addImportFact(_ImportFact(
+        spec,
+        'reexport',
+        named: parsed.named,
+        namedOriginal: parsed.namedOriginal,
+      ));
       continue;
     }
 
@@ -504,6 +590,96 @@ _FileFacts _extractFacts(String filePath, String text) {
       entry.key: entry.value.toList()..sort((a, b) => a.compareTo(b))
   };
   return _FileFacts(filePath, imports, sideEffectOnly, exports);
+}
+
+bool _listEq(List<String> a, List<String> b) {
+  if (identical(a, b)) return true;
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}
+
+class _ParsedImportClause {
+  String? defaultName;
+  String? namespaceName;
+  final List<String> named = [];
+  final List<String> namedOriginal = [];
+  final List<String> typeOnly = [];
+  bool isTypeOnlyImport = false;
+}
+
+List<String> _splitNamedList(String raw) {
+  return raw
+      .split(',')
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .toList();
+}
+
+_ParsedImportClause _parseImportClause(String clause) {
+  final res = _ParsedImportClause();
+  var c = clause.trim();
+
+  if (c.startsWith('type ')) {
+    res.isTypeOnlyImport = true;
+    c = c.substring(5).trim();
+  }
+
+  final ns = RegExp(r'^\*\s+as\s+([A-Za-z_\$][\w\$]*)$').firstMatch(c);
+  if (ns != null) {
+    res.namespaceName = ns.group(1);
+    return res;
+  }
+
+  final defPlusNamed =
+      RegExp(r'^([A-Za-z_\$][\w\$]*)\s*,\s*\{\s*([^}]*)\s*\}$').firstMatch(c);
+  if (defPlusNamed != null) {
+    res.defaultName = defPlusNamed.group(1);
+    final namedRaw = defPlusNamed.group(2) ?? '';
+    for (final item in _splitNamedList(namedRaw)) {
+      final mAs = RegExp(
+              r'^(?:type\s+)?([A-Za-z_\$][\w\$]*)(?:\s+as\s+([A-Za-z_\$][\w\$]*))?$')
+          .firstMatch(item);
+      if (mAs != null) {
+        final isType = item.trim().startsWith('type ');
+        final orig = mAs.group(1)!;
+        final alias = mAs.group(2) ?? orig;
+        res.namedOriginal.add(orig);
+        res.named.add(alias);
+        if (isType) res.typeOnly.add(alias);
+      }
+    }
+    return res;
+  }
+
+  final namedOnly = RegExp(r'^\{\s*([^}]*)\s*\}$').firstMatch(c);
+  if (namedOnly != null) {
+    final namedRaw = namedOnly.group(1) ?? '';
+    for (final item in _splitNamedList(namedRaw)) {
+      final mAs = RegExp(
+              r'^(?:type\s+)?([A-Za-z_\$][\w\$]*)(?:\s+as\s+([A-Za-z_\$][\w\$]*))?$')
+          .firstMatch(item);
+      if (mAs != null) {
+        final isType = item.trim().startsWith('type ');
+        final orig = mAs.group(1)!;
+        final alias = mAs.group(2) ?? orig;
+        res.namedOriginal.add(orig);
+        res.named.add(alias);
+        if (isType) res.typeOnly.add(alias);
+      }
+    }
+    return res;
+  }
+
+  final defOnly = RegExp(r'^([A-Za-z_\$][\w\$]*)$').firstMatch(c);
+  if (defOnly != null) {
+    res.defaultName = defOnly.group(1);
+    return res;
+  }
+
+  return res;
 }
 // -------- resolution --------
 String? _resolveSpecifier(String cwd, String fromFile, String spec) {
