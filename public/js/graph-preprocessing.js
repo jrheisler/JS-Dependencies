@@ -422,17 +422,29 @@
   }
 
   function normalizeExportGroups(groups){
-    if(!groups || typeof groups !== 'object') return null;
-    const normalized = {};
-    Object.entries(groups).forEach(([kind, rawList]) => {
-      const arr = listFromExportGroup(rawList)
+    if(groups == null) return null;
+
+    const buildGroupFromValues = (raw, defaultKind = 'symbols') => {
+      const arr = listFromExportGroup(raw)
         .map(cloneExportEntry)
         .filter(value => {
           if(value == null) return false;
           if(typeof value === 'string') return value.trim() !== '';
           return true;
         });
-      if(arr.length) normalized[kind] = arr;
+      return arr.length ? { [defaultKind]: arr } : null;
+    };
+
+    if(Array.isArray(groups) || typeof groups !== 'object'){
+      return buildGroupFromValues(groups);
+    }
+
+    const normalized = {};
+    Object.entries(groups).forEach(([kind, rawList]) => {
+      const grouped = buildGroupFromValues(rawList, kind);
+      if(grouped){
+        normalized[kind] = grouped[kind];
+      }
     });
     return Object.keys(normalized).length ? normalized : null;
   }
