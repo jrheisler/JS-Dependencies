@@ -60,10 +60,6 @@ void main(List<String> args) async {
   for (final f in files) {
     final text = await File(f).readAsString();
     final facts = _extractFacts(f, text);
-    stderr.writeln(facts.path);
-    if (facts.path.endsWith('Auth.js')) {
-      stderr.writeln('Auth.js exports: ${facts.exports}');
-    }
     factsByPath[f] = facts;
   }
 
@@ -95,14 +91,23 @@ void main(List<String> args) async {
   final nodes = <_Node>[];
   for (final f in files) {
     final normalized = _normalize(f);
+    final facts = factsByPath[f];
+    Map<String, List<String>>? nodeExports;
+    if (facts != null && facts.exports.isNotEmpty) {
+      nodeExports = {
+        for (final entry in facts.exports.entries)
+          entry.key: List<String>.from(entry.value),
+      };
+    }
     nodes.add(_Node(
       id: normalized,
       type: 'file',
       state: 'unused',
       sizeLOC: await _estimateLOC(f),
       packageName: null,
-      hasSideEffects: factsByPath[f]?.hasSideEffectImport ?? false,
+      hasSideEffects: facts?.hasSideEffectImport ?? false,
       absPath: normalized,
+      exports: nodeExports,
     ));
   }
   for (final e in externals) {
@@ -214,20 +219,39 @@ class _Node {
   int outDeg = 0;
   final String? absPath;
   String lang = 'js';
+  final Map<String, List<String>>? exports;
 
-  _Node({required this.id, required this.type, required this.state, this.sizeLOC, this.packageName, this.hasSideEffects, required this.absPath});
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'type': type,
-    'state': state,
-    'lang': lang,
-    if (sizeLOC != null) 'sizeLOC': sizeLOC,
-    if (packageName != null) 'package': packageName,
-    if (hasSideEffects != null) 'hasSideEffects': hasSideEffects,
-    'inDeg': inDeg,
-    'outDeg': outDeg,
-    if (absPath != null) 'absPath': absPath,
-  };
+  _Node({
+    required this.id,
+    required this.type,
+    required this.state,
+    this.sizeLOC,
+    this.packageName,
+    this.hasSideEffects,
+    required this.absPath,
+    this.exports,
+  });
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{
+      'id': id,
+      'type': type,
+      'state': state,
+      'lang': lang,
+      if (sizeLOC != null) 'sizeLOC': sizeLOC,
+      if (packageName != null) 'package': packageName,
+      if (hasSideEffects != null) 'hasSideEffects': hasSideEffects,
+      'inDeg': inDeg,
+      'outDeg': outDeg,
+      if (absPath != null) 'absPath': absPath,
+    };
+    if (exports != null && exports!.isNotEmpty) {
+      map['exports'] = {
+        for (final entry in exports!.entries)
+          entry.key: List<String>.from(entry.value),
+      };
+    }
+    return map;
+  }
 }
 
 class _Edge {
