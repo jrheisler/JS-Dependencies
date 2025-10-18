@@ -320,8 +320,15 @@ _FileFacts _extractFacts(String filePath, String text) {
 
   final noBlock = text.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
   final sanitized = noBlock
+      .replaceFirst('\ufeff', '')
       .split('\n')
-      .map((line) => line.replaceFirst(RegExp(r'//.*$'), ''))
+      .map((line) {
+        var cleaned = line;
+        if (cleaned.startsWith('\ufeff')) {
+          cleaned = cleaned.substring(1);
+        }
+        return cleaned.replaceFirst(RegExp(r'//.*$'), '');
+      })
       .join('\n');
   final lines = sanitized.split('\n');
 
@@ -350,7 +357,10 @@ _FileFacts _extractFacts(String filePath, String text) {
 
   for (var raw in lines) {
     final line = raw;
-    final trimmed = line.trim();
+    var trimmed = line.trim();
+    if (trimmed.startsWith('\ufeff')) {
+      trimmed = trimmed.substring(1);
+    }
 
     final mSide = reImportSide.firstMatch(line);
     if (mSide != null) {
