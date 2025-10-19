@@ -485,6 +485,65 @@
     });
   }
 
+  function collectSecurityFindingInputs(source, target, visited){
+    if(source == null) return;
+    if(Array.isArray(source)){
+      source.forEach(item => collectSecurityFindingInputs(item, target, visited));
+      return;
+    }
+    if(typeof source !== 'object') return;
+    if(visited){
+      if(visited.has(source)) return;
+      visited.add(source);
+    }
+    if(Array.isArray(source.findings)){
+      collectSecurityFindingInputs(source.findings, target, visited);
+    }
+    if(Array.isArray(source.securityFindings)){
+      collectSecurityFindingInputs(source.securityFindings, target, visited);
+    }
+    if(source.finding != null){
+      collectSecurityFindingInputs(source.finding, target, visited);
+    }
+    const normalized = normalizeSecurityFinding(source);
+    if(normalized && (normalized.message || normalized.id)){
+      target.push(normalized);
+    }
+  }
+
+  function collectNodeSecurityFindings(node){
+    if(!node || typeof node !== 'object') return [];
+    const collected = [];
+    const visited = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
+    const add = (value) => collectSecurityFindingInputs(value, collected, visited);
+    add(node.securityFindings);
+    add(node.security);
+    if(node.meta && typeof node.meta === 'object'){
+      add(node.meta.securityFindings);
+      add(node.meta.security);
+    }
+    return collected;
+  }
+
+  function mergeSecurityFindingLists(...lists){
+    if(!lists || lists.length === 0) return [];
+    const merged = [];
+    const seen = new Set();
+    lists.forEach(list => {
+      if(!list) return;
+      const array = Array.isArray(list) ? list : [list];
+      array.forEach(item => {
+        const normalized = normalizeSecurityFinding(item);
+        if(!normalized || (!normalized.message && !normalized.id)) return;
+        const key = securityFindingKey(normalized);
+        if(seen.has(key)) return;
+        merged.push(cloneSecurityFinding(normalized));
+        seen.add(key);
+      });
+    });
+    return merged;
+  }
+
   function canonicalExportId(id){
     if(typeof id !== 'string') return null;
     let value = id.trim();
@@ -766,35 +825,33 @@
         delete node.exports;
       }
 
+      const directSecurity = collectNodeSecurityFindings(node);
+      let referencedSecurity = null;
       if(securityById.size){
-        let security = null;
         for(const candidate of candidateList){
           const canonical = canonicalExportId(candidate);
           if(canonical && securityById.has(canonical)){
-            security = securityById.get(canonical);
+            referencedSecurity = securityById.get(canonical);
             break;
           }
         }
-        if(!security){
+        if(!referencedSecurity){
           for(const candidate of candidateList){
             const trimmed = typeof candidate === 'string' ? candidate.trim() : '';
             if(!trimmed) continue;
             if(securityById.has(trimmed)){
-              security = securityById.get(trimmed);
+              referencedSecurity = securityById.get(trimmed);
               break;
             }
           }
         }
-        if(security && security.length){
-          const cloned = security.map(cloneSecurityFinding).filter(item => item);
-          if(cloned.length){
-            node.securityFindings = cloned;
-          } else if(node.securityFindings){
-            delete node.securityFindings;
-          }
-        } else if(node.securityFindings){
-          delete node.securityFindings;
-        }
+      }
+
+      const mergedSecurity = mergeSecurityFindingLists(directSecurity, referencedSecurity);
+      if(mergedSecurity.length){
+        node.securityFindings = mergedSecurity;
+      } else if(node.securityFindings){
+        delete node.securityFindings;
       }
     });
 
@@ -839,7 +896,9 @@
       normalizeEntrypoints,
       normalizeProfiles,
       compileKeepRules,
-      normalizeSecuritySeverity
+      normalizeSecuritySeverity,
+      collectNodeSecurityFindings,
+      mergeSecurityFindingLists
     }
   };
 })(typeof self !== 'undefined' ? self : this);
