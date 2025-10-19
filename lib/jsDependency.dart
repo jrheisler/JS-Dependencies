@@ -194,6 +194,19 @@ void main(List<String> args) async {
   if (normalizedImports.isNotEmpty) {
     out['imports'] = normalizedImports;
   }
+  final security = <String, List<Map<String, dynamic>>>{};
+  factsByPath.forEach((path, facts) {
+    if (facts.findings.isEmpty) return;
+    security[_normalize(path)] =
+        facts.findings.map((finding) => finding.toJson()).toList();
+  });
+  if (security.isNotEmpty) {
+    out['securityFindings'] = security;
+  }
+  final pkgRisks = _computePackageRisks(pkg);
+  if (pkgRisks != null && pkgRisks.isNotEmpty) {
+    out['packageRisks'] = pkgRisks;
+  }
   await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
 
   // Stats (mirrors javaDependency.dart)
@@ -289,8 +302,105 @@ class _FileFacts {
   final List<_ImportFact> imports;
   final bool hasSideEffectImport;
   final Map<String, List<String>> exports;
-  _FileFacts(this.path, this.imports, this.hasSideEffectImport, this.exports);
+  final List<SecurityFinding> findings;
+  _FileFacts(
+    this.path,
+    this.imports,
+    this.hasSideEffectImport,
+    this.exports,
+    this.findings,
+  );
 }
+
+class SecurityFinding {
+  final String id;
+  final String message;
+  final String severity;
+  final int line;
+  final String code;
+
+  SecurityFinding(this.id, this.message, this.severity, this.line, this.code);
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'message': message,
+        'severity': severity,
+        'line': line,
+        'code': code,
+      };
+}
+
+class _SecurityRule {
+  final String id;
+  final String severity;
+  final String message;
+  final RegExp re;
+
+  const _SecurityRule(this.id, this.severity, this.message, this.re);
+}
+
+const _secRules = <_SecurityRule>[
+  _SecurityRule('eval.call', 'high', 'Use of eval() can execute arbitrary code.', RegExp(r'\beval\s*\(')),
+  _SecurityRule('function.constructor', 'high', 'new Function() dynamically executes code.',
+      RegExp(r'new\s+Function\s*\(')),
+  _SecurityRule('timeout.string', 'high', 'setTimeout/setInterval with a string executes code.',
+      RegExp(r"set(?:Timeout|Interval)\s*\(\s*['\"]")),
+  _SecurityRule('vm.module', 'high', 'Use of Node vm module can escape sandboxes.', RegExp(r'\bvm\.[A-Za-z_][\w]*\s*\(')),
+  _SecurityRule('child_process.exec', 'high', 'child_process execution can run arbitrary commands.',
+      RegExp(r'child_process\.(?:exec|execSync|spawn|spawnSync)\s*\(')),
+  _SecurityRule('child_process.shell', 'high', 'Shell execution enabled via {shell:true}.',
+      RegExp(r'shell\s*:\s*true')),
+  _SecurityRule('dynamic.require', 'high', 'Dynamic require with non-literal path.',
+      RegExp(r"require\s*\(\s*[^'\"\s][^\)]*\)")),
+  _SecurityRule('dynamic.import', 'high', 'Dynamic import() with non-literal path.',
+      RegExp(r"import\s*\(\s*[^'\"\s][^\)]*\)")),
+  _SecurityRule('import.template', 'high', 'Import from template literal allows arbitrary modules.',
+      RegExp(r'from\s*`')),
+  _SecurityRule('node.builtin', 'med', 'Importing sensitive Node built-ins (fs/net/etc).',
+      RegExp(r"\b(?:require|import)\s*\(\s*['\"](?:fs|net|tls|http|https|dgram|cluster|os)\b")),
+  _SecurityRule('process.env', 'med', 'Access to process.env exposes environment secrets.',
+      RegExp(r'process\.env')),
+  _SecurityRule('fs.access', 'med', 'File system access can expose sensitive data.',
+      RegExp(r'\bfs\.(?:readFile|writeFile|readdir|createWriteStream|createReadStream)\s*\(')),
+  _SecurityRule('http.cleartext', 'med', 'HTTP over cleartext detected (non-localhost).',
+      RegExp(r'http://(?!localhost|127\.0\.0\.1)')),
+  _SecurityRule('dom.innerHTML', 'high', 'Writing to innerHTML can enable XSS.', RegExp(r'\.\s*innerHTML\s*=')),
+  _SecurityRule('dom.outerHTML', 'high', 'Writing to outerHTML can enable XSS.', RegExp(r'\.\s*outerHTML\s*=')),
+  _SecurityRule('document.write', 'high', 'document.write can introduce XSS.', RegExp(r'document\.write\s*\(')),
+  _SecurityRule('dom.insertAdjacentHTML', 'high', 'insertAdjacentHTML can introduce XSS.',
+      RegExp(r'insertAdjacentHTML\s*\(')),
+  _SecurityRule('dom.range', 'high', 'Range.createContextualFragment can introduce XSS.',
+      RegExp(r'createContextualFragment\s*\(')),
+  _SecurityRule('react.dangerousHTML', 'high', 'dangerouslySetInnerHTML used; review sanitization.',
+      RegExp(r'dangerouslySetInnerHTML\s*:')),
+  _SecurityRule('iframe.srcdoc', 'high', 'Setting srcdoc can enable injection.', RegExp(r'\bsrcdoc\s*=')),
+  _SecurityRule('template.interpolation', 'low', 'Template literal interpolation detected; ensure sanitization.',
+      RegExp(r'`[^`]*\$\{[^}]+\}[^`]*`')),
+  _SecurityRule('postmessage.wildcard', 'med', 'window.postMessage uses wildcard origin.',
+      RegExp(r"postMessage\s*\([^,]+,\s*['\"]\*['\"]\)")),
+  _SecurityRule('secret.literal', 'high', 'Possible hard-coded secret detected.',
+      RegExp(r"(?:API[_-]?KEY|SECRET|TOKEN|PASSWORD|PRIVATE[_-]?KEY)\s*[:=]\s*['\"][A-Za-z0-9_\-\.=+/]{12,}['\"]")),
+  _SecurityRule('math.random', 'low', 'Math.random used for tokens; use crypto.randomBytes instead.',
+      RegExp(r'Math\.random\s*\(')),
+  _SecurityRule('storage.token', 'med', 'Token stored in web storage.',
+      RegExp(r"(?:localStorage|sessionStorage)\.setItem\s*\(\s*['\"](token|auth|jwt|session)['\"]")),
+  _SecurityRule('crypto.weakHash', 'med', 'Weak hash algorithm (md5/sha1) detected.',
+      RegExp(r"crypto\.createHash\(\s*['\"](?:md5|sha1)['\"]")),
+  _SecurityRule('crypto.createCipher', 'med', 'Deprecated crypto.createCipher detected.',
+      RegExp(r'crypto\.create(?:Cipher|Decipher)\s*\(')),
+  _SecurityRule('jwt.verify', 'med', 'jwt.verify called without options; ensure audience/issuer validated.',
+      RegExp(r'jwt\.verify\s*\([^,]+,\s*[^,)\s]+\s*\)')),
+  _SecurityRule('cors.wildcard', 'med', 'Access-Control-Allow-Origin set to wildcard.',
+      RegExp(r"Access-Control-Allow-Origin['\"]?\s*[:=]\s*['\"]\*['\"]")),
+  _SecurityRule('cors.middleware', 'med', 'app.use(cors()) with no options; ensure restrictions applied.',
+      RegExp(r'app\.use\s*\(\s*cors\s*\(\s*\)')),
+  _SecurityRule('cookie.literal', 'low', 'Cookie configuration literal detected; verify security flags.',
+      RegExp(r"cookie\s*:\s*['\"][^'\"]*['\"]")),
+  _SecurityRule('console.secret', 'low', 'console logging sensitive data.',
+      RegExp(r'console\.(?:log|dir)\s*\([^)]*(password|secret|token)[^)]*\)')),
+  _SecurityRule('import.meta.env', 'low', 'Direct access to import.meta.env; ensure safe exposure.',
+      RegExp(r'import\.meta\.env\.[A-Za-z_][\w]*')),
+];
 
 // -------- crawl & parse --------
 Future<List<String>> _collectSourceFiles(String root) async {
@@ -399,6 +509,19 @@ _FileFacts _extractFacts(String filePath, String text) {
       })
       .join('\n');
   final lines = sanitized.split('\n');
+  final findings = <SecurityFinding>[];
+
+  for (var i = 0; i < lines.length; i++) {
+    final raw = lines[i];
+    for (final rule in _secRules) {
+      if (rule.re.firstMatch(raw) != null) {
+        findings.add(SecurityFinding(rule.id, rule.message, rule.severity, i + 1, raw.trim()));
+      }
+    }
+    if (raw.contains('fs.') && raw.contains('..')) {
+      findings.add(SecurityFinding('fs.dotdot', 'Possible path traversal ("..")', 'med', i + 1, raw.trim()));
+    }
+  }
 
   bool hasDefaultExport() {
     final existing = exportSets['default'];
@@ -781,7 +904,7 @@ _FileFacts _extractFacts(String filePath, String text) {
     for (final entry in exportSets.entries)
       entry.key: entry.value.toList()..sort((a, b) => a.compareTo(b))
   };
-  return _FileFacts(filePath, imports, sideEffectOnly, exports);
+  return _FileFacts(filePath, imports, sideEffectOnly, exports, findings);
 }
 
 bool _listEq(List<String> a, List<String> b) {
@@ -917,6 +1040,47 @@ Future<Map<String, dynamic>?> _readPackageJson(String cwd) async {
   if (!await pj.exists()) return null;
   try { return jsonDecode(await pj.readAsString()) as Map<String, dynamic>; }
   catch (_) { return null; }
+}
+
+Map<String, dynamic>? _computePackageRisks(Map<String, dynamic>? pkg) {
+  if (pkg == null) return null;
+  final risks = <String, dynamic>{};
+  final looseVersionPattern = RegExp(r'[\^\~\*x]|latest|github\.com|git\+');
+
+  final depFields = ['dependencies', 'devDependencies', 'optionalDependencies'];
+  final loose = <String, Map<String, String>>{};
+  for (final field in depFields) {
+    final deps = pkg[field];
+    if (deps is Map) {
+      final items = <String, String>{};
+      deps.forEach((key, value) {
+        if (value is String && looseVersionPattern.hasMatch(value)) {
+          items[key] = value;
+        }
+      });
+      if (items.isNotEmpty) {
+        loose[field] = items;
+      }
+    }
+  }
+  if (loose.isNotEmpty) {
+    risks['looseVersions'] = loose;
+  }
+
+  final scripts = pkg['scripts'];
+  if (scripts is Map) {
+    final bad = <String, String>{};
+    scripts.forEach((key, value) {
+      if (value is String && RegExp(r'(curl|wget|bash|powershell|Invoke-Expression)').hasMatch(value)) {
+        bad[key] = value;
+      }
+    });
+    if (bad.isNotEmpty) {
+      risks['riskyScripts'] = bad;
+    }
+  }
+
+  return risks.isEmpty ? null : risks;
 }
 
 List<String> _discoverEntries(String cwd, Map<String, dynamic>? pkg, List<String> filesAbs) {
