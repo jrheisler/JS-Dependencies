@@ -1,0 +1,27 @@
+{
+  "nodes": [
+    {
+      "id": "C:\\source\\JS-Dependencies\\public\\js\\graph-preprocessing.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 628,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 0,
+      "absPath": "C:\\source\\JS-Dependencies\\public\\js\\graph-preprocessing.js"
+    },
+    {
+      "id": "C:\\source\\JS-Dependencies\\public\\js\\graph-worker.js",
+      "type": "file",
+      "state": "used",
+      "lang": "js",
+      "sizeLOC": 15,
+      "hasSideEffects": false,
+      "inDeg": 0,
+      "outDeg": 0,
+      "absPath": "C:\\source\\JS-Dependencies\\public\\js\\graph-worker.js"
+    }
+  ],
+  "edges": []
+}
