@@ -2500,6 +2500,21 @@ window.addEventListener('DOMContentLoaded', () => {
     return count ? exportsById : null;
   }
 
+  function collectSecurityFindingsIndex(nodes){
+    if(!Array.isArray(nodes)) return null;
+    const findingsById = {};
+    nodes.forEach(node => {
+      if(!node || typeof node.id !== 'string') return;
+      const findings = collectNodeSecurityFindings(node);
+      if(!findings.length) return;
+      const cloned = safeCloneJson(findings);
+      findingsById[node.id] = Array.isArray(cloned)
+        ? cloned
+        : findings.map(item => (item && typeof item === 'object') ? { ...item } : item);
+    });
+    return Object.keys(findingsById).length ? findingsById : null;
+  }
+
   function mergeExportsIndex(base, addition){
     if(!addition || typeof addition !== 'object') return base && Object.keys(base).length ? base : null;
     const target = base ? { ...base } : {};
@@ -2513,7 +2528,7 @@ window.addEventListener('DOMContentLoaded', () => {
     return Object.keys(target).length ? target : null;
   }
 
-  function sanitizeNodesForExport(nodes, exportsIndex){
+  function sanitizeNodesForExport(nodes, exportsIndex, securityIndex){
     if(!Array.isArray(nodes)) return [];
     return nodes.map(node => {
       if(!node || typeof node !== 'object') return node;
@@ -2524,6 +2539,12 @@ window.addEventListener('DOMContentLoaded', () => {
       const id = typeof cloned.id === 'string' ? cloned.id : (typeof node.id === 'string' ? node.id : null);
       if(id && exportsIndex && exportsIndex[id]){
         cloned.exports = safeCloneJson(exportsIndex[id]) || exportsIndex[id];
+      }
+      if(id && securityIndex && securityIndex[id]){
+        const findingsClone = safeCloneJson(securityIndex[id]);
+        cloned.securityFindings = Array.isArray(findingsClone)
+          ? findingsClone
+          : securityIndex[id].map(item => (item && typeof item === 'object') ? { ...item } : item);
       }
       delete cloned.vx;
       delete cloned.vy;
@@ -2567,10 +2588,11 @@ window.addEventListener('DOMContentLoaded', () => {
       }
       let payload = safeCloneJson(rawGraphData);
       if(!payload || typeof payload !== 'object') payload = {};
+      const securityIndex = collectSecurityFindingsIndex(graph?.nodes);
       if(Array.isArray(payload.nodes)){
-        payload.nodes = sanitizeNodesForExport(payload.nodes, exportsIndex);
+        payload.nodes = sanitizeNodesForExport(payload.nodes, exportsIndex, securityIndex);
       } else if(Array.isArray(graph?.nodes)){
-        payload.nodes = sanitizeNodesForExport(graph.nodes, exportsIndex);
+        payload.nodes = sanitizeNodesForExport(graph.nodes, exportsIndex, securityIndex);
       } else {
         payload.nodes = [];
       }
@@ -2612,7 +2634,27 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const headers = ['id','statusPrimary','statuses','type','package','exports','sizeLOC','hasSideEffects','external','inDegree','outDegree','degree'];
+    const headers = [
+      'id',
+      'statusPrimary',
+      'statuses',
+      'type',
+      'package',
+      'exports',
+      'sizeLOC',
+      'hasSideEffects',
+      'external',
+      'inDegree',
+      'outDegree',
+      'degree',
+      'securityFindingCount',
+      'securitySeverityNormalized',
+      'securitySeverityLabels',
+      'securityFindingIds',
+      'securityFindingMessages',
+      'securityFindingLines',
+      'securityFindingCodes'
+    ];
     const escape = (value) => {
       const v = value == null ? '' : String(value);
       if(/[",\n]/.test(v)){
@@ -2629,6 +2671,14 @@ window.addEventListener('DOMContentLoaded', () => {
       const external = isExternal(n);
       const statuses = statusesFor(n);
       const exportsSummary = exportSymbolsSummary(n?.exports);
+      const securityFindings = collectNodeSecurityFindings(n).map(item => ({
+        severityNorm: normalizeSecuritySeverityLocal(item.severityNormalized != null ? item.severityNormalized : item.severity),
+        severityLabel: severityLabelFor(item.severityNormalized != null ? item.severityNormalized : item.severity),
+        id: item.id != null ? String(item.id) : '',
+        message: item.message != null ? String(item.message) : '',
+        line: Number.isFinite(item.line) ? String(Number(item.line)) : '',
+        code: item.code != null ? String(item.code) : ''
+      }));
       const values = [
         n.id || '',
         primaryStatusFor(n),
@@ -2641,7 +2691,14 @@ window.addEventListener('DOMContentLoaded', () => {
         external,
         inDeg,
         outDeg,
-        degree
+        degree,
+        securityFindings.length,
+        securityFindings.map(item => item.severityNorm || '').filter(Boolean).join('|'),
+        securityFindings.map(item => item.severityLabel || '').filter(Boolean).join('|'),
+        securityFindings.map(item => item.id).filter(Boolean).join('|'),
+        securityFindings.map(item => item.message).filter(Boolean).join('|'),
+        securityFindings.map(item => item.line).filter(Boolean).join('|'),
+        securityFindings.map(item => item.code).filter(Boolean).join('|')
       ];
       return values.map(escape).join(',');
     }));
@@ -2658,7 +2715,14 @@ window.addEventListener('DOMContentLoaded', () => {
       external: 'True if the node represents an external dependency',
       inDegree: 'Number of incoming edges referencing the node',
       outDegree: 'Number of outgoing edges from the node',
-      degree: 'Total graph degree (inDegree + outDegree)'
+      degree: 'Total graph degree (inDegree + outDegree)',
+      securityFindingCount: 'Number of security findings associated with the node',
+      securitySeverityNormalized: 'Pipe-delimited list of normalized severity levels for security findings',
+      securitySeverityLabels: 'Pipe-delimited list of human readable severity labels for security findings',
+      securityFindingIds: 'Pipe-delimited list of security finding identifiers',
+      securityFindingMessages: 'Pipe-delimited list of security finding messages',
+      securityFindingLines: 'Pipe-delimited list of source line numbers associated with the findings',
+      securityFindingCodes: 'Pipe-delimited list of codes or snippet identifiers associated with the findings'
     };
 
     rows.push('');
@@ -2733,6 +2797,21 @@ window.addEventListener('DOMContentLoaded', () => {
       setStatus('Demo graph loaded — click “Load graph.json” or drop a JSON file onto the canvas.');
     }
   }
+
+  window.NuroxNexus = Object.assign({}, window.NuroxNexus, {
+    loadGraph,
+    exportGraphJson,
+    exportSbom,
+    collectNodeSecurityFindings,
+    getState(){
+      return {
+        graph,
+        filtered,
+        rawGraphData,
+        graphSummary
+      };
+    }
+  });
 
   tryAutoLoad();
 });
