@@ -509,17 +509,29 @@ _FileFacts _extractFacts(String filePath, String text) {
       })
       .join('\n');
   final lines = sanitized.split('\n');
+  final lineStarts = _computeLineStarts(sanitized);
   final findings = <SecurityFinding>[];
+  final seenFindings = <String>{};
+
+  void addFinding(SecurityFinding finding) {
+    final key = '${finding.id}|${finding.line}|${finding.code}';
+    if (seenFindings.add(key)) {
+      findings.add(finding);
+    }
+  }
+
+  for (final rule in _secRules) {
+    for (final match in rule.re.allMatches(sanitized)) {
+      final lineNumber = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+      final snippet = _lineAt(lines, lineNumber).trim();
+      addFinding(SecurityFinding(rule.id, rule.message, rule.severity, lineNumber, snippet));
+    }
+  }
 
   for (var i = 0; i < lines.length; i++) {
     final raw = lines[i];
-    for (final rule in _secRules) {
-      if (rule.re.firstMatch(raw) != null) {
-        findings.add(SecurityFinding(rule.id, rule.message, rule.severity, i + 1, raw.trim()));
-      }
-    }
     if (raw.contains('fs.') && raw.contains('..')) {
-      findings.add(SecurityFinding('fs.dotdot', 'Possible path traversal ("..")', 'med', i + 1, raw.trim()));
+      addFinding(SecurityFinding('fs.dotdot', 'Possible path traversal ("..")', 'med', i + 1, raw.trim()));
     }
   }
 
@@ -905,6 +917,44 @@ _FileFacts _extractFacts(String filePath, String text) {
       entry.key: entry.value.toList()..sort((a, b) => a.compareTo(b))
   };
   return _FileFacts(filePath, imports, sideEffectOnly, exports, findings);
+}
+
+List<int> _computeLineStarts(String text) {
+  final starts = <int>[0];
+  for (var i = 0; i < text.length; i++) {
+    if (text.codeUnitAt(i) == 0x0A) {
+      starts.add(i + 1);
+    }
+  }
+  return starts;
+}
+
+int _lineNumberForOffset(List<int> starts, int offset, int totalLength) {
+  if (starts.isEmpty) {
+    return 1;
+  }
+  var low = 0;
+  var high = starts.length - 1;
+  while (low <= high) {
+    final mid = (low + high) >> 1;
+    final start = starts[mid];
+    final nextStart = mid + 1 < starts.length ? starts[mid + 1] : totalLength + 1;
+    if (offset < start) {
+      high = mid - 1;
+    } else if (offset >= nextStart) {
+      low = mid + 1;
+    } else {
+      return mid + 1;
+    }
+  }
+  return starts.length;
+}
+
+String _lineAt(List<String> lines, int lineNumber) {
+  if (lineNumber < 1 || lineNumber > lines.length) {
+    return '';
+  }
+  return lines[lineNumber - 1];
 }
 
 bool _listEq(List<String> a, List<String> b) {
