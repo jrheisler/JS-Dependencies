@@ -365,6 +365,126 @@
   const EXPORT_SKIP_KEYS = new Set([...EXPORT_ID_KEYS, ...EXPORT_GROUP_KEYS, 'meta', 'summary', 'stats', 'count', 'type', 'kind', 'category', 'description']);
   const visitedExportContainers = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
 
+  const SECURITY_SEVERITY_ALIASES = new Map([
+    ['crit', 'critical'],
+    ['critical', 'critical'],
+    ['severe', 'high'],
+    ['high', 'high'],
+    ['warn', 'med'],
+    ['warning', 'med'],
+    ['medium', 'med'],
+    ['med', 'med'],
+    ['moderate', 'med'],
+    ['medium-high', 'med'],
+    ['medium_low', 'med'],
+    ['low', 'low'],
+    ['info', 'info'],
+    ['informational', 'info'],
+    ['note', 'info'],
+    ['unknown', 'unknown']
+  ]);
+
+  function normalizeSecuritySeverity(value){
+    if(value == null) return 'unknown';
+    const raw = String(value).trim().toLowerCase();
+    if(!raw) return 'unknown';
+    if(SECURITY_SEVERITY_ALIASES.has(raw)) return SECURITY_SEVERITY_ALIASES.get(raw);
+    if(raw.startsWith('crit')) return 'critical';
+    if(raw.startsWith('hi')) return 'high';
+    if(raw.startsWith('med')) return 'med';
+    if(raw.startsWith('mod')) return 'med';
+    if(raw.startsWith('low')) return 'low';
+    if(raw.startsWith('info')) return 'info';
+    return raw;
+  }
+
+  function normalizeSecurityFinding(raw){
+    if(!raw || typeof raw !== 'object') return null;
+    const id = raw.id != null ? String(raw.id) : null;
+    const message = raw.message != null ? String(raw.message) : '';
+    const severity = raw.severity != null ? String(raw.severity) : '';
+    const severityNormalized = normalizeSecuritySeverity(raw.severityNormalized != null ? raw.severityNormalized : severity);
+    const line = Number.isFinite(raw.line) ? Number(raw.line) : null;
+    const code = raw.code != null ? String(raw.code) : null;
+    return {
+      id,
+      message,
+      severity,
+      severityNormalized,
+      line,
+      code
+    };
+  }
+
+  function cloneSecurityFinding(finding){
+    if(!finding || typeof finding !== 'object') return null;
+    const clone = {
+      message: finding.message != null ? String(finding.message) : ''
+    };
+    if(finding.id != null) clone.id = String(finding.id);
+    if(finding.severity != null) clone.severity = String(finding.severity);
+    if(finding.severityNormalized != null) clone.severityNormalized = String(finding.severityNormalized);
+    if(Number.isFinite(finding.line)) clone.line = Number(finding.line);
+    if(finding.code != null) clone.code = String(finding.code);
+    return clone;
+  }
+
+  function securityFindingKey(finding){
+    if(!finding || typeof finding !== 'object') return '';
+    const parts = [
+      finding.severityNormalized || finding.severity || '',
+      finding.id || '',
+      Number.isFinite(finding.line) ? finding.line : '',
+      finding.message || '',
+      finding.code || ''
+    ];
+    return parts.join('|');
+  }
+
+  function ingestSecurityFindings(container, target){
+    if(!container) return;
+    if(container instanceof Map){
+      container.forEach((value, key) => ingestSecurityFindings({ [key]: value }, target));
+      return;
+    }
+    if(Array.isArray(container)){
+      container.forEach(entry => ingestSecurityFindings(entry, target));
+      return;
+    }
+    if(typeof container !== 'object') return;
+    const entries = Object.entries(container);
+    entries.forEach(([rawKey, rawValue]) => {
+      if(typeof rawKey !== 'string') return;
+      const trimmedKey = rawKey.trim();
+      if(!trimmedKey) return;
+      const list = Array.isArray(rawValue)
+        ? rawValue
+        : (rawValue && typeof rawValue === 'object' && Array.isArray(rawValue.findings))
+          ? rawValue.findings
+          : [rawValue];
+      const normalizedList = list
+        .map(normalizeSecurityFinding)
+        .filter(item => item && (item.message || item.id));
+      if(!normalizedList.length) return;
+      const keys = [];
+      const canonical = canonicalExportId(trimmedKey);
+      if(canonical) keys.push(canonical);
+      if(!canonical || canonical !== trimmedKey) keys.push(trimmedKey);
+      keys.forEach(key => {
+        if(!key) return;
+        if(!target.has(key)) target.set(key, []);
+        const bucket = target.get(key);
+        const seen = new Set(bucket.map(securityFindingKey));
+        normalizedList.forEach(item => {
+          const entryKey = securityFindingKey(item);
+          if(seen.has(entryKey)) return;
+          bucket.push(cloneSecurityFinding(item));
+          seen.add(entryKey);
+        });
+      });
+    });
+  }
+
   function canonicalExportId(id){
     if(typeof id !== 'string') return null;
     let value = id.trim();
@@ -571,6 +691,13 @@
     }
     exportSources.forEach(source => ingestExports(exportsById, source));
 
+    const securityById = new Map();
+    const securitySources = [rawGraph.securityFindings];
+    if(rawGraph.security && typeof rawGraph.security === 'object'){
+      securitySources.push(rawGraph.security.findings, rawGraph.security);
+    }
+    securitySources.forEach(source => ingestSecurityFindings(source, securityById));
+
     const NODE_EXPORT_ID_KEYS = [
       'id',
       'absPath',
@@ -609,7 +736,9 @@
         candidates.add(node.id);
       }
 
-      for(const candidate of candidates){
+      const candidateList = Array.from(candidates).filter(value => typeof value === 'string');
+
+      for(const candidate of candidateList){
         if(typeof candidate !== 'string') continue;
         const canonical = canonicalExportId(candidate);
         if(canonical && exportsById.has(canonical)){
@@ -619,7 +748,7 @@
       }
 
       if(!collected){
-        for(const candidate of candidates){
+        for(const candidate of candidateList){
           if(typeof candidate !== 'string') continue;
           const trimmed = candidate.trim();
           if(!trimmed) continue;
@@ -635,6 +764,37 @@
         node.exports = merged;
       } else if(node.exports){
         delete node.exports;
+      }
+
+      if(securityById.size){
+        let security = null;
+        for(const candidate of candidateList){
+          const canonical = canonicalExportId(candidate);
+          if(canonical && securityById.has(canonical)){
+            security = securityById.get(canonical);
+            break;
+          }
+        }
+        if(!security){
+          for(const candidate of candidateList){
+            const trimmed = typeof candidate === 'string' ? candidate.trim() : '';
+            if(!trimmed) continue;
+            if(securityById.has(trimmed)){
+              security = securityById.get(trimmed);
+              break;
+            }
+          }
+        }
+        if(security && security.length){
+          const cloned = security.map(cloneSecurityFinding).filter(item => item);
+          if(cloned.length){
+            node.securityFindings = cloned;
+          } else if(node.securityFindings){
+            delete node.securityFindings;
+          }
+        } else if(node.securityFindings){
+          delete node.securityFindings;
+        }
       }
     });
 
@@ -678,7 +838,8 @@
       hasDynamicEvidence,
       normalizeEntrypoints,
       normalizeProfiles,
-      compileKeepRules
+      compileKeepRules,
+      normalizeSecuritySeverity
     }
   };
 })(typeof self !== 'undefined' ? self : this);

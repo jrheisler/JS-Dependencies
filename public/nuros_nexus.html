@@ -152,6 +152,21 @@
     .exports-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
     .exports-symbol { font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-word; color: var(--text); }
 
+    .security-list { display: grid; gap: 8px; max-height: 220px; overflow: auto; }
+    .security-item { background: #0d1220; border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; }
+    .security-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .security-severity { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; background: rgba(124,92,255,.14); color: var(--text); }
+    .security-severity.severity-critical { background: rgba(255,71,71,.18); border-color: rgba(255,71,71,.4); color: #ff9a9a; }
+    .security-severity.severity-high { background: rgba(255,174,66,.18); border-color: rgba(255,174,66,.4); color: #ffd9a3; }
+    .security-severity.severity-med { background: rgba(255,220,94,.18); border-color: rgba(255,220,94,.36); color: #fff2b3; }
+    .security-severity.severity-low { background: rgba(118,215,196,.16); border-color: rgba(118,215,196,.32); color: #c9fff0; }
+    .security-severity.severity-info { background: rgba(124,186,255,.18); border-color: rgba(124,186,255,.34); color: #d4e7ff; }
+    .security-severity.severity-unknown { background: rgba(90,102,138,.18); border-color: rgba(90,102,138,.34); color: #d6def0; }
+    .security-rule { font-size: 11px; color: var(--muted); }
+    .security-message { font-size: 13px; color: var(--text); line-height: 1.45; }
+    .security-meta { font-size: 11px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; }
+    .security-snippet { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #090d1a; border: 1px solid rgba(255,255,255,.08); border-radius: 6px; padding: 6px; margin: 0; font-size: 11px; white-space: pre-wrap; word-break: break-word; color: #e8ecf8; }
+
     .kbd { background: #111526; border: 1px solid rgba(255,255,255,.15); border-bottom-color: rgba(0,0,0,.3); padding: 2px 6px; border-radius: 6px; font-size: 12px; }
 
     .modal-overlay { position: fixed; inset: 0; background: rgba(3,5,12,0.88); display: flex; align-items: center; justify-content: center; padding: 4vh 4vw; z-index: 1000; }
@@ -269,6 +284,12 @@
           <div class="status-note" id="exportsEmpty" style="display:none;">No exports recorded for this node.</div>
           <div class="exports-grid" id="exportsList"></div>
         </div>
+        <div class="hr" id="securityDivider" style="display:none;"></div>
+        <div id="securityGroup" style="display:none;">
+          <div style="color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.12em; margin-bottom:6px;">Security</div>
+          <div class="status-note" id="securityEmpty" style="display:none;">No security findings recorded for this node.</div>
+          <div class="security-list" id="securityList"></div>
+        </div>
         <button type="button" id="markKeepRule" class="btn-inline">False positive? Keep this node</button>
         <div class="status-note" id="keepRuleNote"></div>
       </div>
@@ -339,6 +360,8 @@
       <button type="button" class="metric" data-highlight="exports">Exports: <span id="exCount" class="mono">0</span></button>
       <span class="metric-sep" aria-hidden="true">·</span>
       <button type="button" class="metric" data-highlight="dynamic">Dynamic-only: <span id="dCount" class="mono">0</span></button>
+      <span class="metric-sep" aria-hidden="true">·</span>
+      <button type="button" class="metric" data-highlight="security">Security: <span id="secCount" class="mono">0/0</span></button>
     </div>
   </section>
 
@@ -575,6 +598,119 @@ window.addEventListener('DOMContentLoaded', () => {
     return unique.join('|');
   }
 
+  const gpHelpers = (typeof window !== 'undefined' && window.GraphPreprocessing && window.GraphPreprocessing.helpers)
+    ? window.GraphPreprocessing.helpers
+    : null;
+  const normalizeSecuritySeverityHelper = (gpHelpers && typeof gpHelpers.normalizeSecuritySeverity === 'function')
+    ? gpHelpers.normalizeSecuritySeverity
+    : null;
+  const SECURITY_SEVERITY_ORDER = ['critical', 'high', 'med', 'low', 'info', 'unknown'];
+  const SECURITY_SEVERITY_INDEX = SECURITY_SEVERITY_ORDER.reduce((acc, name, idx) => { acc[name] = idx; return acc; }, {});
+  const SECURITY_SEVERITY_LABELS = {
+    critical: 'Critical',
+    high: 'High',
+    med: 'Medium',
+    low: 'Low',
+    info: 'Info',
+    unknown: 'Unknown'
+  };
+  const SECURITY_SEVERITY_ALIASES = {
+    crit: 'critical',
+    critical: 'critical',
+    severe: 'high',
+    high: 'high',
+    warn: 'med',
+    warning: 'med',
+    medium: 'med',
+    med: 'med',
+    moderate: 'med',
+    'medium-high': 'med',
+    'medium_low': 'med',
+    low: 'low',
+    info: 'info',
+    informational: 'info',
+    note: 'info',
+    unknown: 'unknown'
+  };
+
+  function normalizeSecuritySeverityLocal(value){
+    if(normalizeSecuritySeverityHelper){
+      try {
+        const normalized = normalizeSecuritySeverityHelper(value);
+        if(normalized) return normalized;
+      } catch (err) {}
+    }
+    if(value == null) return 'unknown';
+    const raw = String(value).trim().toLowerCase();
+    if(!raw) return 'unknown';
+    if(Object.prototype.hasOwnProperty.call(SECURITY_SEVERITY_ALIASES, raw)){
+      return SECURITY_SEVERITY_ALIASES[raw];
+    }
+    if(raw.startsWith('crit')) return 'critical';
+    if(raw.startsWith('hi')) return 'high';
+    if(raw.startsWith('warn')) return 'med';
+    if(raw.startsWith('med')) return 'med';
+    if(raw.startsWith('mod')) return 'med';
+    if(raw.startsWith('low')) return 'low';
+    if(raw.startsWith('info')) return 'info';
+    return raw;
+  }
+
+  function severityOrderIndex(value){
+    const normalized = normalizeSecuritySeverityLocal(value);
+    return Object.prototype.hasOwnProperty.call(SECURITY_SEVERITY_INDEX, normalized)
+      ? SECURITY_SEVERITY_INDEX[normalized]
+      : SECURITY_SEVERITY_ORDER.length;
+  }
+
+  function severityLabelFor(value){
+    const normalized = normalizeSecuritySeverityLocal(value);
+    if(Object.prototype.hasOwnProperty.call(SECURITY_SEVERITY_LABELS, normalized)){
+      return SECURITY_SEVERITY_LABELS[normalized];
+    }
+    if(!normalized) return 'Unknown';
+    return normalized.replace(/\b\w/g, ch => ch.toUpperCase());
+  }
+
+  function collectNodeSecurityFindings(node){
+    if(!node || !Array.isArray(node.securityFindings)) return [];
+    return node.securityFindings.filter(item => item && typeof item === 'object');
+  }
+
+  function renderSecurityList(findings){
+    const list = Array.isArray(findings) ? findings.filter(item => item && typeof item === 'object') : [];
+    if(!list.length) return '';
+    const normalized = list.map(item => ({
+      severityNorm: normalizeSecuritySeverityLocal(item.severityNormalized != null ? item.severityNormalized : item.severity),
+      severity: item.severity != null ? String(item.severity) : '',
+      message: item.message != null ? String(item.message) : '',
+      id: item.id != null ? String(item.id) : '',
+      line: Number.isFinite(item.line) ? Number(item.line) : null,
+      code: item.code != null ? String(item.code) : ''
+    }));
+    normalized.sort((a,b) => {
+      const orderDiff = severityOrderIndex(a.severityNorm) - severityOrderIndex(b.severityNorm);
+      if(orderDiff !== 0) return orderDiff;
+      if(a.line != null && b.line != null && a.line !== b.line) return a.line - b.line;
+      if(a.line != null && b.line == null) return -1;
+      if(a.line == null && b.line != null) return 1;
+      const msgDiff = a.message.localeCompare(b.message);
+      if(msgDiff !== 0) return msgDiff;
+      return a.id.localeCompare(b.id);
+    });
+
+    return normalized.map(item => {
+      const severityClass = `severity-${(item.severityNorm || 'unknown').replace(/[^a-z0-9_-]/g,'-')}`;
+      const header = `<div class="security-header"><span class="security-severity ${severityClass}">${escapeHtml(severityLabelFor(item.severityNorm))}</span>${item.id ? `<span class="security-rule mono">${escapeHtml(item.id)}</span>` : ''}</div>`;
+      const message = `<div class="security-message">${escapeHtml(item.message || 'No description provided.')}</div>`;
+      const metaParts = [];
+      if(item.line != null) metaParts.push(`Line ${escapeHtml(String(item.line))}`);
+      const meta = metaParts.length ? `<div class="security-meta">${metaParts.join(' · ')}</div>` : '';
+      const snippet = item.code ? `<pre class="security-snippet">${escapeHtml(item.code)}</pre>` : '';
+      return `<div class="security-item">${header}${message}${meta}${snippet}</div>`;
+    }).join('');
+  }
+
   const svg = d3.select('#svg');
   const g = svg.append('g');
   const linkG = g.append('g').attr('class','links');
@@ -657,6 +793,11 @@ window.addEventListener('DOMContentLoaded', () => {
       case 'exports':
         filtered.nodes.forEach(n => {
           if(n && n.id != null && collectNodeExportSymbols(n).length) highlightedNodeIds.add(n.id);
+        });
+        break;
+      case 'security':
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null && collectNodeSecurityFindings(n).length) highlightedNodeIds.add(n.id);
         });
         break;
       case 'dynamic':
@@ -1648,6 +1789,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setText('xCount', 0);
     setText('exCount', '0/0');
     setText('dCount', 0);
+    setText('secCount', '0/0');
     setText('pureLeaves', 0);
     setText('sideFx', 0);
     setText('unusedAttached', 0);
@@ -1659,6 +1801,10 @@ window.addEventListener('DOMContentLoaded', () => {
     setDisplay('exportsDivider','none');
     setDisplay('exportsEmpty','none');
     setHTML('exportsList','');
+    setDisplay('securityGroup','none');
+    setDisplay('securityDivider','none');
+    setDisplay('securityEmpty','none');
+    setHTML('securityList','');
     if(profileSelect){ profileSelect.innerHTML = ''; profileSelect.style.display = 'none'; }
     if(entrypointsList){ entrypointsList.innerHTML = ''; }
     if(entrypointsNote){ entrypointsNote.textContent = ''; }
@@ -1950,6 +2096,11 @@ window.addEventListener('DOMContentLoaded', () => {
         edges: {
           total: 0,
           dynamic: 0
+        },
+        security: {
+          totalFindings: 0,
+          affectedNodes: 0,
+          bySeverity: {}
         }
       };
 
@@ -1974,6 +2125,16 @@ window.addEventListener('DOMContentLoaded', () => {
           summary.nodes.exportNodes += 1;
           nodeExports.forEach(symbol => exportsSet.add(symbol));
         }
+
+        const nodeFindings = collectNodeSecurityFindings(n);
+        if(nodeFindings.length){
+          summary.security.affectedNodes += 1;
+          summary.security.totalFindings += nodeFindings.length;
+          nodeFindings.forEach(finding => {
+            const sev = normalizeSecuritySeverityLocal(finding.severityNormalized != null ? finding.severityNormalized : finding.severity);
+            summary.security.bySeverity[sev] = (summary.security.bySeverity[sev] || 0) + 1;
+          });
+        }
       });
 
       filtered.edges.forEach(e => {
@@ -1995,6 +2156,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setText('xCount', summary.nodes.disconnected);
     setText('exCount', `${summary.nodes.exportSymbols}/${summary.nodes.exportNodes}`);
     setText('dCount', summary.nodes.dynamicOnly);
+    setText('secCount', `${summary.security.totalFindings}/${summary.security.affectedNodes}`);
 
     // Insights
     setText('pureLeaves', summary.nodes.pureLeaves);
@@ -2084,6 +2246,10 @@ window.addEventListener('DOMContentLoaded', () => {
         setDisplay('exportsDivider','none');
         setDisplay('exportsEmpty','none');
         setHTML('exportsList','');
+        setDisplay('securityGroup','none');
+        setDisplay('securityDivider','none');
+        setDisplay('securityEmpty','none');
+        setHTML('securityList','');
       }
     }
   }
@@ -2149,6 +2315,22 @@ window.addEventListener('DOMContentLoaded', () => {
       setDisplay('exportsDivider','block');
       setDisplay('exportsEmpty','block');
       setDisplay('exportsList','none');
+    }
+
+    const securityFindings = collectNodeSecurityFindings(n);
+    const securityMarkup = renderSecurityList(securityFindings);
+    if(securityMarkup){
+      setHTML('securityList', securityMarkup);
+      setDisplay('securityGroup','block');
+      setDisplay('securityDivider','block');
+      setDisplay('securityEmpty','none');
+      setDisplay('securityList','');
+    } else {
+      setHTML('securityList','');
+      setDisplay('securityGroup','block');
+      setDisplay('securityDivider','block');
+      setDisplay('securityEmpty','block');
+      setDisplay('securityList','none');
     }
 
     highlight(n);
