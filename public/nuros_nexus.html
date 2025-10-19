@@ -336,6 +336,8 @@
       <span class="metric-sep" aria-hidden="true">·</span>
       <button type="button" class="metric" data-highlight="disconnected">Disconnected: <span id="xCount" class="mono">0</span></button>
       <span class="metric-sep" aria-hidden="true">·</span>
+      <button type="button" class="metric" data-highlight="exports">Exports: <span id="exCount" class="mono">0</span></button>
+      <span class="metric-sep" aria-hidden="true">·</span>
       <button type="button" class="metric" data-highlight="dynamic">Dynamic-only: <span id="dCount" class="mono">0</span></button>
     </div>
   </section>
@@ -527,6 +529,18 @@ window.addEventListener('DOMContentLoaded', () => {
     return out;
   }
 
+  function collectNodeExportSymbols(node){
+    if(!node || !node.exports || typeof node.exports !== 'object') return [];
+    const unique = new Set();
+    Object.values(node.exports).forEach(values => {
+      flattenExportValues(values).forEach(symbol => {
+        const trimmed = typeof symbol === 'string' ? symbol.trim() : '';
+        if(trimmed) unique.add(trimmed);
+      });
+    });
+    return Array.from(unique);
+  }
+
   function renderExportsList(exports){
     if(!exports || typeof exports !== 'object') return '';
     const groups = Object.entries(exports)
@@ -638,6 +652,11 @@ window.addEventListener('DOMContentLoaded', () => {
       case 'disconnected':
         filtered.nodes.forEach(n => {
           if(n && n.id != null && statusesFor(n).includes('disconnected_all_profiles')) highlightedNodeIds.add(n.id);
+        });
+        break;
+      case 'exports':
+        filtered.nodes.forEach(n => {
+          if(n && n.id != null && collectNodeExportSymbols(n).length) highlightedNodeIds.add(n.id);
         });
         break;
       case 'dynamic':
@@ -1627,6 +1646,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setText('eCount', 0);
     setText('uCount', 0);
     setText('xCount', 0);
+    setText('exCount', 0);
     setText('dCount', 0);
     setText('pureLeaves', 0);
     setText('sideFx', 0);
@@ -1923,13 +1943,16 @@ window.addEventListener('DOMContentLoaded', () => {
           pureLeaves: 0,
           sideEffects: 0,
           unusedAttached: 0,
-          maxDegree: 0
+          maxDegree: 0,
+          exportSymbols: 0
         },
         edges: {
           total: 0,
           dynamic: 0
         }
       };
+
+      const exportsSet = new Set();
 
       filtered.nodes.forEach(n => {
         summary.nodes.total += 1;
@@ -1944,12 +1967,19 @@ window.addEventListener('DOMContentLoaded', () => {
         if(n.hasSideEffects === true) summary.nodes.sideEffects += 1;
         if(statuses.includes('disconnected_all_profiles') && degree > 0) summary.nodes.unusedAttached += 1;
         if(degree > summary.nodes.maxDegree) summary.nodes.maxDegree = degree;
+
+        const nodeExports = collectNodeExportSymbols(n);
+        if(nodeExports.length){
+          nodeExports.forEach(symbol => exportsSet.add(symbol));
+        }
       });
 
       filtered.edges.forEach(e => {
         summary.edges.total += 1;
         if(isDynamicEdge(e)) summary.edges.dynamic += 1;
       });
+
+      summary.nodes.exportSymbols = exportsSet.size;
 
       return summary;
     }
@@ -1961,6 +1991,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setText('eCount', summary.edges.total);
     setText('uCount', summary.nodes.reachableCurrent);
     setText('xCount', summary.nodes.disconnected);
+    setText('exCount', summary.nodes.exportSymbols);
     setText('dCount', summary.nodes.dynamicOnly);
 
     // Insights
