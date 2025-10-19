@@ -209,8 +209,9 @@ String _securityFindingKey(Map<String, dynamic> finding) {
 String _canonicalizeSecurityKey(String raw) {
   if (raw.isEmpty) return raw;
   var value = raw;
-  if (value.startsWith('\\?\')) {
-    value = value.substring(4);
+  const windowsExtendedPrefix = '\\\\?\\';
+  if (value.startsWith(windowsExtendedPrefix)) {
+    value = value.substring(windowsExtendedPrefix.length);
   }
   final hadUncPrefix =
       value.startsWith('\\\\') || value.startsWith('\\/') || value.startsWith('//');
