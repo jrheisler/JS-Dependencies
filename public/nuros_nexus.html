@@ -135,6 +135,8 @@
     .legend .metric { background: transparent; border: none; color: var(--text); font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
     .legend .metric:hover, .legend .metric:focus-visible { background: rgba(124,92,255,.16); color: #fff; outline: none; box-shadow: 0 0 0 1px rgba(124,92,255,.35) inset; }
     .legend .metric.active { background: linear-gradient(135deg, rgba(255,71,216,.9), rgba(255,226,89,.9)); color: #11131d; box-shadow: 0 0 12px rgba(255,226,120,.45); }
+    .legend .metric[disabled] { opacity: .4; cursor: not-allowed; box-shadow: none; }
+    .legend .metric[disabled]:hover, .legend .metric[disabled]:focus-visible { background: transparent; color: var(--text); box-shadow: none; }
     .legend .metric-sep { align-self: center; color: rgba(255,255,255,.4); }
 
     .stat { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 13px; }
@@ -391,6 +393,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let localKeepRules = [];
   let compiledKeepRules = [];
   let rawGraphData = null;
+  let graphSummary = createEmptySummary();
   let graphWorker = null;
   let workerSeq = 0;
   const workerRequests = new Map();
@@ -412,6 +415,39 @@ window.addEventListener('DOMContentLoaded', () => {
   const cfg = { charge: -800, linkDist: 90, linkStr: 0.07, minDegree: 0, showDisconnectedOnly: false, showDynamicOnly: false, showDeferredOnly: false, hideExternals: false, hideDynamic: false };
   const KEEP_RULE_KEY = 'nurox:nexus:keepRules';
   const graphHelpers = (window.GraphPreprocessing && window.GraphPreprocessing.helpers) || {};
+
+  function createEmptySummary(){
+    return {
+      security: {
+        totalFindings: 0,
+        affectedNodes: 0,
+        bySeverity: {}
+      }
+    };
+  }
+
+  function normalizeSecuritySummary(raw){
+    const summary = createEmptySummary();
+    if(!raw || typeof raw !== 'object') return summary;
+    const securitySource = (raw.security && typeof raw.security === 'object') ? raw.security : raw;
+    const total = Number(securitySource.totalFindings);
+    const affected = Number(securitySource.affectedNodes);
+    summary.security.totalFindings = Number.isFinite(total) ? total : 0;
+    summary.security.affectedNodes = Number.isFinite(affected) ? affected : 0;
+    if(securitySource.bySeverity && typeof securitySource.bySeverity === 'object'){
+      const map = {};
+      Object.entries(securitySource.bySeverity).forEach(([key, value]) => {
+        if(key == null) return;
+        const normalizedKey = (typeof normalizeSecuritySeverityLocal === 'function')
+          ? normalizeSecuritySeverityLocal(key)
+          : String(key);
+        const numeric = Number(value);
+        map[normalizedKey] = Number.isFinite(numeric) ? numeric : 0;
+      });
+      summary.security.bySeverity = map;
+    }
+    return summary;
+  }
 
   const isDynamicEdge = graphHelpers.isDynamicEdge || (() => false);
   const isEdgeActiveInProfile = graphHelpers.isEdgeActiveInProfile || (() => true);
@@ -719,6 +755,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const hud = $('hud');
   const hudButtons = hud ? Array.from(hud.querySelectorAll('[data-highlight]')) : [];
+  const securityMetricBtn = hudButtons.find(btn => (btn.dataset.highlight || '') === 'security');
   const profileSelect = $('profileSelect');
   const exportJsonBtn = $('exportJson');
   const entrypointsList = $('entrypointsList');
@@ -860,10 +897,30 @@ window.addEventListener('DOMContentLoaded', () => {
     updateHighlights();
   }
 
+  function updateSecurityMetricDisplay(securitySummary){
+    const summary = (securitySummary && typeof securitySummary === 'object') ? securitySummary : {};
+    const total = Number(summary.totalFindings);
+    const affected = Number(summary.affectedNodes);
+    const totalFindings = Number.isFinite(total) ? total : 0;
+    const affectedNodes = Number.isFinite(affected) ? affected : 0;
+    setText('secCount', `${totalFindings}/${affectedNodes}`);
+    if(securityMetricBtn){
+      const hasFindings = totalFindings > 0;
+      securityMetricBtn.disabled = !hasFindings;
+      securityMetricBtn.setAttribute('aria-disabled', hasFindings ? 'false' : 'true');
+      if(!hasFindings && activeHighlight === 'security'){
+        setHighlightFilter(null);
+      }
+    }
+  }
+
   if(hudButtons.length){
     hudButtons.forEach(btn => {
       btn.setAttribute('aria-pressed', 'false');
-      btn.addEventListener('click', () => setHighlightFilter(btn.dataset.highlight || null));
+      btn.addEventListener('click', () => {
+        if(btn.disabled) return;
+        setHighlightFilter(btn.dataset.highlight || null);
+      });
     });
   }
 
@@ -1789,7 +1846,6 @@ window.addEventListener('DOMContentLoaded', () => {
     setText('xCount', 0);
     setText('exCount', '0/0');
     setText('dCount', 0);
-    setText('secCount', '0/0');
     setText('pureLeaves', 0);
     setText('sideFx', 0);
     setText('unusedAttached', 0);
@@ -1805,6 +1861,8 @@ window.addEventListener('DOMContentLoaded', () => {
     setDisplay('securityDivider','none');
     setDisplay('securityEmpty','none');
     setHTML('securityList','');
+    graphSummary = createEmptySummary();
+    updateSecurityMetricDisplay(graphSummary.security);
     if(profileSelect){ profileSelect.innerHTML = ''; profileSelect.style.display = 'none'; }
     if(entrypointsList){ entrypointsList.innerHTML = ''; }
     if(entrypointsNote){ entrypointsNote.textContent = ''; }
@@ -1865,6 +1923,7 @@ window.addEventListener('DOMContentLoaded', () => {
       });
     }
     graph = newGraph;
+    graphSummary = normalizeSecuritySummary(processed.summary);
     entrypoints = Array.isArray(processed.entrypoints) ? processed.entrypoints.slice() : [];
     profiles = Array.isArray(processed.profiles) && processed.profiles.length
       ? processed.profiles
@@ -1885,6 +1944,7 @@ window.addEventListener('DOMContentLoaded', () => {
     updateProfileSelect();
     updateProfileLegend();
     updateEntrypointsPanel();
+    updateSecurityMetricDisplay(graphSummary.security);
   }
 
   async function requestAndApplyGraph(rawGraph, options = {}, previousPositions){
@@ -2156,7 +2216,10 @@ window.addEventListener('DOMContentLoaded', () => {
     setText('xCount', summary.nodes.disconnected);
     setText('exCount', `${summary.nodes.exportSymbols}/${summary.nodes.exportNodes}`);
     setText('dCount', summary.nodes.dynamicOnly);
-    setText('secCount', `${summary.security.totalFindings}/${summary.security.affectedNodes}`);
+    const securityTotals = (graphSummary && graphSummary.security)
+      ? graphSummary.security
+      : summary.security;
+    updateSecurityMetricDisplay(securityTotals);
 
     // Insights
     setText('pureLeaves', summary.nodes.pureLeaves);
