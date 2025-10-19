@@ -24,6 +24,7 @@ class Graph {
   final Map<String, Map<String, dynamic>> nodes = {};
   final Set<String> edgeKeys = {};
   final List<Map<String, dynamic>> edges = [];
+  final Map<String, List<Map<String, dynamic>>> securityFindings = {};
 
   void addGraph(Map<String, dynamic> g) {
     final ns = (g['nodes'] as List?) ?? const [];
@@ -67,12 +68,219 @@ class Graph {
         if (e['certainty'] != null) 'certainty': e['certainty'],
       });
     }
+
+    _mergeSecurityFindings(this, g);
   }
 
   Map<String, dynamic> toJson() => {
         'nodes': nodes.values.toList(),
         'edges': edges,
+        if (securityFindings.isNotEmpty)
+          'securityFindings': securityFindings.map(
+            (key, value) => MapEntry(
+              key,
+              value.map((finding) => Map<String, dynamic>.from(finding)).toList(),
+            ),
+          ),
       };
+}
+
+void _mergeSecurityFindings(Graph graph, Map<String, dynamic> source) {
+  final security = source['securityFindings'];
+  if (security is Map) {
+    security.forEach((rawKey, rawValue) {
+      if (rawKey == null) return;
+      final findings = _normalizeSecurityFindingList(rawValue);
+      _registerSecurityFindings(graph, rawKey.toString(), findings);
+    });
+  }
+
+  final securityBlock = source['security'];
+  if (securityBlock is Map) {
+    final nested = securityBlock['findings'];
+    if (nested is Map) {
+      nested.forEach((rawKey, rawValue) {
+        if (rawKey == null) return;
+        final findings = _normalizeSecurityFindingList(rawValue);
+        _registerSecurityFindings(graph, rawKey.toString(), findings);
+      });
+    }
+  }
+
+  final nodes = source['nodes'];
+  if (nodes is List) {
+    for (final node in nodes) {
+      if (node is! Map<String, dynamic>) continue;
+      final directFindings = <Map<String, dynamic>>[];
+      directFindings.addAll(_normalizeSecurityFindingList(node['securityFindings']));
+      final securityInfo = node['security'];
+      if (securityInfo is Map && securityInfo['findings'] != null) {
+        directFindings.addAll(_normalizeSecurityFindingList(securityInfo['findings']));
+      }
+      if (directFindings.isEmpty) continue;
+      final candidates = _collectSecurityCandidates(node);
+      if (candidates.isEmpty) {
+        final id = node['id'];
+        if (id is String && id.trim().isNotEmpty) {
+          _registerSecurityFindings(graph, id, directFindings);
+        }
+        continue;
+      }
+      for (final candidate in candidates) {
+        _registerSecurityFindings(graph, candidate, directFindings);
+      }
+    }
+  }
+}
+
+void _registerSecurityFindings(
+  Graph graph,
+  String rawKey,
+  List<Map<String, dynamic>> findings,
+) {
+  final trimmed = rawKey.trim();
+  if (trimmed.isEmpty || findings.isEmpty) return;
+  final canonical = _canonicalizeSecurityKey(trimmed);
+  final key = canonical.isNotEmpty ? canonical : trimmed;
+
+  final bucket = graph.securityFindings.putIfAbsent(key, () => []);
+  final seen = bucket.map(_securityFindingKey).toSet();
+
+  for (final finding in findings) {
+    final normalized = _normalizeSecurityFindingRecord(finding);
+    if (normalized == null) continue;
+    final id = _securityFindingKey(normalized);
+    if (seen.add(id)) {
+      bucket.add(normalized);
+    }
+  }
+}
+
+List<Map<String, dynamic>> _normalizeSecurityFindingList(dynamic raw) {
+  final result = <Map<String, dynamic>>[];
+  if (raw is List) {
+    for (final entry in raw) {
+      if (entry is Map) {
+        final normalized = _normalizeSecurityFindingRecord(entry);
+        if (normalized != null) result.add(normalized);
+      }
+    }
+  } else if (raw is Map) {
+    final normalized = _normalizeSecurityFindingRecord(raw);
+    if (normalized != null) result.add(normalized);
+  }
+  return result;
+}
+
+Map<String, dynamic>? _normalizeSecurityFindingRecord(Map raw) {
+  final message = raw['message'];
+  final id = raw['id'];
+  final severity = raw['severity'];
+  final severityNorm = raw['severityNormalized'];
+  final line = raw['line'];
+  final code = raw['code'];
+
+  if (message == null && id == null && severity == null && code == null) {
+    return null;
+  }
+
+  final record = <String, dynamic>{};
+  if (id != null) record['id'] = id.toString();
+  if (message != null) record['message'] = message.toString();
+  if (severity != null) record['severity'] = severity.toString();
+  if (severityNorm != null) {
+    record['severityNormalized'] = severityNorm.toString();
+  }
+  if (line is num) record['line'] = line is int ? line : line.toInt();
+  if (code != null) record['code'] = code.toString();
+  return record;
+}
+
+String _securityFindingKey(Map<String, dynamic> finding) {
+  final sevNorm = finding['severityNormalized']?.toString() ?? '';
+  final sev = finding['severity']?.toString() ?? '';
+  final id = finding['id']?.toString() ?? '';
+  final line = finding['line']?.toString() ?? '';
+  final message = finding['message']?.toString() ?? '';
+  final code = finding['code']?.toString() ?? '';
+  return '$sevNorm|$sev|$id|$line|$message|$code';
+}
+
+String _canonicalizeSecurityKey(String raw) {
+  if (raw.isEmpty) return raw;
+  var value = raw;
+  if (value.startsWith('\\?\')) {
+    value = value.substring(4);
+  }
+  final hadUncPrefix =
+      value.startsWith('\\\\') || value.startsWith('\\/') || value.startsWith('//');
+  value = value.replaceAll('\\', '/');
+  if (hadUncPrefix && !value.startsWith('//')) {
+    value = '//' + value.replaceFirst(RegExp(r'^/+'), '');
+  }
+  if (value.startsWith('//')) {
+    final body = value.substring(2).replaceAll(RegExp(r'/+'), '/');
+    value = '//' + body;
+  } else {
+    value = value.replaceAll(RegExp(r'/+'), '/');
+  }
+  final drive = RegExp(r'^([a-zA-Z]):/').firstMatch(value);
+  if (drive != null) {
+    value = '${drive.group(1)!.toUpperCase()}${value.substring(1)}';
+  }
+  return value;
+}
+
+Set<String> _collectSecurityCandidates(Map<String, dynamic> node) {
+  const candidateKeys = [
+    'id',
+    'absPath',
+    'path',
+    'file',
+    'module',
+    'source',
+    'resolvedPath',
+    'realPath',
+    'canonicalPath',
+    'uri',
+  ];
+
+  final values = <String>{};
+
+  void gather(dynamic value) {
+    if (value == null) return;
+    if (value is String) {
+      final trimmed = value.trim();
+      if (trimmed.isNotEmpty) values.add(trimmed);
+      return;
+    }
+    if (value is Iterable) {
+      for (final item in value) {
+        gather(item);
+      }
+      return;
+    }
+    if (value is Map) {
+      for (final key in candidateKeys) {
+        if (value.containsKey(key)) {
+          gather(value[key]);
+        }
+      }
+    }
+  }
+
+  for (final key in candidateKeys) {
+    if (node.containsKey(key)) {
+      gather(node[key]);
+    }
+  }
+
+  final meta = node['meta'];
+  if (meta is Map<String, dynamic>) {
+    gather(meta);
+  }
+
+  return values;
 }
 
 // ----------------------------
