@@ -525,6 +525,31 @@
     return collected;
   }
 
+  function summarizeSecurityFindings(nodes){
+    const summary = {
+      totalFindings: 0,
+      affectedNodes: 0,
+      bySeverity: {}
+    };
+    if(!Array.isArray(nodes)) return summary;
+    nodes.forEach(node => {
+      const findings = collectNodeSecurityFindings(node);
+      if(!findings.length) return;
+      summary.affectedNodes += 1;
+      summary.totalFindings += findings.length;
+      findings.forEach(finding => {
+        const severity = finding && finding.severityNormalized != null
+          ? finding.severityNormalized
+          : finding && finding.severity != null
+            ? finding.severity
+            : 'unknown';
+        const bucket = normalizeSecuritySeverity(severity);
+        summary.bySeverity[bucket] = (summary.bySeverity[bucket] || 0) + 1;
+      });
+    });
+    return summary;
+  }
+
   function mergeSecurityFindingLists(...lists){
     if(!lists || lists.length === 0) return [];
     const merged = [];
@@ -861,6 +886,7 @@
     const profiles = normalizeProfiles(rawGraph);
     const compiledKeepRules = compileKeepRules(keepRuleConfig, localKeepRules);
     const profileResults = classifyGraph(graph, profiles, entrypoints, { compiledKeepRules });
+    const securitySummary = summarizeSecurityFindings(graph.nodes);
 
     return {
       graph,
@@ -875,7 +901,10 @@
         reachableRuntime: Array.from(res.reachableRuntime),
         reachableTest: Array.from(res.reachableTest),
         reachableBuild: Array.from(res.reachableBuild)
-      }))
+      })),
+      summary: {
+        security: securitySummary
+      }
     };
   }
 
@@ -898,6 +927,7 @@
       compileKeepRules,
       normalizeSecuritySeverity,
       collectNodeSecurityFindings,
+      summarizeSecurityFindings,
       mergeSecurityFindingLists
     }
   };
