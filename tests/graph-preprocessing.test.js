@@ -1,0 +1,112 @@
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+
+function loadGraphPreprocessing(){
+  const filePath = path.join(__dirname, '..', 'public', 'js', 'graph-preprocessing.js');
+  const source = fs.readFileSync(filePath, 'utf8');
+  const sandbox = { console };
+  sandbox.self = sandbox;
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  sandbox.setTimeout = function(){};
+  sandbox.clearTimeout = function(){};
+  vm.runInNewContext(source, sandbox, { filename: 'graph-preprocessing.js' });
+  return sandbox.GraphPreprocessing || sandbox.self.GraphPreprocessing || sandbox.window.GraphPreprocessing;
+}
+
+const GraphPreprocessing = loadGraphPreprocessing();
+const { preprocessGraph, helpers } = GraphPreprocessing;
+
+function test(name, fn){
+  try {
+    fn();
+    console.log(`✔ ${name}`);
+  } catch (error){
+    console.error(`✘ ${name}`);
+    console.error(error);
+    throw error;
+  }
+}
+
+test('merges node and referenced security findings without overwriting', () => {
+  const rawGraph = {
+    nodes: [
+      {
+        id: 'src/fileA.js',
+        securityFindings: [
+          { id: 'existing', message: 'local finding', severity: 'low', severityNormalized: 'low', line: 12 }
+        ]
+      }
+    ],
+    securityFindings: {
+      'src/fileA.js': [
+        { id: 'existing', message: 'local finding', severity: 'low', severityNormalized: 'low', line: 12 },
+        { id: 'global', message: 'global finding', severity: 'high', severityNormalized: 'high', code: 'SEC001' }
+      ]
+    }
+  };
+
+  const result = preprocessGraph({ rawGraph });
+  const node = result.graph.nodes.find(n => n.id === 'src/fileA.js');
+  assert(node, 'expected node in result');
+  assert(Array.isArray(node.securityFindings), 'security findings should be array');
+  assert.strictEqual(node.securityFindings.length, 2, 'security findings should merge without duplication');
+  const messages = new Set(node.securityFindings.map(item => item.message));
+  assert(messages.has('global finding'), 'should include global finding');
+  assert(messages.has('local finding'), 'should include local finding');
+});
+
+test('resolves canonical IDs so security findings survive normalization', () => {
+  const rawGraph = {
+    nodes: [
+      {
+        id: 'module-a',
+        meta: {
+          realPath: 'C:/app/src/index.js'
+        }
+      }
+    ],
+    securityFindings: {
+      'c:\\\\app\\\\src\\\\index.js': [
+        { id: 'canonical', message: 'canonical finding', severity: 'medium', severityNormalized: 'med' }
+      ]
+    }
+  };
+
+  const result = preprocessGraph({ rawGraph });
+  const node = result.graph.nodes.find(n => n.id === 'module-a');
+  assert(node, 'expected node in result');
+  assert(Array.isArray(node.securityFindings), 'security findings should exist');
+  assert.strictEqual(node.securityFindings.length, 1, 'should attach canonical finding');
+  assert.strictEqual(node.securityFindings[0].message, 'canonical finding');
+});
+
+test('collectNodeSecurityFindings handles nested sources', () => {
+  const node = {
+    security: {
+      findings: [
+        { id: 'dup', message: 'duplicate finding', severity: 'critical', severityNormalized: 'critical' },
+        { id: 'dup', message: 'duplicate finding', severity: 'critical', severityNormalized: 'critical' }
+      ]
+    },
+    meta: {
+      security: {
+        findings: [
+          { id: 'meta', message: 'meta finding', severity: 'info' }
+        ]
+      }
+    }
+  };
+
+  const collected = helpers.collectNodeSecurityFindings(node);
+  assert(Array.isArray(collected), 'collected findings should be an array');
+  const merged = helpers.mergeSecurityFindingLists(collected);
+  assert.strictEqual(merged.length, 2, 'duplicates should collapse after merge');
+  const ids = new Set(merged.map(item => item.id));
+  assert(ids.has('dup'), 'should include duplicate id after merge');
+  assert(ids.has('meta'), 'should include meta id after merge');
+});
+
+console.log('All GraphPreprocessing security finding tests passed.');
