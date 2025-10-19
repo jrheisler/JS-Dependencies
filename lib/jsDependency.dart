@@ -505,7 +505,7 @@ _FileFacts _extractFacts(String filePath, String text) {
         if (cleaned.startsWith('\ufeff')) {
           cleaned = cleaned.substring(1);
         }
-        return cleaned.replaceFirst(RegExp(r'//.*$'), '');
+        return _stripLineCommentPreservingStrings(cleaned);
       })
       .join('\n');
   final lines = sanitized.split('\n');
@@ -919,6 +919,46 @@ _FileFacts _extractFacts(String filePath, String text) {
   return _FileFacts(filePath, imports, sideEffectOnly, exports, findings);
 }
 
+String _stripLineCommentPreservingStrings(String line) {
+  var inSingle = false;
+  var inDouble = false;
+  var inBacktick = false;
+  final buffer = StringBuffer();
+  for (var i = 0; i < line.length; i++) {
+    final ch = line[i];
+    if (ch == '\\') {
+      if (inSingle || inDouble || inBacktick) {
+        if (i + 1 < line.length) {
+          buffer.write(ch);
+          buffer.write(line[i + 1]);
+          i++;
+          continue;
+        }
+      }
+    }
+    if (!inDouble && !inBacktick && ch == "'") {
+      inSingle = !inSingle;
+      buffer.write(ch);
+      continue;
+    }
+    if (!inSingle && !inBacktick && ch == '"') {
+      inDouble = !inDouble;
+      buffer.write(ch);
+      continue;
+    }
+    if (!inSingle && !inDouble && ch == '`') {
+      inBacktick = !inBacktick;
+      buffer.write(ch);
+      continue;
+    }
+    if (!inSingle && !inDouble && !inBacktick && ch == '/' && i + 1 < line.length && line[i + 1] == '/') {
+      break;
+    }
+    buffer.write(ch);
+  }
+  return buffer.toString();
+}
+
 List<int> _computeLineStarts(String text) {
   final starts = <int>[0];
   for (var i = 0; i < text.length; i++) {
@@ -1207,6 +1247,10 @@ Set<String> _sideEffectOnlyTargets(Map<String, _FileFacts> facts, String cwd) {
     }
   });
   return targets;
+}
+
+List<SecurityFinding> collectSecurityFindingsForTest(String path, String text) {
+  return _extractFacts(path, text).findings;
 }
 
 // -------- misc --------
