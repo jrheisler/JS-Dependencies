@@ -441,47 +441,132 @@
     return parts.join('|');
   }
 
+  const SECURITY_LOCATION_KEYS = [
+    'source',
+    'sources',
+    'path',
+    'paths',
+    'file',
+    'files',
+    'absPath',
+    'realPath',
+    'canonicalPath',
+    'resolvedPath',
+    'module',
+    'modules',
+    'node',
+    'nodes',
+    'uri',
+    'url',
+    'target',
+    'targets'
+  ];
+
+  const SECURITY_FINDING_COLLECTION_KEYS = [
+    'findings',
+    'securityFindings',
+    'items',
+    'values',
+    'entries',
+    'list',
+    'results'
+  ];
+
+  function registerSecurityFindingsForKey(rawKey, rawValue, target){
+    if(typeof rawKey !== 'string') return false;
+    const trimmedKey = rawKey.trim();
+    if(!trimmedKey) return false;
+    const normalizedList = [];
+    const visited = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
+    collectSecurityFindingInputs(rawValue, normalizedList, visited);
+    if(!normalizedList.length) return false;
+    const keys = [];
+    const canonical = canonicalExportId(trimmedKey);
+    if(canonical) keys.push(canonical);
+    if(!canonical || canonical !== trimmedKey) keys.push(trimmedKey);
+    keys.forEach(key => {
+      if(!key) return;
+      if(!target.has(key)) target.set(key, []);
+      const bucket = target.get(key);
+      const seen = new Set(bucket.map(securityFindingKey));
+      normalizedList.forEach(item => {
+        const entryKey = securityFindingKey(item);
+        if(seen.has(entryKey)) return;
+        bucket.push(cloneSecurityFinding(item));
+        seen.add(entryKey);
+      });
+    });
+    return true;
+  }
+
+  function extractSecurityRecords(container){
+    if(!container || typeof container !== 'object') return [];
+    const locations = [];
+    SECURITY_LOCATION_KEYS.forEach(key => {
+      const value = container[key];
+      if(typeof value === 'string'){
+        const trimmed = value.trim();
+        if(trimmed && /[\\/.:]/.test(trimmed)) locations.push(trimmed);
+      } else if(Array.isArray(value)){
+        value.forEach(entry => {
+          if(typeof entry !== 'string') return;
+          const trimmed = entry.trim();
+          if(trimmed && /[\\/.:]/.test(trimmed)) locations.push(trimmed);
+        });
+      }
+    });
+    if(!locations.length) return [];
+    let findingsSource = null;
+    for(const key of SECURITY_FINDING_COLLECTION_KEYS){
+      const candidate = container[key];
+      if(Array.isArray(candidate)){
+        findingsSource = candidate;
+        break;
+      }
+    }
+    if(!findingsSource && container.finding != null){
+      findingsSource = container.finding;
+    }
+    if(!findingsSource){
+      if(container.message != null || container.id != null || container.severity != null || container.code != null){
+        findingsSource = container;
+      }
+    }
+    if(!findingsSource) return [];
+    return locations.map(location => ({ key: location, findings: findingsSource }));
+  }
+
   function ingestSecurityFindings(container, target){
     if(!container) return;
     if(container instanceof Map){
-      container.forEach((value, key) => ingestSecurityFindings({ [key]: value }, target));
+      container.forEach((value, key) => registerSecurityFindingsForKey(String(key), value, target));
       return;
     }
     if(Array.isArray(container)){
-      container.forEach(entry => ingestSecurityFindings(entry, target));
+      container.forEach(entry => {
+        if(!entry) return;
+        if(typeof entry === 'object'){
+          const records = extractSecurityRecords(entry);
+          if(records.length){
+            records.forEach(record => registerSecurityFindingsForKey(record.key, record.findings, target));
+            return;
+          }
+        }
+        ingestSecurityFindings(entry, target);
+      });
       return;
     }
     if(typeof container !== 'object') return;
+    const directRecords = extractSecurityRecords(container);
+    if(directRecords.length){
+      directRecords.forEach(record => registerSecurityFindingsForKey(record.key, record.findings, target));
+      return;
+    }
     const entries = Object.entries(container);
     entries.forEach(([rawKey, rawValue]) => {
-      if(typeof rawKey !== 'string') return;
-      const trimmedKey = rawKey.trim();
-      if(!trimmedKey) return;
-      const list = Array.isArray(rawValue)
-        ? rawValue
-        : (rawValue && typeof rawValue === 'object' && Array.isArray(rawValue.findings))
-          ? rawValue.findings
-          : [rawValue];
-      const normalizedList = list
-        .map(normalizeSecurityFinding)
-        .filter(item => item && (item.message || item.id));
-      if(!normalizedList.length) return;
-      const keys = [];
-      const canonical = canonicalExportId(trimmedKey);
-      if(canonical) keys.push(canonical);
-      if(!canonical || canonical !== trimmedKey) keys.push(trimmedKey);
-      keys.forEach(key => {
-        if(!key) return;
-        if(!target.has(key)) target.set(key, []);
-        const bucket = target.get(key);
-        const seen = new Set(bucket.map(securityFindingKey));
-        normalizedList.forEach(item => {
-          const entryKey = securityFindingKey(item);
-          if(seen.has(entryKey)) return;
-          bucket.push(cloneSecurityFinding(item));
-          seen.add(entryKey);
-        });
-      });
+      if(!registerSecurityFindingsForKey(rawKey, rawValue, target)){
+        ingestSecurityFindings(rawValue, target);
+      }
     });
   }
 

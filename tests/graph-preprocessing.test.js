@@ -109,4 +109,41 @@ test('collectNodeSecurityFindings handles nested sources', () => {
   assert(ids.has('meta'), 'should include meta id after merge');
 });
 
+test('ingests security findings from array entries and direct records', () => {
+  const rawGraph = {
+    nodes: [
+      { id: 'src/alpha.js' },
+      { id: 'src/beta.js' }
+    ],
+    securityFindings: [
+      {
+        path: 'src/alpha.js',
+        findings: [
+          { id: 'rule.alpha', message: 'alpha issue', severity: 'high', line: 10 }
+        ]
+      },
+      {
+        source: 'src/beta.js',
+        id: 'rule.beta',
+        message: 'beta issue',
+        severity: 'low',
+        line: 42
+      }
+    ]
+  };
+
+  const result = preprocessGraph({ rawGraph });
+  const alpha = result.graph.nodes.find(n => n.id === 'src/alpha.js');
+  const beta = result.graph.nodes.find(n => n.id === 'src/beta.js');
+
+  assert(alpha && beta, 'expected both nodes present');
+  assert.strictEqual(alpha.securityFindings.length, 1, 'alpha finding should attach');
+  assert.strictEqual(alpha.securityFindings[0].id, 'rule.alpha');
+  assert.strictEqual(beta.securityFindings.length, 1, 'beta finding should attach');
+  assert.strictEqual(beta.securityFindings[0].id, 'rule.beta');
+
+  assert.strictEqual(result.summary.security.totalFindings, 2, 'summary should count total findings');
+  assert.strictEqual(result.summary.security.affectedNodes, 2, 'summary should count affected nodes');
+});
+
 console.log('All GraphPreprocessing security finding tests passed.');
