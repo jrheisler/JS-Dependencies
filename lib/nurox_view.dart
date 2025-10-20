@@ -314,11 +314,19 @@ Future<Map<String, dynamic>?> _loadBundledGraph() async {
     locations.add(scriptDir);
     locations.add(_join(scriptDir, 'public'));
     locations.add(_join(scriptDir, 'samples'));
+    final scriptParent = Directory(scriptDir).parent.path;
+    locations.add(scriptParent);
+    locations.add(_join(scriptParent, 'public'));
+    locations.add(_join(scriptParent, 'samples'));
   } catch (_) {}
   final exeDir = File(Platform.resolvedExecutable).parent.path;
   locations.add(exeDir);
   locations.add(_join(exeDir, 'public'));
   locations.add(_join(exeDir, 'samples'));
+  final exeParent = Directory(exeDir).parent.path;
+  locations.add(exeParent);
+  locations.add(_join(exeParent, 'public'));
+  locations.add(_join(exeParent, 'samples'));
 
   final visited = <String>{};
 
@@ -621,11 +629,17 @@ Future<File?> _locateResource(String relativePath) async {
     final scriptDir = File(Platform.script.toFilePath()).parent.path;
     bases.add(scriptDir);
     bases.add(_join(scriptDir, 'public'));
+    final scriptParent = Directory(scriptDir).parent.path;
+    bases.add(scriptParent);
+    bases.add(_join(scriptParent, 'public'));
   } catch (_) {}
   try {
     final exeDir = File(Platform.resolvedExecutable).parent.path;
     bases.add(exeDir);
     bases.add(_join(exeDir, 'public'));
+    final exeParent = Directory(exeDir).parent.path;
+    bases.add(exeParent);
+    bases.add(_join(exeParent, 'public'));
   } catch (_) {}
 
   Future<File?> searchVariants(Iterable<String> candidates) async {
@@ -767,6 +781,11 @@ Future<String?> _findExecutable(List<String> names) async {
     if (scriptHit != null) return scriptHit;
     final publicHit = await probeDir(_join(scriptDir, 'public'));
     if (publicHit != null) return publicHit;
+    final scriptParent = Directory(scriptDir).parent.path;
+    final parentHit = await probeDir(scriptParent);
+    if (parentHit != null) return parentHit;
+    final parentPublicHit = await probeDir(_join(scriptParent, 'public'));
+    if (parentPublicHit != null) return parentPublicHit;
   } catch (_) {}
 
   // 3) alongside the compiled executable (when packaged)
@@ -775,6 +794,11 @@ Future<String?> _findExecutable(List<String> names) async {
   if (binHit != null) return binHit;
   final binPublicHit = await probeDir(_join(binDir, 'public'));
   if (binPublicHit != null) return binPublicHit;
+  final binParent = Directory(binDir).parent.path;
+  final binParentHit = await probeDir(binParent);
+  if (binParentHit != null) return binParentHit;
+  final binParentPublicHit = await probeDir(_join(binParent, 'public'));
+  if (binParentPublicHit != null) return binParentPublicHit;
 
   // 4) PATH
   final pathEnv = Platform.environment['PATH'] ?? '';
