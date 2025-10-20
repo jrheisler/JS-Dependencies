@@ -764,34 +764,34 @@ _FileFacts _extractFacts(String filePath, String text) {
           'jwt.verify should supply an options object to enforce issuer, audience, and algorithm checks.', 'high', line, snippet));
       continue;
     }
-    final options = options!;
-    final hasAlgorithms = RegExp(r'algorithms\s*:', caseSensitive: false).hasMatch(options);
+    final resolvedOptions = options!;
+    final hasAlgorithms = RegExp(r'algorithms\s*:', caseSensitive: false).hasMatch(resolvedOptions);
     if (!hasAlgorithms) {
       addFinding(SecurityFinding('jwt.verify.algorithms.missing',
           'Provide an explicit algorithms whitelist when verifying JWTs.', 'high', line, snippet));
-    } else if (RegExp(r'algorithms\s*:\s*\[[^\]]*none', caseSensitive: false).hasMatch(options)) {
+    } else if (RegExp(r'algorithms\s*:\s*\[[^\]]*none', caseSensitive: false).hasMatch(resolvedOptions)) {
       addFinding(SecurityFinding('jwt.verify.algorithms.none',
           'Remove "none" from the accepted algorithms list; it disables signature verification.', 'high', line, snippet));
     }
-    if (!_optionTruthy(options, ['audience', 'aud'])) {
+    if (!_optionTruthy(resolvedOptions, ['audience', 'aud'])) {
       addFinding(SecurityFinding('jwt.verify.missingAud',
           'Enforce the expected audience (aud) when verifying JWTs.', 'med', line, snippet));
     }
-    if (!_optionTruthy(options, ['issuer', 'iss'])) {
+    if (!_optionTruthy(resolvedOptions, ['issuer', 'iss'])) {
       addFinding(SecurityFinding('jwt.verify.missingIss',
           'Specify the expected issuer (iss) when verifying JWTs.', 'med', line, snippet));
     }
     final hasExpValidation =
-        RegExp(r'ignoreExpiration\s*:\s*false', caseSensitive: false).hasMatch(options) ||
-            _optionTruthy(options, ['maxAge', 'expiresIn']);
-    if (!hasExpValidation || _optionExplicitlyTrue(options, 'ignoreExpiration')) {
+        RegExp(r'ignoreExpiration\s*:\s*false', caseSensitive: false).hasMatch(resolvedOptions) ||
+            _optionTruthy(resolvedOptions, ['maxAge', 'expiresIn']);
+    if (!hasExpValidation || _optionExplicitlyTrue(resolvedOptions, 'ignoreExpiration')) {
       addFinding(SecurityFinding('jwt.verify.missingExp',
           'Ensure expiration (exp) is enforced; avoid ignoreExpiration:true and consider maxAge/expiresIn.', 'med', line, snippet));
     }
     final hasNbfValidation =
-        RegExp(r'ignoreNotBefore\s*:\s*false', caseSensitive: false).hasMatch(options) ||
-            _optionTruthy(options, ['nbf', 'notBefore']);
-    if (!hasNbfValidation || _optionExplicitlyTrue(options, 'ignoreNotBefore')) {
+        RegExp(r'ignoreNotBefore\s*:\s*false', caseSensitive: false).hasMatch(resolvedOptions) ||
+            _optionTruthy(resolvedOptions, ['nbf', 'notBefore']);
+    if (!hasNbfValidation || _optionExplicitlyTrue(resolvedOptions, 'ignoreNotBefore')) {
       addFinding(SecurityFinding('jwt.verify.missingNbf',
           'Validate not-before (nbf) claims by setting ignoreNotBefore:false or providing expected offsets.', 'med', line, snippet));
     }
