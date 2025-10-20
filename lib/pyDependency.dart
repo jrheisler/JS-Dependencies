@@ -489,7 +489,7 @@ void _populatePythonExports(_FileFacts f, String strippedForSyntax, String origi
   for (final match in assignMatches.allMatches(originalText)) {
     hasDunderAll = true;
     final body = match.group(2) ?? '';
-    final items = RegExp(r'[\'\"]([^\'\"]+)[\'\"]').allMatches(body).map((m) => m.group(1)!).toList();
+    final items = RegExp(r"""['"]([^'"]+)['"]""").allMatches(body).map((m) => m.group(1)!).toList();
     if (items.isNotEmpty) {
       dunderAll.addAll(items);
     } else {
@@ -501,7 +501,7 @@ void _populatePythonExports(_FileFacts f, String strippedForSyntax, String origi
   for (final match in plusMatches.allMatches(originalText)) {
     hasDunderAll = true;
     final body = match.group(1) ?? '';
-    final items = RegExp(r'[\'\"]([^\'\"]+)[\'\"]').allMatches(body).map((m) => m.group(1)!).toList();
+    final items = RegExp(r"""['"]([^'"]+)['"]""").allMatches(body).map((m) => m.group(1)!).toList();
     if (items.isNotEmpty) {
       dunderAll.addAll(items);
     } else {
@@ -509,7 +509,7 @@ void _populatePythonExports(_FileFacts f, String strippedForSyntax, String origi
     }
   }
 
-  final appendMatches = RegExp(r'__all__\s*\.\s*append\s*\(\s*[\'\"]([^\'\"]+)[\'\"]\s*\)');
+  final appendMatches = RegExp(r"""__all__\s*\.\s*append\s*\(\s*['"]([^'"]+)['"]\s*\)""");
   for (final match in appendMatches.allMatches(originalText)) {
     hasDunderAll = true;
     dunderAll.add(match.group(1)!);
@@ -519,7 +519,7 @@ void _populatePythonExports(_FileFacts f, String strippedForSyntax, String origi
   for (final match in extendMatches.allMatches(originalText)) {
     hasDunderAll = true;
     final body = match.group(1) ?? '';
-    final items = RegExp(r'[\'\"]([^\'\"]+)[\'\"]').allMatches(body).map((m) => m.group(1)!).toList();
+    final items = RegExp(r"""['"]([^'"]+)['"]""").allMatches(body).map((m) => m.group(1)!).toList();
     if (items.isNotEmpty) {
       dunderAll.addAll(items);
     } else {
