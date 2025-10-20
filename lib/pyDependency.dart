@@ -196,7 +196,15 @@ class _FileFacts {
 
 // ---------------- main ----------------
 void main(List<String> args) async {
-  final cwd = _normalize(_abs('.'));
+  final targetDir = args.isNotEmpty ? args.first : '.';
+  final rootDir = Directory(targetDir);
+  if (!await rootDir.exists()) {
+    stderr.writeln('[error] Directory not found: $targetDir');
+    exitCode = 2;
+    return;
+  }
+
+  final cwd = _normalize(_abs(targetDir));
 
   // 1) Collect python files
   final files = await _collectPyFiles(cwd);
