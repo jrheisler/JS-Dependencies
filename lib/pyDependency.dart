@@ -321,20 +321,74 @@ void main(List<String> args) async {
 // ---------------- crawl ----------------
 Future<List<String>> _collectPyFiles(String root) async {
   final ignoreDirs = <String>{
-    'node_modules','dist','build','target','out','.git','.idea','.venv','venv','__pycache__','.mypy_cache','.pytest_cache','.ruff_cache','.tox'
+    'node_modules',
+    'dist',
+    'build',
+    'target',
+    'out',
+    '.git',
+    '.idea',
+    '.venv',
+    'venv',
+    '__pycache__',
+    '.mypy_cache',
+    '.pytest_cache',
+    '.ruff_cache',
+    '.tox'
   };
+
+  bool shouldSkip(String relPath) {
+    if (relPath.isEmpty || relPath == '.') return false;
+    final segments = relPath
+        .split(_sep)
+        .where((segment) => segment.isNotEmpty && segment != '.');
+    for (final segment in segments) {
+      if (ignoreDirs.contains(segment)) return true;
+    }
+    return false;
+  }
+
   final result = <String>[];
-  await for (final ent in Directory(root).list(recursive: true, followLinks: false)) {
-    if (ent is! File) continue;
-    final sp = ent.path;
-    final rel = _rel(sp, root);
-    final parts = rel.split(_sep);
-    if (parts.any((seg) => ignoreDirs.contains(seg))) continue;
-    final ext = _ext(sp).toLowerCase();
-    if (ext == '.py' || ext == '.pyw' || ext == '.pyi') {
-      result.add(_normalize(sp));
+  final pending = <String>[_normalize(root)];
+  final seenDirs = <String>{};
+
+  while (pending.isNotEmpty) {
+    final current = pending.removeLast();
+    final normalized = _normalize(current);
+    if (!seenDirs.add(normalized)) continue;
+
+    final dir = Directory(normalized);
+    if (!await dir.exists()) continue;
+
+    Stream<FileSystemEntity> listing;
+    try {
+      listing = dir.list(followLinks: false);
+    } catch (err) {
+      stderr.writeln('[warn] Unable to list directory: $normalized ($err)');
+      continue;
+    }
+
+    await for (final ent in listing.handleError(
+      (error, stack) {
+        stderr.writeln('[warn] Error while scanning $normalized: $error');
+      },
+      test: (error) => error is FileSystemException,
+    )) {
+      final path = _normalize(ent.path);
+      final rel = _rel(path, root);
+      if (shouldSkip(rel)) continue;
+
+      if (ent is File) {
+        final ext = _ext(path).toLowerCase();
+        if (ext == '.py' || ext == '.pyw' || ext == '.pyi') {
+          result.add(path);
+        }
+      } else if (ent is Directory) {
+        pending.add(path);
+      }
     }
   }
+
   return result;
 }
 
