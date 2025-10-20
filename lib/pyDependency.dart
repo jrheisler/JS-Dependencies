@@ -330,7 +330,10 @@ Future<List<String>> _collectPyFiles(String root) async {
     final rel = _rel(sp, root);
     final parts = rel.split(_sep);
     if (parts.any((seg) => ignoreDirs.contains(seg))) continue;
-    if (_ext(sp) == '.py') result.add(_normalize(sp));
+    final ext = _ext(sp).toLowerCase();
+    if (ext == '.py' || ext == '.pyw' || ext == '.pyi') {
+      result.add(_normalize(sp));
+    }
   }
   return result;
 }
