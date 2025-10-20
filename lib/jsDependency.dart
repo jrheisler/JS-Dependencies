@@ -400,6 +400,31 @@ final _secRules = <_SecurityRule>[
       RegExp(r'''console\.(?:log|dir)\s*\([^)]*(password|secret|token)[^)]*\)''')),
   _SecurityRule('import.meta.env', 'low', 'Direct access to import.meta.env; ensure safe exposure.',
       RegExp(r'''import\.meta\.env\.[A-Za-z_][\w]*''')),
+  _SecurityRule('ssrf.metadataHost', 'high', 'HTTP request targets metadata or private network IP; validate hosts.',
+      RegExp(
+          r'(?:https?:\/\/)?(?:169\.254\.169\.254|10\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}|172\.(?:1[6-9]|2[0-9]|3[0-1])\.(?:[0-9]{1,3})\.(?:[0-9]{1,3})|192\.168\.(?:[0-9]{1,3})\.(?:[0-9]{1,3}))')),
+  _SecurityRule('injection.mongoOperator', 'high', 'MongoDB \$where/\$regex operators can execute user-controlled code.',
+      RegExp(r'\$(?:where|regex)\s*:')),
+  _SecurityRule('regex.dynamic', 'med', 'RegExp constructed from dynamic input; ensure it is sanitized.',
+      RegExp(r'(?:new\s+)?RegExp\s*\(\s*(?!["\'`/])')),
+  _SecurityRule('regex.catastrophic', 'high', 'Nested quantifiers in RegExp can cause catastrophic backtracking (ReDoS).',
+      RegExp(r'/(?:[^/\\]|\\.)*\([^)]*\+[^)]*\)(?:[^/\\]|\\.)*\+(?:[^/\\]|\\.)*/')),
+  _SecurityRule('cors.credentialsWildcard', 'high',
+      'CORS allows credentials with a wildcard origin; restrict allowed origins.',
+      RegExp(r'Access-Control-Allow-Origin[^\n;]*\*[\s\S]{0,200}?Access-Control-Allow-Credentials[^\n;]*true',
+          caseSensitive: false, multiLine: true)),
+  _SecurityRule('tls.disabledEnv', 'high',
+      'NODE_TLS_REJECT_UNAUTHORIZED=0 disables TLS verification and should not be set in production.',
+      RegExp(r'NODE_TLS_REJECT_UNAUTHORIZED\s*=\s*0')),
+  _SecurityRule('tls.agentInsecure', 'high',
+      'https.Agent configured with rejectUnauthorized:false disables TLS verification.',
+      RegExp(r'https?\.Agent\s*\(\s*\{[^}]*rejectUnauthorized\s*:\s*false', multiLine: true)),
+  _SecurityRule('template.tripleStache', 'med', 'Triple-stache rendering ({{{ }}}) disables escaping; ensure inputs are trusted.',
+      RegExp(r'\{\{\{[^}]+\}\}\}')),
+  _SecurityRule('template.escapeDisabled', 'med', 'Template rendering with escape disabled; ensure inputs are sanitized.',
+      RegExp(r'escape\s*:\s*false', caseSensitive: false)),
+  _SecurityRule('prototype.proto', 'high', 'Assigning to __proto__ or constructor.prototype can lead to prototype pollution.',
+      RegExp(r'(?:__proto__|constructor\.prototype)\s*='))
 ];
 
 // -------- crawl & parse --------
@@ -513,6 +538,26 @@ _FileFacts _extractFacts(String filePath, String text) {
   final findings = <SecurityFinding>[];
   final seenFindings = <String>{};
 
+  final userInputPattern =
+      RegExp(r'\b(?:req|request|ctx|context|event|body|params|query|user|input|data|form|payload|options|config|argv|env|headers|url|href|path|file|filename|dir|search|hash)\b',
+          caseSensitive: false);
+  final pathInputPattern =
+      RegExp(r'\b(?:req|request|body|params|query|user|input|data|file|filename|filepath|dir|directory|path|paths|entry|archive)\b',
+          caseSensitive: false);
+  final fetchPattern = RegExp(r'\bfetch\s*\(');
+  final axiosPattern = RegExp(r'\baxios(?:\.[A-Za-z_][\w]*)?\s*\(');
+  final httpRequestPattern = RegExp(r'\bhttps?\.request\s*\(');
+  final sqlTemplatePattern = RegExp(r'\.query\s*\(\s*`[^`]*\$\{');
+  final sqlConcatPattern = RegExp(r"\.query\s*\([^)]*['\"`][^)]*\+\s*[A-Za-z_]");
+  final lodashMergePattern = RegExp(r'\b_\.merge\s*\(');
+  final objectAssignPattern = RegExp(r'\bObject\.assign\s*\(');
+  final pathJoinPattern = RegExp(r'\bpath\.join\s*\(');
+  final extractPattern = RegExp(r'\.extract\s*\(');
+  final entryPathPattern = RegExp(r'entry\.path');
+
+  bool containsUserInput(String line) => userInputPattern.hasMatch(line);
+  bool containsPathInput(String line) => pathInputPattern.hasMatch(line);
+
   void addFinding(SecurityFinding finding) {
     final key = '${finding.id}|${finding.line}|${finding.code}';
     if (seenFindings.add(key)) {
@@ -530,6 +575,50 @@ _FileFacts _extractFacts(String filePath, String text) {
 
   for (var i = 0; i < lines.length; i++) {
     final raw = lines[i];
+    final trimmed = raw.trim();
+    final hasUserInput = containsUserInput(trimmed);
+    final hasPathInput = containsPathInput(trimmed);
+
+    if (fetchPattern.hasMatch(trimmed) && hasUserInput) {
+      addFinding(SecurityFinding('ssrf.dynamicFetch',
+          'fetch() invoked with potential user-controlled input; validate URL to prevent SSRF.', 'high', i + 1, trimmed));
+    }
+    if (axiosPattern.hasMatch(trimmed) && hasUserInput) {
+      addFinding(SecurityFinding('ssrf.dynamicAxios',
+          'axios call built from user input; validate host/URL to prevent SSRF.', 'high', i + 1, trimmed));
+    }
+    if (httpRequestPattern.hasMatch(trimmed) && hasUserInput) {
+      addFinding(SecurityFinding('ssrf.dynamicRequest',
+          'http(s).request invoked with user data; ensure host is vetted to avoid SSRF.', 'high', i + 1, trimmed));
+    }
+    if (sqlTemplatePattern.hasMatch(trimmed)) {
+      addFinding(SecurityFinding('injection.sqlTemplate',
+          'SQL query built via template literal with interpolation; use parameterized queries.', 'high', i + 1, trimmed));
+    }
+    if (sqlConcatPattern.hasMatch(trimmed) && hasUserInput) {
+      addFinding(SecurityFinding('injection.sqlConcat',
+          'SQL query concatenates user-controlled data; use bound parameters to avoid injection.', 'high', i + 1, trimmed));
+    }
+    if (lodashMergePattern.hasMatch(trimmed) && hasUserInput) {
+      addFinding(SecurityFinding('prototype.mergeUserInput',
+          '_.merge merges user data into an object; guard against prototype pollution.', 'high', i + 1, trimmed));
+    }
+    if (objectAssignPattern.hasMatch(trimmed) && trimmed.contains('{') && hasUserInput) {
+      addFinding(SecurityFinding('prototype.assignUserInput',
+          'Object.assign merges user data into a plain object; guard against prototype pollution.', 'high', i + 1, trimmed));
+    }
+    if (pathJoinPattern.hasMatch(trimmed) && (trimmed.contains('..') || hasPathInput)) {
+      addFinding(SecurityFinding('path.join.userInput',
+          'path.join combines user-controlled paths; ensure traversal is prevented.', 'high', i + 1, trimmed));
+    }
+    if (extractPattern.hasMatch(trimmed) && trimmed.contains('..')) {
+      addFinding(SecurityFinding('zipSlip.entryPath',
+          'Archive extraction may write paths containing ".." (Zip Slip).', 'high', i + 1, trimmed));
+    }
+    if (entryPathPattern.hasMatch(trimmed) && trimmed.contains('..')) {
+      addFinding(SecurityFinding('zipSlip.entryPath',
+          'Archive entry path contains ".." allowing traversal outside target.', 'high', i + 1, trimmed));
+    }
     if (raw.contains('fs.') && raw.contains('..')) {
       addFinding(SecurityFinding('fs.dotdot', 'Possible path traversal ("..")', 'med', i + 1, raw.trim()));
     }

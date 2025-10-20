@@ -49,6 +49,25 @@ finding to trigger.
 | `console.secret` | low | Logging values that look like secrets. | `console\.(log|dir)\([^)]*(password|secret|token)[^)]*\)` |
 | `import.meta.env` | low | Direct reads from `import.meta.env`. | `import\.meta\.env\.[A-Za-z_]\w*` |
 | `fs.dotdot` | med | References to `fs.` APIs combined with `..`, signaling possible directory traversal. | Any line containing both `fs.` and `..` |
+| `ssrf.dynamicFetch` | high | `fetch()` invoked with user-controlled data (for example `req.query`). | `fetch(...)` with arguments referencing request/body/query data |
+| `ssrf.dynamicAxios` | high | `axios` requests built from tainted input. | `axios.*(...)` where arguments include request/body/query data |
+| `ssrf.dynamicRequest` | high | `http(s).request()` using user-controlled hosts. | `http.request(...)` / `https.request(...)` with request/body/query driven host values |
+| `ssrf.metadataHost` | high | Requests to metadata or private-network IP ranges. | URLs targeting `169.254.169.254`, `10.x.x.x`, `172.16-31.x.x`, or `192.168.x.x` |
+| `injection.sqlTemplate` | high | SQL queries composed with template literal interpolation. | `.query` template literal containing `${...}` |
+| `injection.sqlConcat` | high | SQL queries built via string concatenation of tainted data. | `.query('...' + req.body.foo)` |
+| `injection.mongoOperator` | high | Usage of MongoDB `$where`/`$regex` operators which may execute user input. | `$where:` or `$regex:` |
+| `regex.dynamic` | med | `RegExp` constructed from dynamic (non-literal) input. | `new RegExp(variable)` or `RegExp(variable)` |
+| `regex.catastrophic` | high | Regex literal with nested quantifiers that can trigger ReDoS. | Patterns such as `/(a+)+/` |
+| `prototype.mergeUserInput` | high | `_.merge` merging user data into objects. | `_.merge({}, req.body)` |
+| `prototype.assignUserInput` | high | `Object.assign` merging user data into plain objects. | `Object.assign({}, req.body)` |
+| `prototype.proto` | high | Direct assignment to `__proto__` or `constructor.prototype`. | `object.__proto__ = ...` |
+| `path.join.userInput` | high | `path.join` invoked with user-controlled path segments. | `path.join(req.body.path, ...)` |
+| `zipSlip.entryPath` | high | Archive entry paths containing `..` (Zip-Slip). | `entry.path = '../...'` or similar |
+| `cors.credentialsWildcard` | high | Wildcard CORS origin combined with credential support. | `Access-Control-Allow-Origin: *` plus `Access-Control-Allow-Credentials: true` |
+| `tls.disabledEnv` | high | TLS verification disabled via environment variable. | `NODE_TLS_REJECT_UNAUTHORIZED=0` |
+| `tls.agentInsecure` | high | TLS verification disabled on `https.Agent`. | `new https.Agent({ rejectUnauthorized: false })` |
+| `template.tripleStache` | med | Unescaped Handlebars/Mustache triple-stache rendering. | `{{{...}}}` |
+| `template.escapeDisabled` | med | Template rendering with escaping disabled. | `escape: false` |
 
 ### Notes
 
