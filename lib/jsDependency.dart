@@ -406,7 +406,7 @@ final _secRules = <_SecurityRule>[
   _SecurityRule('injection.mongoOperator', 'high', 'MongoDB \$where/\$regex operators can execute user-controlled code.',
       RegExp(r'\$(?:where|regex)\s*:')),
   _SecurityRule('regex.dynamic', 'med', 'RegExp constructed from dynamic input; ensure it is sanitized.',
-      RegExp(r'(?:new\s+)?RegExp\s*\(\s*(?!["\'`/])')),
+      RegExp(r'''(?:new\s+)?RegExp\s*\(\s*(?!["\'`/])''')),
   _SecurityRule('regex.catastrophic', 'high', 'Nested quantifiers in RegExp can cause catastrophic backtracking (ReDoS).',
       RegExp(r'/(?:[^/\\]|\\.)*\([^)]*\+[^)]*\)(?:[^/\\]|\\.)*\+(?:[^/\\]|\\.)*/')),
   _SecurityRule('cors.credentialsWildcard', 'high',
