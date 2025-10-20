@@ -1,5 +1,5 @@
 // pyDependency.dart — V0 Python dependency crawler (no external packages)
-// Produces: pythonDependencies.json in the current working directory.
+// Produces: pyDependencies.json in the current working directory.
 //
 // What it does:
 // - Recursively scans for *.py (skips common build/venv/cache dirs).
@@ -288,7 +288,7 @@ void main(List<String> args) async {
   }
 
   // 10) Write output
-  final outPath = _join(cwd, 'pythonDependencies.json');
+  final outPath = _join(cwd, 'pyDependencies.json');
   final pythonExports = facts
       .map((ff) => _PyExportsSummary(
             fileId: ff.relId,
