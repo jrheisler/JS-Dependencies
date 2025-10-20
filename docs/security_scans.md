@@ -68,6 +68,23 @@ finding to trigger.
 | `tls.agentInsecure` | high | TLS verification disabled on `https.Agent`. | `new https.Agent({ rejectUnauthorized: false })` |
 | `template.tripleStache` | med | Unescaped Handlebars/Mustache triple-stache rendering. | `{{{...}}}` |
 | `template.escapeDisabled` | med | Template rendering with escaping disabled. | `escape: false` |
+| `jwt.verify.missingOptions` | high | `jwt.verify` missing a populated options object. | `jwt.verify(token, secret, null)` / `{}` |
+| `jwt.verify.algorithms.missing` | high | Missing `algorithms` whitelist on JWT verification. | Options object without `algorithms:` |
+| `jwt.verify.algorithms.none` | high | `algorithms` array includes `none`. | `algorithms: ['HS256', 'none']` |
+| `jwt.verify.missingAud` | med | JWT verification lacking audience validation. | Options object without `audience`/`aud` |
+| `jwt.verify.missingIss` | med | JWT verification lacking issuer validation. | Options object without `issuer`/`iss` |
+| `jwt.verify.missingExp` | med | Expiration not enforced or `ignoreExpiration:true`. | Missing `maxAge`/`expiresIn` or `ignoreExpiration:true` |
+| `jwt.verify.missingNbf` | med | Not-before claim left unchecked. | Missing `nbf`/`notBefore` or `ignoreNotBefore:true` |
+| `cookie.sameSiteNoneInsecure` | high | `SameSite=None` cookie missing the `Secure` flag. | Cookie strings/options with `SameSite=None` but no `secure` |
+| `cookie.session.noHttpOnly` | med | Session cookies lacking `HttpOnly`. | `session`/`sid` cookies without `httpOnly` |
+| `crypto.aesEcb` | high | AES ECB mode selected. | `aes-128-ecb`, `AES_ECB` |
+| `crypto.staticIv` | high | Static IV/nonce passed to encryption APIs. | `createCipheriv(..., 'static')`, `crypto.subtle` algorithm with literal `iv` |
+| `open_redirect.clientLocation` | high | Client-side navigation built from user input. | `window.location = req.query...` |
+| `open_redirect.serverRedirect` | high | Express `res.redirect` fed by user input. | `res.redirect(req.query.returnTo)` |
+| `headers.securityBaseline` | med | Other security headers set without CSP/X-Frame-Options/Referrer-Policy. | `res.set({ 'Strict-Transport-Security': ... })` lacking CSP/frame/referrer |
+| `yaml.load.unsafe` | high | `js-yaml` `load()` without a safe schema. | `yaml.load(src)` missing `schema: DEFAULT_SAFE_SCHEMA` |
+| `xml.externalEntities` | high | XML parser enabling external entities. | `{ resolveEntities: true }`, `{ externalEntities: true }` |
+| `csrf.credentialsMissingToken` | high | Credentialed requests lacking CSRF tokens. | `fetch(... { credentials: 'include', method: 'POST' })` without CSRF headers |
 
 ### Notes
 

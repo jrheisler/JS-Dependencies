@@ -203,7 +203,7 @@ void main(List<String> args) async {
   if (security.isNotEmpty) {
     out['securityFindings'] = security;
   }
-  final pkgRisks = _computePackageRisks(pkg);
+  final pkgRisks = await _computePackageRisks(cwd, pkg);
   if (pkgRisks != null && pkgRisks.isNotEmpty) {
     out['packageRisks'] = pkgRisks;
   }
@@ -410,7 +410,8 @@ final _secRules = <_SecurityRule>[
   _SecurityRule('cookie.literal', 'low', 'Cookie configuration literal detected; verify security flags.',
       RegExp(r'''(?:document\.cookie\s*=\s*["\'][^"\']*["\']|cookie\s*:\s*["\'][^"\']*["\'])''')),
   _SecurityRule('console.secret', 'low', 'console logging sensitive data.',
-      RegExp(r'''console\.(?:log|dir)\s*\([^)]*(password|secret|token)[^)]*\)''')),
+      RegExp(r'''console\.(?:log|dir)\s*\([^)]*(password|secret|token|api[_-]?key|auth|credential|ssn|social|credit|card|email)[^)]*\)''',
+          caseSensitive: false)),
   _SecurityRule('import.meta.env', 'low', 'Direct access to import.meta.env; ensure safe exposure.',
       RegExp(r'''import\.meta\.env\.[A-Za-z_][\w]*''')),
   _SecurityRule('ssrf.metadataHost', 'high', 'HTTP request targets metadata or private network IP; validate hosts.',
@@ -437,7 +438,9 @@ final _secRules = <_SecurityRule>[
   _SecurityRule('template.escapeDisabled', 'med', 'Template rendering with escape disabled; ensure inputs are sanitized.',
       RegExp(r'escape\s*:\s*false', caseSensitive: false)),
   _SecurityRule('prototype.proto', 'high', 'Assigning to __proto__ or constructor.prototype can lead to prototype pollution.',
-      RegExp(r'(?:__proto__|constructor\.prototype)\s*='))
+      RegExp(r'(?:__proto__|constructor\.prototype)\s*=')),
+  _SecurityRule('crypto.aesEcb', 'high', 'AES ECB mode is insecure; use CBC/GCM instead.',
+      RegExp(r'''AES[_-]?ECB|aes-(?:128|192|256)-ecb''', caseSensitive: false))
 ];
 
 // -------- crawl & parse --------
@@ -550,6 +553,11 @@ _FileFacts _extractFacts(String filePath, String text) {
   final lineStarts = _computeLineStarts(sanitized);
   final findings = <SecurityFinding>[];
   final seenFindings = <String>{};
+  final credentialedXhrVars = <String>{};
+  final xhrCsrfProtected = <String>{};
+  final xhrStatefulCalls = <Map<String, dynamic>>[];
+  final headerBlocks = <Map<String, dynamic>>[];
+  final helmetConfigured = RegExp(r'\bhelmet\s*\(', caseSensitive: false).hasMatch(sanitized);
 
   final userInputPattern =
       RegExp(r'\b(?:req|request|ctx|context|event|body|params|query|user|input|data|form|payload|options|config|argv|env|headers|url|href|path|file|filename|dir|search|hash)\b',
@@ -653,6 +661,383 @@ _FileFacts _extractFacts(String filePath, String text) {
     }
     if (raw.contains('fs.') && raw.contains('..')) {
       addFinding(SecurityFinding('fs.dotdot', 'Possible path traversal ("..")', 'med', i + 1, raw.trim()));
+    }
+
+    final lower = raw.toLowerCase();
+    if (RegExp(r'samesite\s*=\s*none', caseSensitive: false).hasMatch(raw)) {
+      if (!RegExp(r'\bsecure\b', caseSensitive: false).hasMatch(raw)) {
+        addFinding(SecurityFinding('cookie.sameSiteNoneInsecure',
+            'SameSite=None cookies must also be marked Secure to avoid downgrade attacks.', 'high', i + 1, raw.trim()));
+      }
+    }
+    if ((raw.contains('document.cookie') || raw.contains('Set-Cookie') || raw.contains('cookie:')) &&
+        RegExp(r'\b(?:sid|session|connect\.sid)\s*=', caseSensitive: false).hasMatch(lower) &&
+        !RegExp(r'httponly', caseSensitive: false).hasMatch(lower)) {
+      addFinding(SecurityFinding('cookie.session.noHttpOnly',
+          'Session-oriented cookies should be flagged HttpOnly to prevent client-side access.', 'med', i + 1, raw.trim()));
+    }
+    if (RegExp(r'(?:window\.)?location(?:\.href)?\s*=', caseSensitive: false).hasMatch(trimmed) && hasUserInput) {
+      addFinding(SecurityFinding('open_redirect.clientLocation',
+          'Client-side navigation built from user input can enable open redirects.', 'high', i + 1, trimmed));
+    }
+    if (trimmed.contains('res.redirect') && hasUserInput) {
+      addFinding(SecurityFinding('open_redirect.serverRedirect',
+          'Express res.redirect called with user-controlled input; validate destinations to prevent open redirect abuse.',
+          'high', i + 1, trimmed));
+    }
+
+    final mWithCred = RegExp(r'([A-Za-z_][\w]*)\.withCredentials\s*=\s*true').firstMatch(trimmed);
+    if (mWithCred != null) {
+      credentialedXhrVars.add(mWithCred.group(1)!);
+    }
+    final mSetHeader = RegExp(r'([A-Za-z_][\w]*)\.setRequestHeader\s*\(').firstMatch(trimmed);
+    if (mSetHeader != null && _containsCsrfMarker(trimmed)) {
+      xhrCsrfProtected.add(mSetHeader.group(1)!);
+    }
+    final mSend = RegExp(r'([A-Za-z_][\w]*)\.send\s*\(([^)]*)\)').firstMatch(trimmed);
+    if (mSend != null && _containsCsrfMarker(mSend.group(2)!)) {
+      xhrCsrfProtected.add(mSend.group(1)!);
+    }
+    final mOpen = RegExp(r'([A-Za-z_][\w]*)\.open\s*\(\s*["\'](POST|PUT|PATCH|DELETE)["\']', caseSensitive: false)
+        .firstMatch(trimmed);
+    if (mOpen != null) {
+      xhrStatefulCalls.add({
+        'var': mOpen.group(1)!,
+        'method': mOpen.group(2)!.toUpperCase(),
+        'line': i + 1,
+        'snippet': trimmed,
+      });
+    }
+
+    if (RegExp(r'req\.file\.(?:mimetype|originalname)', caseSensitive: false).hasMatch(trimmed)) {
+      addFinding(SecurityFinding('upload.trustsClientMime',
+          'Upload flow relies on client-provided MIME type or filename; enforce server-side validation.', 'med', i + 1, trimmed));
+    }
+    if ((trimmed.contains('fs.writeFile') || trimmed.contains('fs.writeFileSync') ||
+            trimmed.contains('fs.createWriteStream')) &&
+        hasPathInput &&
+        RegExp(r'(?:/|\\)(?:public|uploads)', caseSensitive: false).hasMatch(trimmed)) {
+      addFinding(SecurityFinding('upload.publicWrite',
+          'User-controlled upload written directly to a public directory; randomize destinations and validate paths.',
+          'high', i + 1, trimmed));
+    }
+  }
+
+  for (final call in xhrStatefulCalls) {
+    final name = call['var'] as String;
+    final method = call['method'] as String;
+    final line = call['line'] as int;
+    final snippet = call['snippet'] as String;
+    if (credentialedXhrVars.contains(name) && !xhrCsrfProtected.contains(name)) {
+      addFinding(SecurityFinding('csrf.credentialsMissingToken',
+          'Credentialed XMLHttpRequest using $method without CSRF token headers; include a CSRF token before sending state-changing requests.',
+          'high', line, snippet));
+    }
+  }
+
+  final jwtVerifyPattern = RegExp(r'(?:jwt|jsonwebtoken)\s*\.\s*verify\s*\(', caseSensitive: false);
+  for (final match in jwtVerifyPattern.allMatches(sanitized)) {
+    final call = _extractCallExpression(sanitized, match.start);
+    if (call == null) continue;
+    final argsString = call.substring(call.indexOf('(') + 1, call.lastIndexOf(')'));
+    final args = _splitTopLevelArgs(argsString);
+    final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+    final snippet = _lineAt(lines, line).trim();
+    String? optionsArg;
+    if (args.length >= 3) {
+      optionsArg = _firstOptionsArg(args);
+    }
+    var hasOptions = false;
+    String? options;
+    if (optionsArg != null) {
+      final optTrim = optionsArg.trim();
+      final lowerOpt = optTrim.toLowerCase();
+      hasOptions = optTrim.isNotEmpty && optTrim != '{}' && lowerOpt != 'null' && lowerOpt != 'undefined';
+      if (hasOptions) {
+        options = optTrim;
+      }
+    }
+    if (!hasOptions) {
+      addFinding(SecurityFinding('jwt.verify.missingOptions',
+          'jwt.verify should supply an options object to enforce issuer, audience, and algorithm checks.', 'high', line, snippet));
+      continue;
+    }
+    final options = options!;
+    final hasAlgorithms = RegExp(r'algorithms\s*:', caseSensitive: false).hasMatch(options);
+    if (!hasAlgorithms) {
+      addFinding(SecurityFinding('jwt.verify.algorithms.missing',
+          'Provide an explicit algorithms whitelist when verifying JWTs.', 'high', line, snippet));
+    } else if (RegExp(r'algorithms\s*:\s*\[[^\]]*none', caseSensitive: false).hasMatch(options)) {
+      addFinding(SecurityFinding('jwt.verify.algorithms.none',
+          'Remove "none" from the accepted algorithms list; it disables signature verification.', 'high', line, snippet));
+    }
+    if (!_optionTruthy(options, ['audience', 'aud'])) {
+      addFinding(SecurityFinding('jwt.verify.missingAud',
+          'Enforce the expected audience (aud) when verifying JWTs.', 'med', line, snippet));
+    }
+    if (!_optionTruthy(options, ['issuer', 'iss'])) {
+      addFinding(SecurityFinding('jwt.verify.missingIss',
+          'Specify the expected issuer (iss) when verifying JWTs.', 'med', line, snippet));
+    }
+    final hasExpValidation =
+        RegExp(r'ignoreExpiration\s*:\s*false', caseSensitive: false).hasMatch(options) ||
+            _optionTruthy(options, ['maxAge', 'expiresIn']);
+    if (!hasExpValidation || _optionExplicitlyTrue(options, 'ignoreExpiration')) {
+      addFinding(SecurityFinding('jwt.verify.missingExp',
+          'Ensure expiration (exp) is enforced; avoid ignoreExpiration:true and consider maxAge/expiresIn.', 'med', line, snippet));
+    }
+    final hasNbfValidation =
+        RegExp(r'ignoreNotBefore\s*:\s*false', caseSensitive: false).hasMatch(options) ||
+            _optionTruthy(options, ['nbf', 'notBefore']);
+    if (!hasNbfValidation || _optionExplicitlyTrue(options, 'ignoreNotBefore')) {
+      addFinding(SecurityFinding('jwt.verify.missingNbf',
+          'Validate not-before (nbf) claims by setting ignoreNotBefore:false or providing expected offsets.', 'med', line, snippet));
+    }
+  }
+
+  final resCookiePattern = RegExp(r'\bres\.cookie\s*\(', caseSensitive: false);
+  for (final match in resCookiePattern.allMatches(sanitized)) {
+    final call = _extractCallExpression(sanitized, match.start);
+    if (call == null) continue;
+    final argsString = call.substring(call.indexOf('(') + 1, call.lastIndexOf(')'));
+    final args = _splitTopLevelArgs(argsString);
+    final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+    final snippet = _lineAt(lines, line).trim();
+    final nameLiteral = args.isNotEmpty ? _stringLiteralValue(args[0]) : null;
+    final isSessionCookie = nameLiteral != null &&
+        RegExp(r'^(?:sid|session|connect\.sid)$', caseSensitive: false).hasMatch(nameLiteral);
+    final optionsArg = args.length >= 3 ? _firstOptionsArg(args) : null;
+    if (optionsArg != null) {
+      final hasSecure = _optionTruthy(optionsArg, ['secure']);
+      final secureDisabled = RegExp(r'secure\s*:\s*false', caseSensitive: false).hasMatch(optionsArg);
+      final sameSiteNone = RegExp(r'sameSite\s*:\s*["\']?none', caseSensitive: false).hasMatch(optionsArg);
+      if (sameSiteNone && (!hasSecure || secureDisabled)) {
+        addFinding(SecurityFinding('cookie.sameSiteNoneInsecure',
+            'Cookies with SameSite=None must also specify secure: true.', 'high', line, snippet));
+      }
+      final httpOnlyEnabled = _optionTruthy(optionsArg, ['httpOnly']);
+      final httpOnlyDisabled = RegExp(r'httpOnly\s*:\s*false', caseSensitive: false).hasMatch(optionsArg);
+      if (isSessionCookie && (!httpOnlyEnabled || httpOnlyDisabled)) {
+        addFinding(SecurityFinding('cookie.session.noHttpOnly',
+            'Session cookies should set httpOnly: true to block client-side access.', 'med', line, snippet));
+      }
+    } else if (isSessionCookie) {
+      addFinding(SecurityFinding('cookie.session.noHttpOnly',
+          'Session cookies should set httpOnly: true to block client-side access.', 'med', line, snippet));
+    }
+  }
+
+  void recordHeaderBlock(Map<String, dynamic> block) {
+    if ((block['names'] as Set<String>).isEmpty) return;
+    headerBlocks.add(block);
+  }
+
+  final resSetPattern = RegExp(r'res\.(?:set|header|append)\s*\(', caseSensitive: false);
+  for (final match in resSetPattern.allMatches(sanitized)) {
+    final call = _extractCallExpression(sanitized, match.start);
+    if (call == null) continue;
+    final argsString = call.substring(call.indexOf('(') + 1, call.lastIndexOf(')'));
+    final args = _splitTopLevelArgs(argsString);
+    final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+    final snippet = call.split('\n').first.trim();
+    if (args.isEmpty) continue;
+    if (args[0].trim().startsWith('{')) {
+      recordHeaderBlock({
+        'names': _extractHeaderNames(args[0]),
+        'line': line,
+        'snippet': snippet,
+      });
+    } else if (args.length >= 2) {
+      final headerName = _stringLiteralValue(args[0]) ?? args[0].trim();
+      recordHeaderBlock({
+        'names': {headerName.toLowerCase()},
+        'line': line,
+        'snippet': snippet,
+      });
+    }
+  }
+
+  final writeHeadPattern = RegExp(r'res\.writeHead\s*\(');
+  for (final match in writeHeadPattern.allMatches(sanitized)) {
+    final call = _extractCallExpression(sanitized, match.start);
+    if (call == null) continue;
+    final argsString = call.substring(call.indexOf('(') + 1, call.lastIndexOf(')'));
+    final args = _splitTopLevelArgs(argsString);
+    if (args.length < 2) continue;
+    final headersArg = args.sublist(1).firstWhere((a) => a.trim().startsWith('{'), orElse: () => '');
+    if (headersArg.isEmpty) continue;
+    final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+    final snippet = call.split('\n').first.trim();
+    recordHeaderBlock({
+      'names': _extractHeaderNames(headersArg),
+      'line': line,
+      'snippet': snippet,
+    });
+  }
+
+  for (final block in headerBlocks) {
+    final names = (block['names'] as Set<String>).map((n) => n.toLowerCase()).toSet();
+    if (names.isEmpty) continue;
+    final otherSecurityNames = {
+      'strict-transport-security',
+      'x-content-type-options',
+      'permissions-policy',
+      'cross-origin-opener-policy',
+      'cross-origin-embedder-policy',
+      'cross-origin-resource-policy',
+      'access-control-allow-origin',
+      'x-dns-prefetch-control'
+    };
+    final hasOtherSecurity = names.intersection(otherSecurityNames).isNotEmpty;
+    if (!hasOtherSecurity || helmetConfigured) continue;
+    final missing = <String>[];
+    if (!names.contains('content-security-policy')) missing.add('Content-Security-Policy');
+    if (!(names.contains('x-frame-options') || names.contains('frame-ancestors'))) {
+      missing.add('X-Frame-Options/frame-ancestors');
+    }
+    if (!names.contains('referrer-policy')) missing.add('Referrer-Policy');
+    if (missing.isEmpty) continue;
+    addFinding(SecurityFinding('headers.securityBaseline',
+        'Security headers missing: ${missing.join(', ')}.', 'med', block['line'] as int, block['snippet'] as String));
+  }
+
+  final fetchCallPattern = RegExp(r'\bfetch\s*\(');
+  for (final match in fetchCallPattern.allMatches(sanitized)) {
+    final call = _extractCallExpression(sanitized, match.start);
+    if (call == null) continue;
+    final argsString = call.substring(call.indexOf('(') + 1, call.lastIndexOf(')'));
+    final args = _splitTopLevelArgs(argsString);
+    if (args.length < 2) continue;
+    final options = args[1];
+    final hasCredentialsInclude =
+        RegExp(r'credentials\s*:\s*["\']include["\']', caseSensitive: false).hasMatch(options);
+    if (!hasCredentialsInclude) continue;
+    final methodMatch =
+        RegExp(r'method\s*:\s*["\'](POST|PUT|PATCH|DELETE)["\']', caseSensitive: false).firstMatch(options);
+    if (methodMatch == null) continue;
+    final hasCsrf = _containsCsrfMarker(options);
+    if (!hasCsrf) {
+      final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+      final snippet = _lineAt(lines, line).trim();
+      addFinding(SecurityFinding('csrf.credentialsMissingToken',
+          'Credentialed fetch ${methodMatch.group(1)} request lacks CSRF token headers.', 'high', line, snippet));
+    }
+  }
+
+  final axiosMethodPattern = RegExp(r'axios\.([A-Za-z_][\w]*)\s*\(');
+  for (final match in axiosMethodPattern.allMatches(sanitized)) {
+    final methodName = match.group(1)!.toLowerCase();
+    if (!{'post', 'put', 'patch', 'delete'}.contains(methodName)) continue;
+    final call = _extractCallExpression(sanitized, match.start);
+    if (call == null) continue;
+    final argsString = call.substring(call.indexOf('(') + 1, call.lastIndexOf(')'));
+    final args = _splitTopLevelArgs(argsString);
+    String? configArg;
+    if (args.length >= 3) {
+      configArg = args[2];
+    } else if (args.length >= 2 && args[1].trim().startsWith('{')) {
+      configArg = args[1];
+    }
+    if (configArg == null) continue;
+    final hasCred = RegExp(r'withCredentials\s*:\s*true', caseSensitive: false).hasMatch(configArg);
+    if (!hasCred) continue;
+    var hasCsrf = _containsCsrfMarker(configArg);
+    if (!hasCsrf && args.length >= 2) {
+      hasCsrf = _containsCsrfMarker(args[1]);
+    }
+    if (!hasCsrf) {
+      final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+      final snippet = _lineAt(lines, line).trim();
+      addFinding(SecurityFinding('csrf.credentialsMissingToken',
+          'Axios ${methodName.toUpperCase()} request with credentials lacks CSRF protections.', 'high', line, snippet));
+    }
+  }
+
+  final axiosConfigPattern = RegExp(r'\baxios\s*\(');
+  for (final match in axiosConfigPattern.allMatches(sanitized)) {
+    if (match.start + 5 < sanitized.length && sanitized[match.start + 5] == '.') {
+      continue; // handled by axios.method pattern
+    }
+    final call = _extractCallExpression(sanitized, match.start);
+    if (call == null) continue;
+    final argsString = call.substring(call.indexOf('(') + 1, call.lastIndexOf(')'));
+    final args = _splitTopLevelArgs(argsString);
+    if (args.isEmpty) continue;
+    final config = args[0];
+    final hasCred = RegExp(r'(withCredentials|credentials)\s*:\s*(true|["\']include["\'])', caseSensitive: false)
+        .hasMatch(config);
+    if (!hasCred) continue;
+    final methodMatch =
+        RegExp(r'method\s*:\s*["\'](POST|PUT|PATCH|DELETE)["\']', caseSensitive: false).firstMatch(config);
+    if (methodMatch == null) continue;
+    if (!_containsCsrfMarker(config)) {
+      final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+      final snippet = _lineAt(lines, line).trim();
+      addFinding(SecurityFinding('csrf.credentialsMissingToken',
+          'Axios request with credentials lacks CSRF token headers.', 'high', line, snippet));
+    }
+  }
+
+  final yamlLoadPattern = RegExp(r'(?:yaml|jsyaml)\.load\s*\(');
+  for (final match in yamlLoadPattern.allMatches(sanitized)) {
+    final call = _extractCallExpression(sanitized, match.start);
+    if (call == null) continue;
+    final argsString = call.substring(call.indexOf('(') + 1, call.lastIndexOf(')'));
+    final args = _splitTopLevelArgs(argsString);
+    String? optionsArg;
+    if (args.length >= 2) {
+      optionsArg = args[1];
+    }
+    final safeSchema = optionsArg != null &&
+        RegExp(r'schema\s*:\s*(?:yaml\.)?(?:FAILSAFE_SCHEMA|DEFAULT_SAFE_SCHEMA)', caseSensitive: false)
+            .hasMatch(optionsArg);
+    if (!safeSchema) {
+      final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+      final snippet = _lineAt(lines, line).trim();
+      addFinding(SecurityFinding('yaml.load.unsafe',
+          'js-yaml load() should use DEFAULT_SAFE_SCHEMA/FAILSAFE_SCHEMA or safeLoad.', 'high', line, snippet));
+    }
+  }
+
+  final xmlOptionPattern =
+      RegExp(r'(externalEntities|resolveEntities|expandEntities|processEntities)\s*:\s*true', caseSensitive: false);
+  for (final match in xmlOptionPattern.allMatches(sanitized)) {
+    final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+    final snippet = _lineAt(lines, line).trim();
+    addFinding(SecurityFinding('xml.externalEntities',
+        'XML parser enables external entity processing; disable to prevent XXE.', 'high', line, snippet));
+  }
+
+  final cipherIvPattern = RegExp(r'crypto\.(?:createCipheriv|createDecipheriv)\s*\(');
+  for (final match in cipherIvPattern.allMatches(sanitized)) {
+    final call = _extractCallExpression(sanitized, match.start);
+    if (call == null) continue;
+    final argsString = call.substring(call.indexOf('(') + 1, call.lastIndexOf(')'));
+    final args = _splitTopLevelArgs(argsString);
+    if (args.length < 3) continue;
+    final ivArg = args[2];
+    if (_looksLikeStaticIv(ivArg)) {
+      final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+      final snippet = _lineAt(lines, line).trim();
+      addFinding(SecurityFinding('crypto.staticIv',
+          'Use a unique IV/nonce per encryption operation instead of static literals.', 'high', line, snippet));
+    }
+  }
+
+  final subtlePattern = RegExp(r'crypto\.subtle\.(?:encrypt|decrypt)\s*\(');
+  for (final match in subtlePattern.allMatches(sanitized)) {
+    final call = _extractCallExpression(sanitized, match.start);
+    if (call == null) continue;
+    final argsString = call.substring(call.indexOf('(') + 1, call.lastIndexOf(')'));
+    final args = _splitTopLevelArgs(argsString);
+    if (args.isEmpty) continue;
+    final algArg = args[0];
+    final ivMatch = RegExp(r'iv\s*:\s*([^,}]+)', caseSensitive: false).firstMatch(algArg);
+    if (ivMatch != null && _looksLikeStaticIv(ivMatch.group(1)!)) {
+      final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
+      final snippet = _lineAt(lines, line).trim();
+      addFinding(SecurityFinding('crypto.staticIv',
+          'crypto.subtle encrypt/decrypt should use random IVs instead of constants.', 'high', line, snippet));
     }
   }
 
@@ -1207,6 +1592,274 @@ _ParsedImportClause _parseImportClause(String clause) {
 
   return res;
 }
+
+List<String> _splitTopLevelArgs(String source) {
+  final args = <String>[];
+  final buf = StringBuffer();
+  var depthParen = 0;
+  var depthBrace = 0;
+  var depthBracket = 0;
+  var inSingle = false;
+  var inDouble = false;
+  var inBacktick = false;
+  var escaped = false;
+
+  void flush() {
+    final part = buf.toString().trim();
+    if (part.isNotEmpty) {
+      args.add(part);
+    }
+    buf.clear();
+  }
+
+  for (var i = 0; i < source.length; i++) {
+    final ch = source[i];
+    if (escaped) {
+      buf.write(ch);
+      escaped = false;
+      continue;
+    }
+    if (ch == '\\') {
+      buf.write(ch);
+      escaped = true;
+      continue;
+    }
+    if (inSingle) {
+      if (ch == "'") inSingle = false;
+      buf.write(ch);
+      continue;
+    }
+    if (inDouble) {
+      if (ch == '"') inDouble = false;
+      buf.write(ch);
+      continue;
+    }
+    if (inBacktick) {
+      if (ch == '`') inBacktick = false;
+      buf.write(ch);
+      continue;
+    }
+    switch (ch) {
+      case "'":
+        inSingle = true;
+        buf.write(ch);
+        continue;
+      case '"':
+        inDouble = true;
+        buf.write(ch);
+        continue;
+      case '`':
+        inBacktick = true;
+        buf.write(ch);
+        continue;
+      case '(':
+        depthParen++;
+        buf.write(ch);
+        continue;
+      case ')':
+        if (depthParen > 0) depthParen--;
+        buf.write(ch);
+        continue;
+      case '{':
+        depthBrace++;
+        buf.write(ch);
+        continue;
+      case '}':
+        if (depthBrace > 0) depthBrace--;
+        buf.write(ch);
+        continue;
+      case '[':
+        depthBracket++;
+        buf.write(ch);
+        continue;
+      case ']':
+        if (depthBracket > 0) depthBracket--;
+        buf.write(ch);
+        continue;
+      case ',':
+        if (depthParen == 0 && depthBrace == 0 && depthBracket == 0) {
+          flush();
+          continue;
+        }
+        buf.write(ch);
+        continue;
+      default:
+        buf.write(ch);
+    }
+  }
+
+  flush();
+  return args;
+}
+
+String? _extractCallExpression(String text, int start) {
+  final openIndex = text.indexOf('(', start);
+  if (openIndex == -1) return null;
+  final buf = StringBuffer();
+  var depth = 0;
+  var inSingle = false;
+  var inDouble = false;
+  var inBacktick = false;
+  var escaped = false;
+
+  for (var i = start; i < text.length; i++) {
+    final ch = text[i];
+    buf.write(ch);
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (ch == '\\') {
+      escaped = true;
+      continue;
+    }
+    if (inSingle) {
+      if (ch == "'") inSingle = false;
+      continue;
+    }
+    if (inDouble) {
+      if (ch == '"') inDouble = false;
+      continue;
+    }
+    if (inBacktick) {
+      if (ch == '`') inBacktick = false;
+      continue;
+    }
+    if (ch == "'") {
+      inSingle = true;
+      continue;
+    }
+    if (ch == '"') {
+      inDouble = true;
+      continue;
+    }
+    if (ch == '`') {
+      inBacktick = true;
+      continue;
+    }
+    if (ch == '(') {
+      depth++;
+      continue;
+    }
+    if (ch == ')') {
+      depth--;
+      if (depth <= 0) {
+        return buf.toString();
+      }
+      continue;
+    }
+  }
+  return null;
+}
+
+String? _stringLiteralValue(String? raw) {
+  if (raw == null) return null;
+  final trimmed = raw.trim();
+  if (trimmed.length < 2) return null;
+  final first = trimmed[0];
+  final last = trimmed[trimmed.length - 1];
+  if ((first == '"' && last == '"') || (first == "'" && last == "'") || (first == '`' && last == '`')) {
+    return trimmed.substring(1, trimmed.length - 1);
+  }
+  return null;
+}
+
+bool _looksLikeFunctionLiteral(String arg) {
+  final trimmed = arg.trim();
+  return trimmed.startsWith('function') || trimmed.startsWith('(') && trimmed.contains(')=>') || trimmed.contains('=>');
+}
+
+String? _firstOptionsArg(List<String> args, {int startIndex = 2}) {
+  for (var i = startIndex; i < args.length; i++) {
+    final candidate = args[i].trim();
+    if (candidate.isEmpty) continue;
+    if (_looksLikeFunctionLiteral(candidate)) continue;
+    if (candidate.startsWith('{') || candidate.contains('algorithms') || candidate.contains('sameSite') || candidate.contains('httpOnly')) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+bool _isFalsyLiteral(String value) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return true;
+  const falsy = {'false', '0', 'null', 'undefined', 'NaN'};
+  if (falsy.contains(trimmed)) return true;
+  if (trimmed == "''" || trimmed == '""') return true;
+  return false;
+}
+
+bool _optionTruthy(String options, List<String> keys) {
+  for (final key in keys) {
+    final pattern = RegExp('$key\\s*:\\s*([^,}\
+]+)', caseSensitive: false);
+    final match = pattern.firstMatch(options);
+    if (match != null) {
+      final value = match.group(1)?.trim() ?? '';
+      if (!_isFalsyLiteral(value)) {
+        return true;
+      }
+      return false;
+    }
+  }
+  return false;
+}
+
+bool _optionExplicitlyTrue(String options, String key) {
+  final pattern = RegExp('$key\\s*:\\s*([^,}\
+]+)', caseSensitive: false);
+  final match = pattern.firstMatch(options);
+  if (match == null) return false;
+  final value = match.group(1)?.trim() ?? '';
+  return {'true', '1'}.contains(value.trim().toLowerCase());
+}
+
+bool _containsCsrfMarker(String text) {
+  final lowered = text.toLowerCase();
+  return lowered.contains('x-csrf') ||
+      lowered.contains('x-xsrf') ||
+      lowered.contains('csrf-token') ||
+      lowered.contains('xsrf-token') ||
+      lowered.contains('csrftoken');
+}
+
+Set<String> _extractHeaderNames(String objectLiteral) {
+  final names = <String>{};
+  final quoted = RegExp(r'''['"]([^'"]+)['"]\s*:''');
+  for (final match in quoted.allMatches(objectLiteral)) {
+    names.add(match.group(1)!.toLowerCase());
+  }
+  final bare = RegExp(r'([A-Za-z0-9_-]+)\s*:');
+  for (final match in bare.allMatches(objectLiteral)) {
+    final candidate = match.group(1)!.toLowerCase();
+    if (!names.contains(candidate)) {
+      names.add(candidate);
+    }
+  }
+  return names;
+}
+
+bool _looksLikeStaticIv(String arg) {
+  final trimmed = arg.trim();
+  if (trimmed.isEmpty) return false;
+  if (trimmed.startsWith("'") || trimmed.startsWith('"') || trimmed.startsWith('`')) {
+    return true;
+  }
+  if (RegExp(r'^(?:0x)?0+$').hasMatch(trimmed)) {
+    return true;
+  }
+  if (RegExp(r'Buffer\.(?:from|alloc)\s*\(\s*["\']', caseSensitive: false).hasMatch(trimmed)) {
+    return true;
+  }
+  if (RegExp(r'new\s+Uint8Array\s*\([^)]*\)', caseSensitive: false).hasMatch(trimmed)) {
+    return true;
+  }
+  if (RegExp(r'\[[^\]]+\]').hasMatch(trimmed) && !trimmed.contains('Math.random')) {
+    return true;
+  }
+  return false;
+}
 // -------- resolution --------
 String? _resolveSpecifier(String cwd, String fromFile, String spec) {
   if (!(spec.startsWith('./') || spec.startsWith('../'))) return null;
@@ -1253,7 +1906,7 @@ Future<Map<String, dynamic>?> _readPackageJson(String cwd) async {
   catch (_) { return null; }
 }
 
-Map<String, dynamic>? _computePackageRisks(Map<String, dynamic>? pkg) {
+Future<Map<String, dynamic>?> _computePackageRisks(String cwd, Map<String, dynamic>? pkg) async {
   if (pkg == null) return null;
   final risks = <String, dynamic>{};
   final looseVersionPattern = RegExp(r'[\^\~\*x]|latest|github\.com|git\+');
@@ -1280,14 +1933,107 @@ Map<String, dynamic>? _computePackageRisks(Map<String, dynamic>? pkg) {
 
   final scripts = pkg['scripts'];
   if (scripts is Map) {
-    final bad = <String, String>{};
+    final riskyScripts = <String, String>{};
+    final installWarnings = <String, String>{};
     scripts.forEach((key, value) {
-      if (value is String && RegExp(r'(curl|wget|bash|powershell|Invoke-Expression)').hasMatch(value)) {
-        bad[key] = value;
+      if (value is! String) return;
+      final scriptBody = value.trim();
+      if (RegExp(r'(curl|wget|bash|powershell|invoke-expression|scp|git|python|node)', caseSensitive: false)
+          .hasMatch(scriptBody)) {
+        riskyScripts[key] = value;
+      }
+      final isInstallScript = RegExp(r'(^|:)(?:preinstall|postinstall|install)$').hasMatch(key);
+      if (isInstallScript) {
+        final suspicious = RegExp(r'(curl|wget|http://|https://|scp\b|powershell|invoke-expression|bash|sh|node|python|npm|yarn|pnpm)',
+                caseSensitive: false)
+            .hasMatch(scriptBody);
+        if (suspicious && !RegExp(r'^echo\b', caseSensitive: false).hasMatch(scriptBody)) {
+          installWarnings[key] = value;
+        }
       }
     });
-    if (bad.isNotEmpty) {
-      risks['riskyScripts'] = bad;
+    if (riskyScripts.isNotEmpty) {
+      risks['riskyScripts'] = riskyScripts;
+    }
+    if (installWarnings.isNotEmpty) {
+      risks['installScripts'] = installWarnings;
+    }
+  }
+
+  Future<Map<String, dynamic>?> readJson(String relPath) async {
+    final file = File(_join(cwd, relPath));
+    if (!await file.exists()) return null;
+    try {
+      return jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  final deprecated = <String, String>{};
+  final lock = await readJson('package-lock.json');
+  if (lock != null) {
+    final packages = lock['packages'];
+    if (packages is Map) {
+      packages.forEach((path, meta) {
+        if (meta is Map) {
+          final name = (meta['name'] as String?) ?? path.toString().split('/').last;
+          final message = meta['deprecated'];
+          if (name != null && message is String) {
+            deprecated[name] = message;
+          }
+        }
+      });
+    }
+    final deps = lock['dependencies'];
+    if (deps is Map) {
+      deps.forEach((name, meta) {
+        if (meta is Map) {
+          final message = meta['deprecated'];
+          if (message is String) {
+            deprecated[name.toString()] = message;
+          }
+        }
+      });
+    }
+  }
+  if (deprecated.isNotEmpty) {
+    risks['deprecatedPackages'] = deprecated;
+  }
+
+  final audit = await readJson('npm-audit.json');
+  if (audit != null) {
+    final vulns = <String, dynamic>{};
+    final vulnerabilities = audit['vulnerabilities'];
+    if (vulnerabilities is Map) {
+      vulnerabilities.forEach((pkgName, data) {
+        if (data is Map) {
+          final severity = data['severity'];
+          final via = data['via'];
+          if (severity is String) {
+            final entry = <String, dynamic>{'severity': severity};
+            if (via is List) {
+              entry['via'] = via.take(3).map((v) => v.toString()).toList();
+            }
+            vulns[pkgName.toString()] = entry;
+          }
+        }
+      });
+    }
+    final advisories = audit['advisories'];
+    if (advisories is Map) {
+      advisories.forEach((_, data) {
+        if (data is Map) {
+          final moduleName = data['module_name'];
+          final severity = data['severity'];
+          if (moduleName is String && severity is String) {
+            vulns.putIfAbsent(moduleName, () => {'severity': severity});
+          }
+        }
+      });
+    }
+    if (vulns.isNotEmpty) {
+      risks['knownVulnerabilities'] = vulns;
     }
   }
 
