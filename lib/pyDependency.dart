@@ -71,6 +71,58 @@ String _ext(String p) {
 }
 
 // ---------------- models ----------------
+class _PyExport {
+  final String name;      // exported symbol name
+  final String kind;      // function | class | variable
+  final int line;
+  _PyExport(this.name, this.kind, this.line);
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'kind': kind,
+        'line': line,
+      };
+}
+
+class _PyReexport {
+  final String fromModule; // module specifier (relative dots allowed)
+  final String name;       // local binding name
+  final int line;
+  _PyReexport(this.fromModule, this.name, this.line);
+  Map<String, dynamic> toJson() => {
+        'from': fromModule,
+        'name': name,
+        'line': line,
+      };
+}
+
+class _PyExportsSummary {
+  final String fileId;
+  final List<_PyExport> exports;
+  final List<_PyReexport> reexports;
+  final List<String> starImports;
+  final bool hasDunderAll;
+  final List<String>? dunderAll;
+  final bool uncertainExports;
+  _PyExportsSummary({
+    required this.fileId,
+    required this.exports,
+    required this.reexports,
+    required this.starImports,
+    required this.hasDunderAll,
+    required this.dunderAll,
+    required this.uncertainExports,
+  });
+  Map<String, dynamic> toJson() => {
+        'file': fileId,
+        'exports': exports.map((e) => e.toJson()).toList(),
+        'reexports': reexports.map((r) => r.toJson()).toList(),
+        'starImports': starImports,
+        'hasDunderAll': hasDunderAll,
+        if (dunderAll != null) 'dunderAll': dunderAll,
+        'uncertain': uncertainExports,
+      };
+}
+
 class _Node {
   String id;            // repo-relative path for files; external id for externals
   String type;          // file | external
@@ -118,10 +170,12 @@ class _Edge {
 class _PyImport {
   final String module;     // as-written module path (may be '', meaning relative-only "from . import x")
   final String? name;      // imported name (for from ... import name), null for plain `import`
+  final String? asName;    // alias if "as" was used
   final int relDots;       // leading dots for relative imports (0 = absolute)
   final bool star;         // from x import *
   final String kind;       // 'import' | 'from'
-  _PyImport(this.module, this.name, this.relDots, this.star, this.kind);
+  final int line;          // 1-based line number in file (best effort)
+  _PyImport(this.module, this.name, this.asName, this.relDots, this.star, this.kind, this.line);
 }
 
 class _FileFacts {
@@ -130,6 +184,13 @@ class _FileFacts {
   final String? module;       // best-effort module path (pkg.sub.mod)
   final List<_PyImport> imports;
   final bool isMainGuard;     // contains if __name__ == "__main__"
+  List<_PyExport> exports = const [];
+  List<_PyReexport> reexports = const [];
+  List<String> starImports = const [];
+  bool hasDunderAll = false;
+  List<String>? dunderAll;
+  bool uncertainExports = false;
+
   _FileFacts(this.absPath, this.relId, this.module, this.imports, this.isMainGuard);
 }
 
@@ -220,9 +281,22 @@ void main(List<String> args) async {
 
   // 10) Write output
   final outPath = _join(cwd, 'pythonDependencies.json');
+  final pythonExports = facts
+      .map((ff) => _PyExportsSummary(
+            fileId: ff.relId,
+            exports: ff.exports,
+            reexports: ff.reexports,
+            starImports: ff.starImports,
+            hasDunderAll: ff.hasDunderAll,
+            dunderAll: ff.dunderAll,
+            uncertainExports: ff.uncertainExports,
+          ).toJson())
+      .toList();
+
   final out = {
     'nodes': nodes.map((n) => n.toJson()).toList(),
     'edges': edges.map((e) => e.toJson()).toList(),
+    'pythonExports': pythonExports,
   };
   await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
 
@@ -295,16 +369,22 @@ _FileFacts _extractFacts(String cwd, String fileAbs, String text, Set<String> pa
   // from ...module import name[, name2] | from . import name
   final reFrom = RegExp(r'^\s*from\s+([\.]*[a-zA-Z0-9_\.]*)\s+import\s+(\*|[a-zA-Z0-9_\.]+(?:\s+as\s+\w+)?(?:\s*,\s*[a-zA-Z0-9_\.]+(?:\s+as\s+\w+)?)*)\s*$');
 
-  for (var raw in lines) {
+  for (var idx = 0; idx < lines.length; idx++) {
+    final raw = lines[idx];
+    final lineNo = idx + 1;
     final line = raw.replaceFirst(RegExp(r'#.*$'), '');
 
     final m1 = reImport.firstMatch(line);
     if (m1 != null) {
       final list = m1.group(1)!;
       for (final part in list.split(',')) {
-        final seg = part.trim().split(RegExp(r'\s+as\s+'))[0];
+        final seg = part.trim();
         if (seg.isEmpty) continue;
-        imports.add(_PyImport(seg, null, 0, false, 'import'));
+        final split = seg.split(RegExp(r'\s+as\s+'));
+        final modName = split[0].trim();
+        if (modName.isEmpty) continue;
+        final alias = split.length > 1 ? split[1].trim() : null;
+        imports.add(_PyImport(modName, null, alias, 0, false, 'import', lineNo));
       }
       continue;
     }
@@ -317,18 +397,24 @@ _FileFacts _extractFacts(String cwd, String fileAbs, String text, Set<String> pa
       final dots = RegExp(r'^\.+').firstMatch(modRaw)?.group(0)?.length ?? 0;
       final mod = modRaw.replaceFirst(RegExp(r'^\.+'), ''); // remove leading dots
       if (star) {
-        imports.add(_PyImport(mod, null, dots, true, 'from'));
+        imports.add(_PyImport(mod, null, null, dots, true, 'from', lineNo));
       } else {
         for (final part in names.split(',')) {
-          final name = part.trim().split(RegExp(r'\s+as\s+'))[0];
+          final seg = part.trim();
+          if (seg.isEmpty) continue;
+          final split = seg.split(RegExp(r'\s+as\s+'));
+          final name = split[0].trim();
           if (name.isEmpty) continue;
-          imports.add(_PyImport(mod, name, dots, false, 'from'));
+          final alias = split.length > 1 ? split[1].trim() : null;
+          imports.add(_PyImport(mod, name, alias, dots, false, 'from', lineNo));
         }
       }
     }
   }
 
-  return _FileFacts(fileAbs, relId, module, imports, isMain);
+  final facts = _FileFacts(fileAbs, relId, module, imports, isMain);
+  _populatePythonExports(facts, stripped, text);
+  return facts;
 }
 
 String _stripTripleQuoted(String s) {
@@ -338,6 +424,115 @@ String _stripTripleQuoted(String s) {
   out = out.replaceAll(RegExp(r'"""[\s\S]*?"""', multiLine: true), '\n');
   out = out.replaceAll(RegExp(r"'''[\s\S]*?'''", multiLine: true), '\n');
   return out;
+}
+
+void _populatePythonExports(_FileFacts f, String strippedForSyntax, String originalText) {
+  final exports = <_PyExport>[];
+  final reexports = <_PyReexport>[];
+  final starImports = <String>[];
+
+  final lines = strippedForSyntax.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    final raw = lines[i];
+    final lineNo = i + 1;
+    if (raw.trim().isEmpty) continue;
+    final leading = raw.length - raw.replaceFirst(RegExp(r'^[ \t]+'), '').length;
+    if (leading != 0) continue;
+
+    final line = raw.replaceFirst(RegExp(r'#.*$'), '').trimRight();
+    if (line.isEmpty) continue;
+
+    final mDef = RegExp(r'^(?:async\s+)?def\s+([A-Za-z_]\w*)\s*\(').firstMatch(line);
+    if (mDef != null) {
+      exports.add(_PyExport(mDef.group(1)!, 'function', lineNo));
+      continue;
+    }
+
+    final mClass = RegExp(r'^class\s+([A-Za-z_]\w*)\s*[:(]').firstMatch(line);
+    if (mClass != null) {
+      exports.add(_PyExport(mClass.group(1)!, 'class', lineNo));
+      continue;
+    }
+
+    final mAssign = RegExp(r'^([A-Za-z_]\w*)\s*(?::[^\n=]+)?\s*=').firstMatch(line);
+    if (mAssign != null) {
+      final name = mAssign.group(1)!;
+      if (name != '__all__' && !name.startsWith('_')) {
+        exports.add(_PyExport(name, 'variable', lineNo));
+      }
+    }
+  }
+
+  for (final imp in f.imports) {
+    if (imp.kind == 'from' && imp.star) {
+      final fromModule = ''.padLeft(imp.relDots, '.') + imp.module;
+      starImports.add(fromModule);
+      continue;
+    }
+
+    String? localName;
+    if (imp.kind == 'import') {
+      localName = imp.asName ?? (imp.module.contains('.') ? imp.module.split('.').first : imp.module);
+    } else if (imp.name != null) {
+      localName = imp.asName ?? imp.name;
+    }
+    if (localName == null || localName.startsWith('_')) continue;
+    final fromModule = ''.padLeft(imp.relDots, '.') + imp.module;
+    reexports.add(_PyReexport(fromModule, localName, imp.line));
+  }
+
+  final dunderAll = <String>{};
+  var hasDunderAll = false;
+  var uncertain = false;
+
+  final assignMatches = RegExp(r'(?m)^\s*__all__\s*=\s*([\[(])\s*([^\]\)]*)[\]\)]');
+  for (final match in assignMatches.allMatches(originalText)) {
+    hasDunderAll = true;
+    final body = match.group(2) ?? '';
+    final items = RegExp(r'[\'\"]([^\'\"]+)[\'\"]').allMatches(body).map((m) => m.group(1)!).toList();
+    if (items.isNotEmpty) {
+      dunderAll.addAll(items);
+    } else {
+      uncertain = true;
+    }
+  }
+
+  final plusMatches = RegExp(r'(?m)^\s*__all__\s*\+=\s*\[\s*([^\]]*)\s*\]');
+  for (final match in plusMatches.allMatches(originalText)) {
+    hasDunderAll = true;
+    final body = match.group(1) ?? '';
+    final items = RegExp(r'[\'\"]([^\'\"]+)[\'\"]').allMatches(body).map((m) => m.group(1)!).toList();
+    if (items.isNotEmpty) {
+      dunderAll.addAll(items);
+    } else {
+      uncertain = true;
+    }
+  }
+
+  final appendMatches = RegExp(r'__all__\s*\.\s*append\s*\(\s*[\'\"]([^\'\"]+)[\'\"]\s*\)');
+  for (final match in appendMatches.allMatches(originalText)) {
+    hasDunderAll = true;
+    dunderAll.add(match.group(1)!);
+  }
+
+  final extendMatches = RegExp(r'__all__\s*\.\s*extend\s*\(\s*\[\s*([^\]]+)\s*\]\s*\)');
+  for (final match in extendMatches.allMatches(originalText)) {
+    hasDunderAll = true;
+    final body = match.group(1) ?? '';
+    final items = RegExp(r'[\'\"]([^\'\"]+)[\'\"]').allMatches(body).map((m) => m.group(1)!).toList();
+    if (items.isNotEmpty) {
+      dunderAll.addAll(items);
+    } else {
+      uncertain = true;
+    }
+  }
+
+  f.exports = exports.where((e) => !e.name.startsWith('_')).toList();
+  f.reexports = reexports;
+  f.starImports = starImports;
+  f.hasDunderAll = hasDunderAll;
+  f.dunderAll = hasDunderAll && dunderAll.isNotEmpty ? dunderAll.toList() : null;
+  f.uncertainExports = (hasDunderAll && dunderAll.isEmpty) || uncertain || starImports.isNotEmpty;
 }
 
 String? _modulePathFor(String fileAbs, Set<String> packageRoots) {
