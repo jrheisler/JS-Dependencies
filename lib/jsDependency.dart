@@ -548,7 +548,8 @@ _FileFacts _extractFacts(String filePath, String text) {
   final axiosPattern = RegExp(r'\baxios(?:\.[A-Za-z_][\w]*)?\s*\(');
   final httpRequestPattern = RegExp(r'\bhttps?\.request\s*\(');
   final sqlTemplatePattern = RegExp(r'\.query\s*\(\s*`[^`]*\$\{');
-  final sqlConcatPattern = RegExp(r"\.query\s*\([^)]*['\"`][^)]*\+\s*[A-Za-z_]");
+  final sqlConcatPattern =
+      RegExp("\\.query\\s*\\([^)]*['\"`][^)]*\\+\\s*[A-Za-z_]");
   final lodashMergePattern = RegExp(r'\b_\.merge\s*\(');
   final objectAssignPattern = RegExp(r'\bObject\.assign\s*\(');
   final pathJoinPattern = RegExp(r'\bpath\.join\s*\(');
