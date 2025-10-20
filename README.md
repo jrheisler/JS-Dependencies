@@ -31,3 +31,10 @@ sample graph even when launched directly from that directory.
 
 You can also use the **Load graph.json** button in the header to supply any
 compatible graph JSON file manually.
+
+## Security scans
+
+The JavaScript crawler (`lib/jsDependency.dart`) emits security findings when it
+spots risky language features or API usage. Consult
+[`docs/security_scans.md`](docs/security_scans.md) for a complete list of the
+rules, severities, and trigger patterns.
