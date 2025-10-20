@@ -18,7 +18,9 @@ void main() {
   require("fs").readFileSync("/etc/hosts", "utf8");
   localStorage.setItem("authToken", "abc123");
   require("jsonwebtoken").verify("token", "secret");
-  document.cookie = "sid=abc123; path=/";
+  jwt.verify(token, secret, { algorithms: ['HS256', 'none'] });
+  jsonwebtoken.verify(token, secret, { audience: 'app' });
+  document.cookie = "sid=abc123; SameSite=None";
   const API_KEY = "sk_live_1234567890abcdef";
   ''';
 
@@ -34,12 +36,32 @@ void main() {
   assert(has('jwt.verify'));
   assert(has('cookie.literal'));
   assert(has('secret.literal'));
+  assert(has('jwt.verify.algorithms.none'));
+  assert(has('jwt.verify.missingAud'));
+  assert(has('jwt.verify.missingIss'));
+  assert(has('jwt.verify.missingExp'));
+  assert(has('jwt.verify.missingNbf'));
+  assert(has('cookie.sameSiteNoneInsecure'));
+  assert(has('cookie.session.noHttpOnly'));
 
   const securitySample = '''
   const target = req.query.url;
   fetch(target);
   axios.get(req.body.url);
   https.request({ host: req.params.host });
+  window.location = req.query.redirect;
+  res.redirect(req.body.next);
+  fetch('/api/update', { method: 'POST', credentials: 'include' });
+  axios.post('/api', data, { withCredentials: true });
+  const xhr = new XMLHttpRequest();
+  xhr.withCredentials = true;
+  xhr.open('POST', '/submit');
+  xhr.send('payload');
+  res.set({ 'Strict-Transport-Security': 'max-age=63072000' });
+  yaml.load(source);
+  const parser = new xml2js.Parser({ resolveEntities: true });
+  crypto.createCipheriv('aes-256-gcm', key, 'static-iv-value');
+  crypto.createCipher('aes-128-ecb', key);
   client.query(`SELECT * FROM users WHERE id = ${userId}`);
   db.query('SELECT ' + req.body.filter);
   db.collection('users').find({ $where: req.body.whereClause });
@@ -78,6 +100,14 @@ void main() {
   assert(secHas('tls.disabledEnv'));
   assert(secHas('cors.credentialsWildcard'));
   assert(secHas('ssrf.metadataHost'));
+  assert(secHas('open_redirect.clientLocation'));
+  assert(secHas('open_redirect.serverRedirect'));
+  assert(secHas('csrf.credentialsMissingToken'));
+  assert(secHas('headers.securityBaseline'));
+  assert(secHas('yaml.load.unsafe'));
+  assert(secHas('xml.externalEntities'));
+  assert(secHas('crypto.staticIv'));
+  assert(secHas('crypto.aesEcb'));
 
   final totalFindings =
       findings.length + complexFindings.length + securityFindings.length;
