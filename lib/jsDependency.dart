@@ -698,7 +698,7 @@ _FileFacts _extractFacts(String filePath, String text) {
     if (mSend != null && _containsCsrfMarker(mSend.group(2)!)) {
       xhrCsrfProtected.add(mSend.group(1)!);
     }
-    final mOpen = RegExp(r'([A-Za-z_][\w]*)\.open\s*\(\s*["\'](POST|PUT|PATCH|DELETE)["\']', caseSensitive: false)
+    final mOpen = RegExp(r"([A-Za-z_][\\w]*)\\.open\\s*\\(\\s*['\"](POST|PUT|PATCH|DELETE)['\"]", caseSensitive: false)
         .firstMatch(trimmed);
     if (mOpen != null) {
       xhrStatefulCalls.add({
@@ -810,7 +810,7 @@ _FileFacts _extractFacts(String filePath, String text) {
     if (optionsArg != null) {
       final hasSecure = _optionTruthy(optionsArg, ['secure']);
       final secureDisabled = RegExp(r'secure\s*:\s*false', caseSensitive: false).hasMatch(optionsArg);
-      final sameSiteNone = RegExp(r'sameSite\s*:\s*["\']?none', caseSensitive: false).hasMatch(optionsArg);
+      final sameSiteNone = RegExp(r"sameSite\\s*:\\s*['\"]?none", caseSensitive: false).hasMatch(optionsArg);
       if (sameSiteNone && (!hasSecure || secureDisabled)) {
         addFinding(SecurityFinding('cookie.sameSiteNoneInsecure',
             'Cookies with SameSite=None must also specify secure: true.', 'high', line, snippet));
@@ -910,10 +910,10 @@ _FileFacts _extractFacts(String filePath, String text) {
     if (args.length < 2) continue;
     final options = args[1];
     final hasCredentialsInclude =
-        RegExp(r'credentials\s*:\s*["\']include["\']', caseSensitive: false).hasMatch(options);
+        RegExp(r"credentials\\s*:\\s*['\"]include['\"]", caseSensitive: false).hasMatch(options);
     if (!hasCredentialsInclude) continue;
     final methodMatch =
-        RegExp(r'method\s*:\s*["\'](POST|PUT|PATCH|DELETE)["\']', caseSensitive: false).firstMatch(options);
+        RegExp(r"method\\s*:\\s*['\"](POST|PUT|PATCH|DELETE)['\"]", caseSensitive: false).firstMatch(options);
     if (methodMatch == null) continue;
     final hasCsrf = _containsCsrfMarker(options);
     if (!hasCsrf) {
@@ -964,11 +964,11 @@ _FileFacts _extractFacts(String filePath, String text) {
     final args = _splitTopLevelArgs(argsString);
     if (args.isEmpty) continue;
     final config = args[0];
-    final hasCred = RegExp(r'(withCredentials|credentials)\s*:\s*(true|["\']include["\'])', caseSensitive: false)
+    final hasCred = RegExp(r"(withCredentials|credentials)\\s*:\\s*(true|['\"]include['\"])", caseSensitive: false)
         .hasMatch(config);
     if (!hasCred) continue;
     final methodMatch =
-        RegExp(r'method\s*:\s*["\'](POST|PUT|PATCH|DELETE)["\']', caseSensitive: false).firstMatch(config);
+        RegExp(r"method\\s*:\\s*['\"](POST|PUT|PATCH|DELETE)['\"]", caseSensitive: false).firstMatch(config);
     if (methodMatch == null) continue;
     if (!_containsCsrfMarker(config)) {
       final line = _lineNumberForOffset(lineStarts, match.start, sanitized.length);
@@ -1792,8 +1792,7 @@ bool _isFalsyLiteral(String value) {
 
 bool _optionTruthy(String options, List<String> keys) {
   for (final key in keys) {
-    final pattern = RegExp('$key\\s*:\\s*([^,}\
-]+)', caseSensitive: false);
+    final pattern = RegExp('$key\s*:\s*([^,}\]]+)', caseSensitive: false);
     final match = pattern.firstMatch(options);
     if (match != null) {
       final value = match.group(1)?.trim() ?? '';
@@ -1807,8 +1806,7 @@ bool _optionTruthy(String options, List<String> keys) {
 }
 
 bool _optionExplicitlyTrue(String options, String key) {
-  final pattern = RegExp('$key\\s*:\\s*([^,}\
-]+)', caseSensitive: false);
+  final pattern = RegExp('$key\s*:\s*([^,}\]]+)', caseSensitive: false);
   final match = pattern.firstMatch(options);
   if (match == null) return false;
   final value = match.group(1)?.trim() ?? '';
@@ -1849,7 +1847,7 @@ bool _looksLikeStaticIv(String arg) {
   if (RegExp(r'^(?:0x)?0+$').hasMatch(trimmed)) {
     return true;
   }
-  if (RegExp(r'Buffer\.(?:from|alloc)\s*\(\s*["\']', caseSensitive: false).hasMatch(trimmed)) {
+  if (RegExp(r"Buffer\\.(?:from|alloc)\\s*\\(\\s*['\"]", caseSensitive: false).hasMatch(trimmed)) {
     return true;
   }
   if (RegExp(r'new\s+Uint8Array\s*\([^)]*\)', caseSensitive: false).hasMatch(trimmed)) {
