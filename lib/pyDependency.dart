@@ -555,7 +555,8 @@ String? _modulePathFor(String fileAbs, Set<String> packageRoots) {
   for (var i = 0; i < chain.length; i++) {
     if (packageRoots.contains(chain[i])) {
       lastRootIndex = i;
-      break; // nearest (deepest) is first in chain
+      // Keep walking so that we prefer the outermost package root when
+      // multiple nested packages exist (pkg/sub/__init__.py, etc.).
     }
   }
   if (lastRootIndex == -1) {
@@ -657,11 +658,22 @@ String? _resolveModuleToFile(String cwd, String module, Set<String> packageRoots
   final parts = module.split('.');
   // Try each package root as a base; build path parts under it.
   for (final root in packageRoots) {
-    final basePath = root;
-    // candidate: root/parts.../__init__.py or root/parts....py
-    final file1 = _join(basePath, parts.join(_sep) + '.py');
+    var relativeParts = parts;
+    final rootName = _base(root);
+    if (relativeParts.isNotEmpty && relativeParts.first == rootName) {
+      relativeParts = relativeParts.sublist(1);
+    }
+
+    if (relativeParts.isEmpty) {
+      final init = _join(root, '__init__.py');
+      if (File(init).existsSync()) return _rel(_normalize(init), cwd);
+      continue;
+    }
+
+    final joined = relativeParts.join(_sep);
+    final file1 = _join(root, '$joined.py');
     if (File(file1).existsSync()) return _rel(_normalize(file1), cwd);
-    final pkgDir = _join(basePath, parts.join(_sep));
+    final pkgDir = _join(root, joined);
     final init = _join(pkgDir, '__init__.py');
     if (File(init).existsSync()) return _rel(_normalize(init), cwd);
   }
