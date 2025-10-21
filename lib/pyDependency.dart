@@ -321,76 +321,101 @@ void main(List<String> args) async {
 // ---------------- crawl ----------------
 Future<List<String>> _collectPyFiles(String root) async {
   final ignoreDirs = <String>{
-    'node_modules',
-    'dist',
-    'build',
-    'target',
-    'out',
-    '.git',
-    '.idea',
-    '.venv',
-    'venv',
-    '__pycache__',
-    '.mypy_cache',
-    '.pytest_cache',
-    '.ruff_cache',
-    '.tox'
+    'node_modules','dist','build','target','out','.git','.idea',
+    '.venv','venv','__pycache__','.mypy_cache','.pytest_cache',
+    '.ruff_cache','.tox'
   };
 
-  bool shouldSkip(String relPath) {
+  String _relSafe(String abs, String base) {
+    // Robust relative path even if base lacks trailing separator or case differs.
+    final a = _normalize(abs);
+    final b = _normalize(base);
+    if (a == b) return '.';
+    // Ensure b ends with a separator for prefix strip
+    final bWithSep = b.endsWith(_sep) ? b : '$b$_sep';
+    return a.startsWith(bWithSep) ? a.substring(bWithSep.length) : a;
+  }
+
+  bool _skipRelPath(String relPath) {
     if (relPath.isEmpty || relPath == '.') return false;
-    final segments = relPath
-        .split(_sep)
-        .where((segment) => segment.isNotEmpty && segment != '.');
-    for (final segment in segments) {
+    for (final segment in relPath.split(_sep)) {
+      if (segment.isEmpty || segment == '.') continue;
       if (ignoreDirs.contains(segment)) return true;
     }
     return false;
   }
 
   final result = <String>[];
-  final pending = <String>[_normalize(root)];
-  final seenDirs = <String>{};
+  final stack = <String>[_normalize(root)];
+  final seen = <String>{};
 
-  while (pending.isNotEmpty) {
-    final current = pending.removeLast();
-    final normalized = _normalize(current);
-    if (!seenDirs.add(normalized)) continue;
+  while (stack.isNotEmpty) {
+    final current = stack.removeLast();
+    final curNorm = _normalize(current);
+    if (!seen.add(curNorm)) continue;
 
-    final dir = Directory(normalized);
+    final dir = Directory(curNorm);
     if (!await dir.exists()) continue;
 
-    Stream<FileSystemEntity> listing;
+    // List directory entries (don’t crash entire walk on one error)
+    late final Stream<FileSystemEntity> listing;
     try {
       listing = dir.list(followLinks: false);
-    } catch (err) {
-      stderr.writeln('[warn] Unable to list directory: $normalized ($err)');
+    } catch (e) {
+      stderr.writeln('[warn] Unable to list: $curNorm ($e)');
       continue;
     }
 
     await for (final ent in listing.handleError(
-      (error, stack) {
-        stderr.writeln('[warn] Error while scanning $normalized: $error');
-      },
-      test: (error) => error is FileSystemException,
+      (error) => stderr.writeln('[warn] Error under $curNorm: $error'),
+      test: (e) => e is FileSystemException,
     )) {
-      final path = _normalize(ent.path);
-      final rel = _rel(path, root);
-      if (shouldSkip(rel)) continue;
+      final p = _normalize(ent.path);
+      final rel = _relSafe(p, root);
+      if (_skipRelPath(rel)) continue;
 
-      if (ent is File) {
-        final ext = _ext(path).toLowerCase();
-        if (ext == '.py' || ext == '.pyw' || ext == '.pyi') {
-          result.add(path);
-        }
-      } else if (ent is Directory) {
-        pending.add(path);
+      final type = await FileSystemEntity.type(p, followLinks: false);
+      switch (type) {
+        case FileSystemEntityType.file:
+          final ext = _ext(p).toLowerCase();
+          if (ext == '.py' || ext == '.pyw' || ext == '.pyi') {
+            result.add(p);
+          }
+          break;
+
+        case FileSystemEntityType.directory:
+          // Descend into real directories
+          stack.add(p);
+          break;
+
+        case FileSystemEntityType.link:
+          // Optional: follow dir symlinks (disabled by default)
+          // If you know your repo uses symlinked python dirs (monorepos), set this to true.
+          const followDirSymlinks = false;
+          if (followDirSymlinks) {
+            try {
+              final targetType = await FileSystemEntity.type(p, followLinks: true);
+              if (targetType == FileSystemEntityType.directory) {
+                stack.add(p);
+              }
+            } catch (e) {
+              stderr.writeln('[warn] Broken symlink or inaccessible: $p ($e)');
+            }
+          }
+          break;
+
+        default:
+          // do nothing (sockets/pipes/unknown)
+          break;
       }
     }
   }
 
-  return result;
+  // De-dupe, stable sort
+  result.sort();
+  return result.toSet().toList();
 }
+
 
 // ---------------- package roots ----------------
 // Return set of directories that are python packages (contain __init__.py).
@@ -478,8 +503,13 @@ _FileFacts _extractFacts(String cwd, String fileAbs, String text, Set<String> pa
   }
 
   final facts = _FileFacts(fileAbs, relId, module, imports, isMain);
-  _populatePythonExports(facts, stripped, text);
+  try {
+    _populatePythonExports(facts, stripped, text);
+  } catch (e, st) {
+    stderr.writeln('[warn] export parse failed for ${facts.relId}: $e');
+  }
   return facts;
+
 }
 
 String _stripTripleQuoted(String s) {
@@ -550,11 +580,17 @@ void _populatePythonExports(_FileFacts f, String strippedForSyntax, String origi
   var hasDunderAll = false;
   var uncertain = false;
 
-  final assignMatches = RegExp(r'(?m)^\s*__all__\s*=\s*([\[(])\s*([^\]\)]*)[\]\)]');
-  for (final match in assignMatches.allMatches(originalText)) {
+  final assignRe = RegExp(
+    r'^\s*__all__\s*=\s*([\[(])\s*([^\]\)]*)\s*[\]\)]',
+    multiLine: true,
+  );
+  for (final match in assignRe.allMatches(originalText)) {
     hasDunderAll = true;
     final body = match.group(2) ?? '';
-    final items = RegExp(r"""['"]([^'"]+)['"]""").allMatches(body).map((m) => m.group(1)!).toList();
+    final items = RegExp(r"""['"]([^'"]+)['"]""")
+        .allMatches(body)
+        .map((m) => m.group(1)!)
+        .toList();
     if (items.isNotEmpty) {
       dunderAll.addAll(items);
     } else {
@@ -562,11 +598,17 @@ void _populatePythonExports(_FileFacts f, String strippedForSyntax, String origi
     }
   }
 
-  final plusMatches = RegExp(r'(?m)^\s*__all__\s*\+=\s*\[\s*([^\]]*)\s*\]');
-  for (final match in plusMatches.allMatches(originalText)) {
+  final plusRe = RegExp(
+    r'^\s*__all__\s*\+=\s*\[\s*([^\]]*)\s*\]',
+    multiLine: true,
+  );
+for (final match in plusRe.allMatches(originalText)) {
     hasDunderAll = true;
     final body = match.group(1) ?? '';
-    final items = RegExp(r"""['"]([^'"]+)['"]""").allMatches(body).map((m) => m.group(1)!).toList();
+    final items = RegExp(r"""['"]([^'"]+)['"]""")
+        .allMatches(body)
+        .map((m) => m.group(1)!)
+        .toList();
     if (items.isNotEmpty) {
       dunderAll.addAll(items);
     } else {
