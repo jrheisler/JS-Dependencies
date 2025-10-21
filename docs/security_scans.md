@@ -115,3 +115,68 @@ The scanner exposes two groups of built-in rules:
   context.
 * The scanner is heuristic-driven and may produce false positives/negatives; it
   is intended for surfacing potential risks rather than enforcing strict policy.
+
+# Python security scans
+
+The `pyDependency.dart` crawler performs an analogous static sweep across Python
+files and emits each match as a `_SecurityFinding`. The engine runs two rule
+sets:
+
+* **Sanitized rules** – executed on a copy of the source where comments and
+  string literals have been blanked out to avoid matching on documentation or
+  data.
+* **Raw-text rules** – executed directly on the original source so that
+  configuration values inside strings remain visible.
+
+## Sanitized rule reference
+
+| ID | Severity | Description | Pattern / trigger |
+| --- | --- | --- | --- |
+| `py.eval.call` | high | Use of `eval()` which can execute arbitrary code. | `\beval\s*\(` |
+| `py.exec.call` | high | Use of `exec()` which can execute arbitrary code. | `\bexec\s*\(` |
+| `py.os.system` | high | `os.system` invokes a shell command. | `\bos\.system\s*\(` |
+| `py.subprocess.shell` | high | `subprocess.*` with `shell=True` executes a shell command. | `\bsubprocess\.(?:Popen|run|call|check_output)\s*\([^)]*shell\s*=\s*True` (case-insensitive) |
+| `py.subprocess.cmd_str` | med | `subprocess.*` called with a string command (consider list args). | `\bsubprocess\.(?:Popen|run|call|check_output)\s*\(\s*(?:[rRuUbBfF]*["\'])` |
+| `py.pickle.load` | high | `pickle.load`/`loads` can deserialize untrusted data. | `\bpickle\.(?:load|loads)\s*\(` |
+| `py.yaml.unsafe_load` | high | `yaml.load` without a safe loader can be unsafe. | `\byaml\.load\s*\(` |
+| `py.jsonpickle.decode` | high | `jsonpickle.decode`/`Unpickler` reinstantiates arbitrary objects. | `\bjsonpickle\.(?:decode|Unpickler)\s*\(` |
+| `py.marshal.loads` | high | `marshal.load`/`loads` can load arbitrary code objects. | `\bmarshal\.(?:load|loads)\s*\(` |
+| `py.requests.verify_false` | med | Disables TLS verification via `verify=False`. | `\brequests\.\w+\s*\([^)]*verify\s*=\s*False` (case-insensitive) |
+| `py.ssl.unverified_context` | med | `ssl._create_unverified_context()` disables certificate validation. | `\bssl\._create_unverified_context\s*\(` |
+| `py.regex.dynamic` | med | Compiling a regex from a variable (possible ReDoS). | `\bre\.compile\s*\(\s*[A-Za-z_]\w*` |
+| `py.crypto.weak_hash` | med | Weak hash algorithms `md5`/`sha1`. | `\bhashlib\.(?:md5|sha1)\s*\(` |
+| `py.random.for_tokens` | med | `random.*` usage where secrets may be expected. | `\brandom\.(?:random|randrange|randint|choice)\s*\(` |
+| `py.jwt.decode.unsafe` | med | `jwt.decode` without validating algorithm/issuer/audience. | `\bjwt\.decode\s*\(` |
+| `py.zip.extraction` | high | Archive extraction helpers without path validation (Zip-Slip). | `\b(?:zipfile|tarfile)\.[A-Za-z_]\w*extractall\s*\(` |
+| `py.tempfile.insecure` | med | `tempfile.mktemp()` is insecure. | `\btempfile\.mktemp\s*\(` |
+| `py.fs.world_perms` | med | World-writable permissions (`0o777`) or `umask(0)`. | `\bos\.(?:chmod\s*\([^,]+,\s*0o?777\b|umask\s*\(\s*0\s*\))` |
+| `py.ssrf.dynamic_url` | high | Non-literal URLs in `requests.*` calls (possible SSRF). | `\brequests\.(?:get|post|put|delete|patch|head|options)\s*\(\s*(?![rRuUbBfF]?["\'])` |
+| `py.open_redirect` | high | Redirect target built from a non-literal (potential open redirect). | `\bredirect\s*\(\s*(?![rRuUbBfF]?["\'])` |
+| `py.sql.concat` | high | SQL queries built via concatenation or f-strings. | `\b(?:execute|executemany)\s*\(\s*[^)]*(?:[+{])` (case-insensitive) |
+| `py.cookie.insecure` | med | Cookie set without security flags. | `\.set_cookie\s*\(` |
+| `py.importlib.dynamic` | med | Dynamic imports via `importlib.import_module`. | `\bimportlib\.import_module\s*[(]` |
+
+## Raw-text rule reference
+
+| ID | Severity | Description | Pattern / trigger |
+| --- | --- | --- | --- |
+| `py.django.debug_true` | low | Django `DEBUG = True`. | `^\s*DEBUG\s*=\s*True\b` (multi-line) |
+| `py.django.allowed_hosts_any` | med | Django `ALLOWED_HOSTS` allows any host. | `^\s*ALLOWED_HOSTS\s*=\s*\[\s*["']\*["']\s*\]` (multi-line) |
+| `py.cors.wildcard` | med | Wildcard `Access-Control-Allow-Origin` header. | `Access-Control-Allow-Origin\s*[:=]\s*["']\*["']` |
+| `py.cors.credentialsWildcard` | high | CORS allows credentials with a wildcard origin. | `Access-Control-Allow-Credentials\s*[:=]\s*["']true["']` (case-insensitive) |
+| `py.urllib3.disable_warnings` | low | `urllib3.disable_warnings()` hides TLS warnings. | `\burllib3\.disable_warnings\s*\(` |
+| `py.secret.literal` | high | Potential hard-coded secret (API key/token/password). | `(API[_-]?KEY|SECRET[_-]?KEY|SECRET|TOKEN|PASSWORD|PRIVATE[_-]?KEY)\s*[:=]\s*["'][A-Za-z0-9_\-\.=+/]{12,}["']` |
+| `py.env.access` | low | Reads an environment variable (review for secrets). | `\bos\.environ\[\s*["'][A-Za-z_]\w*["']\s*\]` |
+| `py.logging.secrets` | low | Logging sensitive keywords. | `\b(?:print|logging\.\w+)\s*\([^)]*(password|secret|token|api[_-]?key|auth|credential)[^)]*\)` (case-insensitive) |
+| `py.fs.dotdot` | high | Path traversal sequence (`..`) detected. | `(\.\./|\.\.\\)` |
+| `py.jwt.none_alg` | high | JWT allowlist includes `none`. | `algorithms\s*=\s*\[[^\]]*\bnone\b[^\]]*\]` (case-insensitive) |
+| `py.http.cleartext` | med | Non-localhost HTTP URL. | `http://(?!localhost|127\.0\.0\.1|0\.0\.0\.0)` |
+
+### Notes
+
+* Sanitized rules run on text with string literals and comments replaced by
+  spaces so reported offsets still map to the original file.
+* Raw-text rules complement the sanitized pass by catching settings that only
+  appear inside strings or comments.
+* Each `_SecurityFinding` records the rule identifier, severity, message, line
+  number, and line snippet to aid downstream reporting.
