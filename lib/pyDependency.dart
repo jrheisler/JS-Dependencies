@@ -1279,7 +1279,7 @@ final _securityRulesRaw = <Map<String, dynamic>>[
     'id': 'py.urllib3.disable_warnings',
     'severity': 'low',
     'message': 'urllib3.disable_warnings() hides TLS warnings.',
-    're': RegExp(r'\\burllib3\\.disable_warnings\\s*\\('),
+    're': RegExp(r'\burllib3\.disable_warnings\s*\('),
   },
   {
     'id': 'py.secret.literal',
