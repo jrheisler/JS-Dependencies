@@ -146,4 +146,40 @@ test('ingests security findings from array entries and direct records', () => {
   assert.strictEqual(result.summary.security.affectedNodes, 2, 'summary should count affected nodes');
 });
 
-console.log('All GraphPreprocessing security finding tests passed.');
+test('exports survive repeated preprocessing on same payload', () => {
+  const rawGraph = {
+    nodes: [
+      { id: 'src/foo.js' }
+    ],
+    exports: {
+      'src/foo.js': {
+        named: ['alpha'],
+        functions: ['beta']
+      }
+    }
+  };
+
+  const first = preprocessGraph({ rawGraph });
+  const firstNode = first.graph.nodes.find(n => n.id === 'src/foo.js');
+  assert(firstNode, 'expected node in first result');
+  assert(firstNode.exports, 'expected exports on first pass');
+  assert(Array.isArray(firstNode.exports.named), 'named exports should be array');
+  assert(Array.isArray(firstNode.exports.functions), 'function exports should be array');
+  assert.strictEqual(firstNode.exports.named.length, 1, 'expected one named export');
+  assert.strictEqual(firstNode.exports.functions.length, 1, 'expected one function export');
+  assert.strictEqual(firstNode.exports.named[0], 'alpha');
+  assert.strictEqual(firstNode.exports.functions[0], 'beta');
+
+  const second = preprocessGraph({ rawGraph });
+  const secondNode = second.graph.nodes.find(n => n.id === 'src/foo.js');
+  assert(secondNode, 'expected node in second result');
+  assert(secondNode.exports, 'expected exports on second pass');
+  assert(Array.isArray(secondNode.exports.named), 'named exports should persist as array');
+  assert(Array.isArray(secondNode.exports.functions), 'function exports should persist as array');
+  assert.strictEqual(secondNode.exports.named.length, 1, 'expected one named export after second pass');
+  assert.strictEqual(secondNode.exports.functions.length, 1, 'expected one function export after second pass');
+  assert.strictEqual(secondNode.exports.named[0], 'alpha');
+  assert.strictEqual(secondNode.exports.functions[0], 'beta');
+});
+
+console.log('All GraphPreprocessing tests passed.');

@@ -363,7 +363,7 @@
   const EXPORT_ID_KEYS = ['id', 'node', 'file', 'path', 'module'];
   const EXPORT_GROUP_KEYS = ['groups', 'exports', 'symbols', 'values', 'items', 'members', 'entries', 'data', 'list'];
   const EXPORT_SKIP_KEYS = new Set([...EXPORT_ID_KEYS, ...EXPORT_GROUP_KEYS, 'meta', 'summary', 'stats', 'count', 'type', 'kind', 'category', 'description']);
-  const visitedExportContainers = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
+  const createExportVisitTracker = ()=> typeof WeakSet !== 'undefined' ? new WeakSet() : null;
 
   const SECURITY_SEVERITY_ALIASES = new Map([
     ['crit', 'critical'],
@@ -776,11 +776,11 @@
     }
   }
 
-  function ingestExports(exportsById, container){
+  function ingestExports(exportsById, container, visited){
     if(container == null) return;
-    if(typeof container === 'object'){
-      if(visitedExportContainers && visitedExportContainers.has(container)) return;
-      if(visitedExportContainers) visitedExportContainers.add(container);
+    if(visited && typeof container === 'object'){
+      if(visited.has(container)) return;
+      visited.add(container);
     }
     if(Array.isArray(container)){
       container.forEach(entry => {
@@ -789,7 +789,7 @@
           if(entry.length >= 2 && typeof entry[0] === 'string'){
             recordExports(exportsById, entry[0], entry[1]);
           } else {
-            ingestExports(exportsById, entry);
+            ingestExports(exportsById, entry, visited);
           }
           return;
         }
@@ -812,7 +812,7 @@
           recordExports(exportsById, id, fallback);
           return;
         }
-        ingestExports(exportsById, entry);
+        ingestExports(exportsById, entry, visited);
       });
       return;
     }
@@ -836,7 +836,7 @@
           return;
         }
       }
-      ingestExports(exportsById, value);
+      ingestExports(exportsById, value, visited);
     });
   }
 
@@ -858,7 +858,8 @@
     if(rawGraph.symbols && typeof rawGraph.symbols === 'object'){
       exportSources.push(rawGraph.symbols.exports, rawGraph.symbols);
     }
-    exportSources.forEach(source => ingestExports(exportsById, source));
+    const visitedExportContainers = createExportVisitTracker();
+    exportSources.forEach(source => ingestExports(exportsById, source, visitedExportContainers));
 
     const securityById = new Map();
     const securitySources = [rawGraph.securityFindings];
