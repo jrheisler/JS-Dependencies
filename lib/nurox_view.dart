@@ -25,6 +25,7 @@ class Graph {
   final Set<String> edgeKeys = {};
   final List<Map<String, dynamic>> edges = [];
   final Map<String, List<Map<String, dynamic>>> securityFindings = {};
+  final Map<String, Map<String, dynamic>> exports = {};
 
   void addGraph(Map<String, dynamic> g) {
     final ns = (g['nodes'] as List?) ?? const [];
@@ -70,6 +71,7 @@ class Graph {
     }
 
     _mergeSecurityFindings(this, g);
+    _mergeExports(this, g);
   }
 
   Map<String, dynamic> toJson() => {
@@ -81,6 +83,10 @@ class Graph {
               key,
               value.map((finding) => Map<String, dynamic>.from(finding)).toList(),
             ),
+          ),
+        if (exports.isNotEmpty)
+          'exports': exports.map(
+            (key, value) => MapEntry(key, _cloneJsonLike(value)),
           ),
       };
 }
@@ -204,6 +210,67 @@ String _securityFindingKey(Map<String, dynamic> finding) {
   final message = finding['message']?.toString() ?? '';
   final code = finding['code']?.toString() ?? '';
   return '$sevNorm|$sev|$id|$line|$message|$code';
+}
+
+void _mergeExports(Graph graph, Map<String, dynamic> source) {
+  final container = source['exports'];
+  if (container is! Map) return;
+  container.forEach((rawId, rawGroups) {
+    if (rawId == null) return;
+    final id = rawId.toString().trim();
+    if (id.isEmpty) return;
+    final canonical = _canonicalizeSecurityKey(id);
+    final key = canonical.isNotEmpty ? canonical : id;
+    final groups = _normalizeExportGroups(rawGroups);
+    if (groups == null || groups.isEmpty) return;
+    graph.exports.update(
+      key,
+      (existing) {
+        final merged = <String, dynamic>{};
+        existing.forEach((k, v) {
+          merged[k] = _cloneJsonLike(v);
+        });
+        for (final entry in groups.entries) {
+          merged[entry.key] = _cloneJsonLike(entry.value);
+        }
+        return merged;
+      },
+      ifAbsent: () {
+        final initial = <String, dynamic>{};
+        for (final entry in groups.entries) {
+          initial[entry.key] = _cloneJsonLike(entry.value);
+        }
+        return initial;
+      },
+    );
+  });
+}
+
+Map<String, dynamic>? _normalizeExportGroups(dynamic raw) {
+  if (raw is! Map) return null;
+  final normalized = <String, dynamic>{};
+  raw.forEach((rawKey, rawValue) {
+    if (rawKey == null) return;
+    final key = rawKey.toString().trim();
+    if (key.isEmpty) return;
+    normalized[key] = _cloneJsonLike(rawValue);
+  });
+  return normalized;
+}
+
+dynamic _cloneJsonLike(dynamic value) {
+  if (value is Map) {
+    final result = <String, dynamic>{};
+    value.forEach((k, v) {
+      if (k == null) return;
+      result[k.toString()] = _cloneJsonLike(v);
+    });
+    return result;
+  }
+  if (value is List) {
+    return value.map(_cloneJsonLike).toList();
+  }
+  return value;
 }
 
 String _canonicalizeSecurityKey(String raw) {
