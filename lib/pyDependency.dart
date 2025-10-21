@@ -167,6 +167,24 @@ class _Edge {
       };
 }
 
+class _SecurityFinding {
+  final String id;
+  final String message;
+  final String severity;
+  final int line;
+  final String code;
+
+  _SecurityFinding(this.id, this.message, this.severity, this.line, this.code);
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'message': message,
+        'severity': severity,
+        'line': line,
+        'code': code,
+      };
+}
+
 class _PyImport {
   final String module;     // as-written module path (may be '', meaning relative-only "from . import x")
   final String? name;      // imported name (for from ... import name), null for plain `import`
@@ -190,6 +208,7 @@ class _FileFacts {
   bool hasDunderAll = false;
   List<String>? dunderAll;
   bool uncertainExports = false;
+  List<_SecurityFinding> securityFindings = const [];
 
   _FileFacts(this.absPath, this.relId, this.module, this.imports, this.isMainGuard);
 }
@@ -301,10 +320,18 @@ void main(List<String> args) async {
           ).toJson())
       .toList();
 
+  final securityFindings = <String, List<Map<String, dynamic>>>{};
+  for (final ff in facts) {
+    if (ff.securityFindings.isEmpty) continue;
+    securityFindings[ff.relId] =
+        ff.securityFindings.map((finding) => finding.toJson()).toList();
+  }
+
   final out = {
     'nodes': nodes.map((n) => n.toJson()).toList(),
     'edges': edges.map((e) => e.toJson()).toList(),
     'pythonExports': pythonExports,
+    if (securityFindings.isNotEmpty) 'securityFindings': securityFindings,
   };
   await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
 
@@ -508,6 +535,7 @@ _FileFacts _extractFacts(String cwd, String fileAbs, String text, Set<String> pa
   } catch (e, st) {
     stderr.writeln('[warn] export parse failed for ${facts.relId}: $e');
   }
+  facts.securityFindings = _collectSecurityFindings(text);
   return facts;
 
 }
@@ -963,3 +991,332 @@ Future<int> _estimateLOC(String file) async {
     return 0;
   }
 }
+
+// ---------------- security ----------------
+List<_SecurityFinding> _collectSecurityFindings(String text) {
+  if (text.trim().isEmpty) return const [];
+
+  final sanitized = _sanitizeForSecurity(text);
+  final lineStarts = _computeLineStarts(text);
+  final lines = text.split('\n');
+  final findings = <_SecurityFinding>[];
+  final seen = <String>{};
+
+  String snippetForLine(int line) => _lineAt(lines, line).trim();
+
+  void addFinding(String id, String message, String severity, int offset) {
+    final line = _lineNumberForOffset(lineStarts, offset);
+    final snippet = snippetForLine(line);
+    final key = '$id|$line|$snippet';
+    if (seen.add(key)) {
+      findings.add(_SecurityFinding(id, message, severity, line, snippet));
+    }
+  }
+
+  for (final rule in _securityRules) {
+    final id = rule['id'] as String;
+    final severity = rule['severity'] as String;
+    final message = rule['message'] as String;
+    final re = rule['re'] as RegExp;
+    for (final match in re.allMatches(sanitized)) {
+      addFinding(id, message, severity, match.start);
+    }
+  }
+
+  for (final rule in _securityRulesRaw) {
+    final id = rule['id'] as String;
+    final severity = rule['severity'] as String;
+    final message = rule['message'] as String;
+    final re = rule['re'] as RegExp;
+    for (final match in re.allMatches(text)) {
+      addFinding(id, message, severity, match.start);
+    }
+  }
+
+  return findings;
+}
+
+String _sanitizeForSecurity(String text) {
+  if (text.isEmpty) return text;
+  final chars = text.split('');
+
+  void blankOut(Match match) {
+    for (var i = match.start; i < match.end && i < chars.length; i++) {
+      final ch = chars[i];
+      if (ch == '\n' || ch == '\r') continue;
+      chars[i] = ' ';
+    }
+  }
+
+  final tripleDouble = RegExp(r'[rRuUbBfF]*"""[\s\S]*?"""', multiLine: true);
+  final tripleSingle = RegExp(r"[rRuUbBfF]*'''[\s\S]*?'''", multiLine: true);
+  final doubleQuote = RegExp(r'[rRuUbBfF]*"(?:\\.|[^"\\\n])*"');
+  final singleQuote = RegExp(r"[rRuUbBfF]*'(?:\\.|[^'\\\n])*'");
+  final comments = RegExp(r'#.*$', multiLine: true);
+
+  for (final match in tripleDouble.allMatches(text)) {
+    blankOut(match);
+  }
+  for (final match in tripleSingle.allMatches(text)) {
+    blankOut(match);
+  }
+  for (final match in doubleQuote.allMatches(text)) {
+    blankOut(match);
+  }
+  for (final match in singleQuote.allMatches(text)) {
+    blankOut(match);
+  }
+  for (final match in comments.allMatches(text)) {
+    blankOut(match);
+  }
+
+  return chars.join();
+}
+
+List<int> _computeLineStarts(String text) {
+  final starts = <int>[0];
+  for (var i = 0; i < text.length; i++) {
+    if (text.codeUnitAt(i) == 10) {
+      starts.add(i + 1);
+    }
+  }
+  return starts;
+}
+
+int _lineNumberForOffset(List<int> starts, int offset) {
+  var low = 0;
+  var high = starts.length - 1;
+  while (low <= high) {
+    final mid = (low + high) >> 1;
+    final value = starts[mid];
+    if (value <= offset) {
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+  final result = high + 1;
+  if (result < 1) return 1;
+  if (result > starts.length) return starts.length;
+  return result;
+}
+
+String _lineAt(List<String> lines, int lineNumber) {
+  if (lineNumber < 1 || lineNumber > lines.length) return '';
+  return lines[lineNumber - 1];
+}
+
+// ---------------- Python security rule catalog ----------------
+// CLEAN rules (run on source with strings/comments stripped)
+final _securityRules = <Map<String, dynamic>>[
+  {
+    'id': 'py.eval.call',
+    'severity': 'high',
+    'message': 'Use of eval() can execute arbitrary code.',
+    're': RegExp(r'\\beval\\s*\\('),
+  },
+  {
+    'id': 'py.exec.call',
+    'severity': 'high',
+    'message': 'Use of exec() can execute arbitrary code.',
+    're': RegExp(r'\\bexec\\s*\\('),
+  },
+  {
+    'id': 'py.os.system',
+    'severity': 'high',
+    'message': 'os.system executes a shell command.',
+    're': RegExp(r'\\bos\\.system\\s*\\('),
+  },
+  {
+    'id': 'py.subprocess.shell',
+    'severity': 'high',
+    'message': 'subprocess invocation with shell=True can execute shell commands.',
+    're': RegExp(r'\\bsubprocess\\.(?:Popen|run|call|check_output)\\s*\\([^)]*shell\\s*=\\s*True',
+        caseSensitive: false),
+  },
+  {
+    'id': 'py.subprocess.cmd_str',
+    'severity': 'med',
+    'message': 'subprocess called with a string command (consider list args).',
+    're': RegExp(r'''\\bsubprocess\\.(?:Popen|run|call|check_output)\\s*\\(\\s*(?:[rRuUbBfF]*["\'])'''),
+  },
+  {
+    'id': 'py.pickle.load',
+    'severity': 'high',
+    'message': 'pickle.load/loads can deserialize untrusted data.',
+    're': RegExp(r'\\bpickle\\.(?:load|loads)\\s*\\('),
+  },
+  {
+    'id': 'py.yaml.unsafe_load',
+    'severity': 'high',
+    'message': 'yaml.load without a SafeLoader can be unsafe.',
+    're': RegExp(r'\\byaml\\.load\\s*\\('),
+  },
+  {
+    'id': 'py.jsonpickle.decode',
+    'severity': 'high',
+    'message': 'jsonpickle decoding can reinstantiate arbitrary objects.',
+    're': RegExp(r'\\bjsonpickle\\.(?:decode|Unpickler\\()'),
+  },
+  {
+    'id': 'py.marshal.loads',
+    'severity': 'high',
+    'message': 'marshal.loads can load arbitrary code objects.',
+    're': RegExp(r'\\bmarshal\\.(?:load|loads)\\s*\\('),
+  },
+  {
+    'id': 'py.requests.verify_false',
+    'severity': 'med',
+    'message': 'requests called with verify=False disables TLS verification.',
+    're': RegExp(r'\\brequests\\.\\w+\\s*\\([^)]*verify\\s*=\\s*False', caseSensitive: false),
+  },
+  {
+    'id': 'py.ssl.unverified_context',
+    'severity': 'med',
+    'message': 'Unverified SSL context disables certificate validation.',
+    're': RegExp(r'\\bssl\\._create_unverified_context\\s*\\('),
+  },
+  {
+    'id': 'py.regex.dynamic',
+    'severity': 'med',
+    'message': 'Regular expression compiled from a variable (review for ReDoS).',
+    're': RegExp(r'\\bre\\.compile\\s*\\(\\s*[A-Za-z_]\\w*'),
+  },
+  {
+    'id': 'py.crypto.weak_hash',
+    'severity': 'med',
+    'message': 'Weak hash algorithm (md5/sha1) detected.',
+    're': RegExp(r'\\bhashlib\\.(?:md5|sha1)\\s*\\('),
+  },
+  {
+    'id': 'py.random.for_tokens',
+    'severity': 'med',
+    'message': 'random.* is not suitable for secrets/tokens.',
+    're': RegExp(r'\\brandom\\.(?:random|randrange|randint|choice)\\s*\\('),
+  },
+  {
+    'id': 'py.jwt.decode.unsafe',
+    'severity': 'med',
+    'message': 'jwt.decode called without algorithm/issuer/audience validation.',
+    're': RegExp(r'\\bjwt\\.decode\\s*\\('),
+  },
+  {
+    'id': 'py.zip.extraction',
+    'severity': 'high',
+    'message': 'Archive extraction (extractall) can allow Zip-Slip without path validation.',
+    're': RegExp(r'\\b(?:zipfile|tarfile)\\.[A-Za-z_]\\w*extractall\\s*\\('),
+  },
+  {
+    'id': 'py.tempfile.insecure',
+    'severity': 'med',
+    'message': 'tempfile.mktemp() is insecure; use NamedTemporaryFile.',
+    're': RegExp(r'\\btempfile\\.mktemp\\s*\\('),
+  },
+  {
+    'id': 'py.fs.world_perms',
+    'severity': 'med',
+    'message': 'World-writable permissions (0o777) or umask(0).',
+    're': RegExp(r'\\bos\\.(?:chmod\\s*\\([^,]+,\\s*0o?777\\b|umask\\s*\\(\\s*0\\s*\\))'),
+  },
+  {
+    'id': 'py.ssrf.dynamic_url',
+    'severity': 'high',
+    'message': 'HTTP request built from a non-literal URL (possible SSRF).',
+    're': RegExp(r'\\brequests\\.(?:get|post|put|delete|patch|head|options)\\s*\\(\\s*(?![rRuUbBfF]?["\'])'),
+  },
+  {
+    'id': 'py.open_redirect',
+    'severity': 'high',
+    'message': 'Redirect target appears non-literal (potential open redirect).',
+    're': RegExp(r'\\bredirect\\s*\\(\\s*(?![rRuUbBfF]?["\'])'),
+  },
+  {
+    'id': 'py.sql.concat',
+    'severity': 'high',
+    'message': 'SQL built by string concatenation or f-strings.',
+    're': RegExp(r'\\b(?:execute|executemany)\\s*\\(\\s*(?:f?["\'][^)]*[{+][^)]*)', caseSensitive: false),
+  },
+  {
+    'id': 'py.cookie.insecure',
+    'severity': 'med',
+    'message': 'Cookie set without security flags (review HttpOnly/Secure/SameSite).',
+    're': RegExp(r'\\.set_cookie\\s*\\('),
+  },
+  {
+    'id': 'py.importlib.dynamic',
+    'severity': 'med',
+    'message': 'Dynamic import via importlib.import_module.',
+    're': RegExp(r'\\bimportlib\\.import_module\\s*\\('),
+  },
+];
+
+// RAW rules (run on original text; needed for content inside string literals / settings)
+final _securityRulesRaw = <Map<String, dynamic>>[
+  {
+    'id': 'py.django.debug_true',
+    'severity': 'low',
+    'message': 'Django DEBUG = True.',
+    're': RegExp(r'^\\s*DEBUG\\s*=\\s*True\\b', multiLine: true),
+  },
+  {
+    'id': 'py.django.allowed_hosts_any',
+    'severity': 'med',
+    'message': 'Django ALLOWED_HOSTS allows any host.',
+    're': RegExp(r'^\\s*ALLOWED_HOSTS\\s*=\\s*\\[\\s*["\']\\*\\s*["\']\\s*\\]', multiLine: true),
+  },
+  {
+    'id': 'py.cors.wildcard',
+    'severity': 'med',
+    'message': 'CORS wildcard origin header.',
+    're': RegExp(r'Access-Control-Allow-Origin\\s*[:=]\\s*["\']\\*["\']'),
+  },
+  {
+    'id': 'py.cors.credentialsWildcard',
+    'severity': 'high',
+    'message': 'CORS allows credentials with wildcard origin.',
+    're': RegExp(r'Access-Control-Allow-Credentials\\s*[:=]\\s*["\']true["\']', caseSensitive: false),
+  },
+  {
+    'id': 'py.urllib3.disable_warnings',
+    'severity': 'low',
+    'message': 'urllib3.disable_warnings() hides TLS warnings.',
+    're': RegExp(r'\\burllib3\\.disable_warnings\\s*\\('),
+  },
+  {
+    'id': 'py.secret.literal',
+    'severity': 'high',
+    'message': 'Possible hard-coded secret (API key/token/password).',
+    're': RegExp(r'(API[_-]?KEY|SECRET[_-]?KEY|SECRET|TOKEN|PASSWORD|PRIVATE[_-]?KEY)\\s*[:=]\\s*["\'][A-Za-z0-9_\\-\\.=+/]{12,}["\']'),
+  },
+  {
+    'id': 'py.env.access',
+    'severity': 'low',
+    'message': 'Access to environment variables (review for secrets).',
+    're': RegExp(r'\\bos\\.environ\\[\\s*["\'][A-Za-z_]\\w*["\']\\s*\\]'),
+  },
+  {
+    'id': 'py.logging.secrets',
+    'severity': 'low',
+    'message': 'Logging may include sensitive keywords.',
+    're': RegExp(r'\\b(?:print|logging\\.\\w+)\\s*\\([^)]*(password|secret|token|api[_-]?key|auth|credential)[^)]*\\)',
+        caseSensitive: false),
+  },
+  {
+    'id': 'py.fs.dotdot',
+    'severity': 'high',
+    'message': 'Path traversal sequence (“..” path) appears in path.',
+    're': RegExp(r'(\\.\\./|\\.\\.\\\\)'),
+  },
+  {
+    'id': 'py.jwt.none_alg',
+    'severity': 'high',
+    'message': 'JWT algorithms allowlist includes "none".',
+    're': RegExp(r'algorithms\\s*=\\s*\\[[^\\]]*\\bnone\\b[^\\]]*\\]', caseSensitive: false),
+  },
+  {
+    'id': 'py.http.cleartext',
+    'severity': 'med',
+    'message': 'Cleartext HTTP URL (non-localhost).',
+    're': RegExp(r'http://(?!localhost|127\\.0\\.0\\.1|0\\.0\\.0\\.0)'),
+  },
+];
