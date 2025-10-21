@@ -1239,7 +1239,7 @@ final _securityRules = <Map<String, dynamic>>[
     'id': 'py.cookie.insecure',
     'severity': 'med',
     'message': 'Cookie set without security flags (review HttpOnly/Secure/SameSite).',
-    're': RegExp(r'\\.set_cookie\\s*\\('),
+    're': RegExp(r'\.set_cookie\s*\('),
   },
   {
     'id': 'py.importlib.dynamic',
