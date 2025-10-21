@@ -95,34 +95,6 @@ class _PyReexport {
       };
 }
 
-class _PyExportsSummary {
-  final String fileId;
-  final List<_PyExport> exports;
-  final List<_PyReexport> reexports;
-  final List<String> starImports;
-  final bool hasDunderAll;
-  final List<String>? dunderAll;
-  final bool uncertainExports;
-  _PyExportsSummary({
-    required this.fileId,
-    required this.exports,
-    required this.reexports,
-    required this.starImports,
-    required this.hasDunderAll,
-    required this.dunderAll,
-    required this.uncertainExports,
-  });
-  Map<String, dynamic> toJson() => {
-        'file': fileId,
-        'exports': exports.map((e) => e.toJson()).toList(),
-        'reexports': reexports.map((r) => r.toJson()).toList(),
-        'starImports': starImports,
-        'hasDunderAll': hasDunderAll,
-        if (dunderAll != null) 'dunderAll': dunderAll,
-        'uncertain': uncertainExports,
-      };
-}
-
 class _Node {
   String id;            // repo-relative path for files; external id for externals
   String type;          // file | external
@@ -308,29 +280,56 @@ void main(List<String> args) async {
 
   // 10) Write output
   final outPath = _join(cwd, 'pyDependencies.json');
-  final pythonExports = facts
-      .map((ff) => _PyExportsSummary(
-            fileId: ff.relId,
-            exports: ff.exports,
-            reexports: ff.reexports,
-            starImports: ff.starImports,
-            hasDunderAll: ff.hasDunderAll,
-            dunderAll: ff.dunderAll,
-            uncertainExports: ff.uncertainExports,
-          ).toJson())
-      .toList();
+  final exportsByFile = <String, Map<String, dynamic>>{};
+  for (final ff in facts) {
+    final exportGroups = <String, dynamic>{};
+    final exportedSymbols = ff.exports.map((e) => e.toJson()).toList();
+    if (exportedSymbols.isNotEmpty) {
+      exportGroups['exports'] = exportedSymbols;
+    }
+    final reexportedSymbols = ff.reexports.map((r) => r.toJson()).toList();
+    if (reexportedSymbols.isNotEmpty) {
+      exportGroups['reexports'] = reexportedSymbols;
+    }
+    if (ff.starImports.isNotEmpty) {
+      exportGroups['starImports'] = List<String>.from(ff.starImports);
+    }
+    final meta = <String, dynamic>{};
+    if (ff.hasDunderAll) {
+      meta['hasDunderAll'] = true;
+    }
+    if (ff.dunderAll != null && ff.dunderAll!.isNotEmpty) {
+      meta['dunderAll'] = List<String>.from(ff.dunderAll!);
+    }
+    if (ff.uncertainExports) {
+      meta['uncertain'] = true;
+    }
+    if (meta.isNotEmpty) {
+      exportGroups['meta'] = meta;
+    }
+    if (exportGroups.isNotEmpty) {
+      exportsByFile[ff.relId] = exportGroups;
+    }
+  }
 
   final securityFindings = <String, List<Map<String, dynamic>>>{};
   for (final ff in facts) {
     if (ff.securityFindings.isEmpty) continue;
-    securityFindings[ff.relId] =
+    final findingsJson =
         ff.securityFindings.map((finding) => finding.toJson()).toList();
+    securityFindings[ff.relId] =
+        findingsJson.map((item) => Map<String, dynamic>.from(item)).toList();
+    final absKey = _normalize(ff.absPath);
+    if (absKey.isNotEmpty && absKey != ff.relId) {
+      securityFindings[absKey] =
+          findingsJson.map((item) => Map<String, dynamic>.from(item)).toList();
+    }
   }
 
   final out = {
     'nodes': nodes.map((n) => n.toJson()).toList(),
     'edges': edges.map((e) => e.toJson()).toList(),
-    'pythonExports': pythonExports,
+    if (exportsByFile.isNotEmpty) 'exports': exportsByFile,
     if (securityFindings.isNotEmpty) 'securityFindings': securityFindings,
   };
   await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
