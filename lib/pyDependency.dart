@@ -1233,7 +1233,7 @@ final _securityRules = <Map<String, dynamic>>[
     'id': 'py.sql.concat',
     'severity': 'high',
     'message': 'SQL built by string concatenation or f-strings.',
-    're': RegExp(r'''\\b(?:execute|executemany)\\s*\\(\\s*(?:f?["\'][^)]*[{+][^)]*)''', caseSensitive: false),
+    're': RegExp(r'\b(?:execute|executemany)\s*\(\s*[^)]*(?:[+{])', caseSensitive: false),
   },
   {
     'id': 'py.cookie.insecure',
