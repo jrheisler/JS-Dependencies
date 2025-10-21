@@ -46,6 +46,26 @@ void main() {
     }
   });
 
+  graph.addGraph({
+    'exports': {
+      r'C:\\repo\\src\\a.js': {
+        'exports': [
+          {'name': 'alpha', 'kind': 'function'}
+        ]
+      }
+    }
+  });
+
+  graph.addGraph({
+    'exports': {
+      'C:/repo/src/a.js': {
+        'reexports': [
+          {'name': 'beta', 'from': 'pkg.module'}
+        ]
+      }
+    }
+  });
+
   final merged = graph.toJson();
   final security = merged['securityFindings'] as Map<String, dynamic>?;
   assert(security != null && security!.isNotEmpty, 'security findings should be preserved');
@@ -56,4 +76,12 @@ void main() {
 
   final ids = findings!.map((item) => (item as Map<String, dynamic>)['id']).toSet();
   assert(ids.contains('rule.eval') && ids.contains('rule.exec'));
+
+  final exports = merged['exports'] as Map<String, dynamic>?;
+  assert(exports != null && exports!.containsKey(key), 'exports should merge on canonical path');
+  final exportGroups = exports![key] as Map<String, dynamic>;
+  final named = exportGroups['exports'] as List<dynamic>?;
+  final reexports = exportGroups['reexports'] as List<dynamic>?;
+  assert(named != null && named.length == 1 && (named.first as Map)['name'] == 'alpha');
+  assert(reexports != null && reexports.length == 1 && (reexports.first as Map)['name'] == 'beta');
 }
