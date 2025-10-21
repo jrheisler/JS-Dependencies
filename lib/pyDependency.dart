@@ -1221,13 +1221,13 @@ final _securityRules = <Map<String, dynamic>>[
     'id': 'py.ssrf.dynamic_url',
     'severity': 'high',
     'message': 'HTTP request built from a non-literal URL (possible SSRF).',
-    're': RegExp(r'''\brequests\.(?:get|post|put|delete|patch|head|options)\s*\(\s*(?![rRuUbBfF]?["\']))'''),
+    're': RegExp(r'\brequests\.(?:get|post|put|delete|patch|head|options)\s*\(\s*(?![rRuUbBfF]?["\']))'),
   },
   {
     'id': 'py.open_redirect',
     'severity': 'high',
     'message': 'Redirect target appears non-literal (potential open redirect).',
-    're': RegExp(r'''\bredirect\s*\(\s*(?![rRuUbBfF]?["\']))'''),
+    're': RegExp(r'\bredirect\s*\(\s*(?![rRuUbBfF]?["\']))'),
   },
   {
     'id': 'py.sql.concat',
