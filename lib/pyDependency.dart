@@ -1245,7 +1245,7 @@ final _securityRules = <Map<String, dynamic>>[
     'id': 'py.importlib.dynamic',
     'severity': 'med',
     'message': 'Dynamic import via importlib.import_module.',
-    're': RegExp(r'\\bimportlib\\.import_module\\s*\\('),
+    're': RegExp(r'\bimportlib\.import_module\s*[(]'),
   },
 ];
 
