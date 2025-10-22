@@ -367,11 +367,9 @@ Future<Graph> _loadInitialGraph() async {
 }
 
 Future<Map<String, dynamic>?> _loadBundledGraph() async {
-  const candidates = [
-    'samples/jsNuroxDependencies.json',
-    'samples/jsDependencies.json',
-    'jsNuroxDependencies.json',
+  const candidates = [    
     'jsDependencies.json',
+    'samples/jsDependencies.json',        
   ];
 
   final locations = <String>{};
