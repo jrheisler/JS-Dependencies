@@ -19,6 +19,7 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/source/line_info.dart';
 import 'package:analyzer/source/source.dart';
@@ -30,14 +31,37 @@ class _CliOptions {
   final bool debug;
   final List<String> entryArgs;
   final String? explain;
+  final String? sdkPath;
 
-  const _CliOptions({required this.debug, required this.entryArgs, this.explain});
+  const _CliOptions({
+    required this.debug,
+    required this.entryArgs,
+    this.explain,
+    this.sdkPath,
+  });
+}
+
+class _SdkSearchResult {
+  final String? path;
+  final List<String> attempted;
+
+  const _SdkSearchResult({required this.path, required this.attempted});
+}
+
+class _MissingSdkException implements Exception {
+  final String message;
+
+  const _MissingSdkException(this.message);
+
+  @override
+  String toString() => message;
 }
 
 _CliOptions _parseArgs(List<String> args) {
   var debug = false;
   final entryArgs = <String>[];
   String? explain;
+  String? sdkPath;
 
   for (var i = 0; i < args.length; i++) {
     final arg = args[i];
@@ -53,10 +77,121 @@ _CliOptions _parseArgs(List<String> args) {
       explain = args[++i];
       continue;
     }
+    if (arg.startsWith('--dart-sdk=')) {
+      sdkPath = arg.substring('--dart-sdk='.length);
+      continue;
+    }
+    if ((arg == '--dart-sdk' || arg == '--sdk') && i + 1 < args.length) {
+      sdkPath = args[++i];
+      continue;
+    }
     entryArgs.add(arg);
   }
 
-  return _CliOptions(debug: debug, entryArgs: entryArgs, explain: explain);
+  return _CliOptions(
+    debug: debug,
+    entryArgs: entryArgs,
+    explain: explain,
+    sdkPath: sdkPath,
+  );
+}
+
+_SdkSearchResult _discoverSdkPath(String root, _CliOptions cli) {
+  final attempted = <String>[];
+  final seen = <String>{};
+
+  String? check(String? candidate) {
+    if (candidate == null || candidate.trim().isEmpty) return null;
+    final normalized = p.normalize(p.absolute(candidate));
+    if (!seen.add(normalized)) return null;
+    attempted.add(normalized);
+    return _looksLikeSdk(normalized) ? normalized : null;
+  }
+
+  final explicit = check(cli.sdkPath);
+  if (explicit != null) {
+    return _SdkSearchResult(path: explicit, attempted: attempted);
+  }
+
+  final envSdk = check(Platform.environment['DART_SDK']);
+  if (envSdk != null) {
+    return _SdkSearchResult(path: envSdk, attempted: attempted);
+  }
+
+  final flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  if (flutterRoot != null && flutterRoot.trim().isNotEmpty) {
+    final flutterSdk = check(p.join(flutterRoot, 'bin', 'cache', 'dart-sdk'));
+    if (flutterSdk != null) {
+      return _SdkSearchResult(path: flutterSdk, attempted: attempted);
+    }
+  }
+
+  final exeDir = p.dirname(Platform.resolvedExecutable);
+  final exeCandidates = [
+    p.join(exeDir, 'dart-sdk'),
+    p.join(p.dirname(exeDir), 'dart-sdk'),
+  ];
+  for (final candidate in exeCandidates) {
+    final resolved = check(candidate);
+    if (resolved != null) {
+      return _SdkSearchResult(path: resolved, attempted: attempted);
+    }
+  }
+
+  final localCandidates = [
+    p.join(root, 'dart-sdk'),
+    p.join(root, '.dart-sdk'),
+    p.join(root, 'tools', 'dart-sdk'),
+  ];
+  for (final candidate in localCandidates) {
+    final resolved = check(candidate);
+    if (resolved != null) {
+      return _SdkSearchResult(path: resolved, attempted: attempted);
+    }
+  }
+
+  return _SdkSearchResult(path: null, attempted: attempted);
+}
+
+bool _looksLikeSdk(String path) {
+  final provider = PhysicalResourceProvider.INSTANCE;
+  final version = provider.getFile(p.join(path, 'version'));
+  if (!version.exists) return false;
+  final libDir = provider.getFolder(p.join(path, 'lib'));
+  if (!libDir.exists) return false;
+  final metadataJson = provider.getFile(
+    p.join(path, 'lib', '_internal', 'sdk_library_metadata', 'lib', 'libraries.json'),
+  );
+  final metadataDart = provider.getFile(
+    p.join(path, 'lib', '_internal', 'sdk_library_metadata', 'lib', 'libraries.dart'),
+  );
+  return metadataJson.exists || metadataDart.exists;
+}
+
+String _missingSdkMessage({
+  String? attemptedPath,
+  List<String> searched = const <String>[],
+  String? failingPath,
+}) {
+  final buffer = StringBuffer()
+    ..writeln('Unable to locate the Dart SDK required for static analysis.');
+  if (failingPath != null) {
+    buffer.writeln('Analyzer tried to read: $failingPath');
+  }
+  if (attemptedPath != null) {
+    buffer.writeln('Explicit SDK path: $attemptedPath');
+  }
+  if (searched.isNotEmpty) {
+    buffer.writeln('Searched locations:');
+    for (final path in searched) {
+      buffer.writeln('  - $path');
+    }
+  }
+  buffer
+    ..writeln('Provide the SDK path with --dart-sdk <path> or set the DART_SDK environment variable.')
+    ..writeln('If Flutter is installed, use <flutter>/bin/cache/dart-sdk.')
+    ..writeln('You can also place a dart-sdk directory next to dartDependency.exe.');
+  return buffer.toString().trimRight();
 }
 
 T? _tryGetter<T>(T? Function() getter) {
@@ -137,7 +272,19 @@ Future<void> main(List<String> args) async {
   final cwd = p.normalize(p.absolute('.'));
 
   final packageName = await _readPackageName(cwd);
-  final units = await _resolveUnits(cwd);
+  final sdkSearch = _discoverSdkPath(cwd, cli);
+  late final Map<String, ResolvedUnitResult> units;
+  try {
+    units = await _resolveUnits(
+      cwd,
+      sdkPath: sdkSearch.path,
+      sdkSearchPaths: sdkSearch.attempted,
+    );
+  } on _MissingSdkException catch (e) {
+    stderr.writeln('[error] ${e.message}');
+    exitCode = 64;
+    return;
+  }
 
   final explicitEntries = _normalizeEntryArgs(cli.entryArgs, cwd);
 
@@ -173,6 +320,12 @@ Future<void> main(List<String> args) async {
 
   if (cli.debug) {
     stderr.writeln('[debug] cwd=$cwd');
+    if (sdkSearch.path != null) {
+      stderr.writeln('[debug] dartSdk=${sdkSearch.path}');
+    }
+    if (sdkSearch.path == null && sdkSearch.attempted.isNotEmpty) {
+      stderr.writeln('[debug] sdkCandidates=${sdkSearch.attempted}');
+    }
     stderr.writeln('[debug] explicitEntries=${explicitEntries.toList()..sort()}');
     stderr.writeln('[debug] autoEntries=${graph.autoEntries.toList()..sort()}');
     stderr.writeln('[debug] finalEntries=${graph.entries}');
@@ -199,11 +352,27 @@ Future<void> main(List<String> args) async {
   stderr.writeln('[stats] nodes=$total edges=${graph.edges.length} used=$used unused=$unused externals=$externals maxDeg=$maxDeg findings=${(security['findings'] as List).length}');
 }
 
-Future<Map<String, ResolvedUnitResult>> _resolveUnits(String root) async {
-  final collection = AnalysisContextCollection(
-    includedPaths: [root],
-    resourceProvider: PhysicalResourceProvider.INSTANCE,
-  );
+Future<Map<String, ResolvedUnitResult>> _resolveUnits(
+  String root, {
+  String? sdkPath,
+  List<String> sdkSearchPaths = const <String>[],
+}) async {
+  AnalysisContextCollection collection;
+  try {
+    collection = AnalysisContextCollection(
+      includedPaths: [root],
+      resourceProvider: PhysicalResourceProvider.INSTANCE,
+      sdkPath: sdkPath,
+    );
+  } on PathNotFoundException catch (e) {
+    throw _MissingSdkException(
+      _missingSdkMessage(
+        attemptedPath: sdkPath,
+        searched: sdkSearchPaths,
+        failingPath: e.path,
+      ),
+    );
+  }
 
   final result = <String, ResolvedUnitResult>{};
   for (final context in collection.contexts) {
