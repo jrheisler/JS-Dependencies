@@ -20,6 +20,8 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
+import 'package:analyzer/source/line_info.dart';
+import 'package:analyzer/source/source.dart';
 import 'package:path/path.dart' as p;
 
 import 'hash_utils.dart';
@@ -55,6 +57,79 @@ _CliOptions _parseArgs(List<String> args) {
   }
 
   return _CliOptions(debug: debug, entryArgs: entryArgs, explain: explain);
+}
+
+T? _tryGetter<T>(T? Function() getter) {
+  try {
+    return getter();
+  } catch (_) {
+    return null;
+  }
+}
+
+Source _librarySource(LibraryElement lib) {
+  final dynamic dyn = lib;
+  final source = _tryGetter(() => dyn.source as Source?) ??
+      _tryGetter(() => dyn.librarySource as Source?);
+  if (source != null) {
+    return source;
+  }
+  throw StateError('Unable to determine source for library ${lib.name ?? '<unnamed>'}');
+}
+
+List<ImportElement> _libraryImports(LibraryElement lib) {
+  final dynamic dyn = lib;
+  return _tryGetter(() => dyn.libraryImports as List<ImportElement>?) ??
+      _tryGetter(() => dyn.imports as List<ImportElement>?) ??
+      const <ImportElement>[];
+}
+
+List<ExportElement> _libraryExports(LibraryElement lib) {
+  final dynamic dyn = lib;
+  return _tryGetter(() => dyn.libraryExports as List<ExportElement>?) ??
+      _tryGetter(() => dyn.exports as List<ExportElement>?) ??
+      const <ExportElement>[];
+}
+
+Iterable<dynamic> _libraryParts(LibraryElement lib) {
+  final dynamic dyn = lib;
+  return _tryGetter(() => dyn.parts as Iterable<dynamic>?) ??
+      _tryGetter(() => dyn.libraryParts as Iterable<dynamic>?) ??
+      const <dynamic>[];
+}
+
+Source? _partElementSource(dynamic element) {
+  return _tryGetter(() => (element as dynamic).source as Source?) ??
+      _tryGetter(() => (element as dynamic).librarySource as Source?);
+}
+
+Map<String, Element> _namespaceElements(Namespace namespace) {
+  return _tryGetter(() => namespace.definedNames as Map<String, Element>?) ??
+      _tryGetter(() => namespace.definedElements as Map<String, Element>?) ??
+      const <String, Element>{};
+}
+
+Element? _resolvedElement(Object? node) {
+  if (node == null) return null;
+  final dynamic dyn = node;
+  return _tryGetter(() => dyn.staticElement as Element?) ??
+      _tryGetter(() => dyn.element as Element?);
+}
+
+String _elementDisplay(Element element) {
+  final dynamic dyn = element;
+  return _tryGetter(() => dyn.getDisplayString(withNullability: true) as String?) ??
+      _tryGetter(() => dyn.displayString(withNullability: true) as String?) ??
+      element.displayName;
+}
+
+String? _libraryUri(LibraryElement? library) {
+  if (library == null) return null;
+  return _librarySource(library).uri.toString();
+}
+
+String? _elementLibraryUri(Element? element) {
+  return _libraryUri(element?.library);
 }
 
 Future<void> main(List<String> args) async {
@@ -193,7 +268,7 @@ Future<_DependencyGraphResult> _buildDependencyGraph(
     final lib = unit.libraryElement;
     if (lib == null || lib.isSynthetic) continue;
 
-    final libPath = p.normalize(lib.source.fullName);
+    final libPath = p.normalize(_librarySource(lib).fullName);
     if (!_isWithinRoot(root, libPath)) continue;
     if (entry.key != libPath) continue;
     if (!processedLibraries.add(libPath)) continue;
@@ -275,7 +350,7 @@ Future<_LibrarySummary> _summarizeLibrary(
   String? packageName,
   Map<String, String?> shaCache,
 ) async {
-  final absPath = p.normalize(lib.source.fullName);
+  final absPath = p.normalize(_librarySource(lib).fullName);
   final relPath = p.relative(absPath, from: root);
 
   await _ensureFileNode(
@@ -288,11 +363,11 @@ Future<_LibrarySummary> _summarizeLibrary(
   );
 
   final imports = <_ImportExportSummary>[];
-  for (final imp in lib.libraryImports) {
+  for (final imp in _libraryImports(lib)) {
     final target = imp.importedLibrary;
     String targetId;
     if (target != null) {
-      final targetPath = p.normalize(target.source.fullName);
+      final targetPath = p.normalize(_librarySource(target).fullName);
       if (_isWithinRoot(root, targetPath)) {
         final relTarget = p.relative(targetPath, from: root);
         final targetUnit = units[targetPath];
@@ -307,7 +382,7 @@ Future<_LibrarySummary> _summarizeLibrary(
         edges.add(_Edge(source: relPath, target: relTarget, kind: 'import', certainty: 'static'));
         targetId = relTarget;
       } else {
-        final extId = _externalNodeId(target.source.uri, imp.uri);
+        final extId = _externalNodeId(_librarySource(target).uri, imp.uri);
         _ensureExternalNode(nodes, externalNodes, extId);
         edges.add(_Edge(source: relPath, target: extId, kind: 'import', certainty: 'static'));
         targetId = extId;
@@ -346,11 +421,11 @@ Future<_LibrarySummary> _summarizeLibrary(
   }
 
   final exports = <_ImportExportSummary>[];
-  for (final ex in lib.libraryExports) {
+  for (final ex in _libraryExports(lib)) {
     final target = ex.exportedLibrary;
     String targetId;
     if (target != null) {
-      final targetPath = p.normalize(target.source.fullName);
+      final targetPath = p.normalize(_librarySource(target).fullName);
       if (_isWithinRoot(root, targetPath)) {
         final relTarget = p.relative(targetPath, from: root);
         final targetUnit = units[targetPath];
@@ -365,7 +440,7 @@ Future<_LibrarySummary> _summarizeLibrary(
         edges.add(_Edge(source: relPath, target: relTarget, kind: 'export', certainty: 'static'));
         targetId = relTarget;
       } else {
-        final extId = _externalNodeId(target.source.uri, ex.uri);
+        final extId = _externalNodeId(_librarySource(target).uri, ex.uri);
         _ensureExternalNode(nodes, externalNodes, extId);
         edges.add(_Edge(source: relPath, target: extId, kind: 'export', certainty: 'static'));
         targetId = extId;
@@ -404,8 +479,10 @@ Future<_LibrarySummary> _summarizeLibrary(
   }
 
   final parts = <String>{};
-  for (final part in lib.parts) {
-    final partPath = p.normalize(part.source.fullName);
+  for (final part in _libraryParts(lib)) {
+    final source = _partElementSource(part);
+    if (source == null) continue;
+    final partPath = p.normalize(source.fullName);
     if (!_isWithinRoot(root, partPath)) continue;
     final relPart = p.relative(partPath, from: root);
     final partUnit = units[partPath];
@@ -425,9 +502,10 @@ Future<_LibrarySummary> _summarizeLibrary(
 
   final publicApi = _collectPublicApi(lib);
 
+  final libName = lib.name;
   return _LibrarySummary(
     path: relPath,
-    libraryName: lib.name.isEmpty ? null : lib.name,
+    libraryName: (libName == null || libName.isEmpty) ? null : libName,
     hasMain: lib.entryPoint != null,
     imports: imports,
     exports: exports,
@@ -866,7 +944,7 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
   final variables = <Map<String, String>>[];
 
   final namespace = lib.exportNamespace;
-  for (final element in namespace.definedNames.values) {
+  for (final element in _namespaceElements(namespace).values) {
     if (!element.isPublic) continue;
 
     if (element is InterfaceElement) {
@@ -889,7 +967,7 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
         members.add(ctor.getDisplayString(withNullability: true));
       }
       final classEntry = <String, dynamic>{
-        'name': element.name,
+        'name': element.name ?? element.displayName,
         'kind': kind,
       };
       if (members.isNotEmpty) {
@@ -900,26 +978,29 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
       continue;
     }
 
-    if (element is FunctionElement) {
+    if (element is ExecutableElement && element.kind == ElementKind.FUNCTION) {
       if (element.isGetter || element.isSetter || element.isOperator) continue;
+      final name = element.name ?? element.displayName;
       functions.add({
-        'name': element.name,
-        'signature': element.getDisplayString(withNullability: true),
+        'name': name,
+        'signature': _elementDisplay(element),
       });
       continue;
     }
 
     if (element is TypeAliasElement) {
+      final name = element.name ?? element.displayName;
       typedefs.add({
-        'name': element.name,
+        'name': name,
         'aliasedType': element.aliasedType.getDisplayString(withNullability: true),
       });
       continue;
     }
 
     if (element is ExtensionElement) {
+      final name = element.name;
       extensions.add({
-        'name': element.name.isEmpty ? element.displayName : element.name,
+        'name': (name == null || name.isEmpty) ? element.displayName : name,
         'on': element.extendedType.getDisplayString(withNullability: true),
       });
       continue;
@@ -927,8 +1008,9 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
 
     if (element is TopLevelVariableElement) {
       if (element.isSynthetic) continue;
+      final name = element.name ?? element.displayName;
       variables.add({
-        'name': element.name,
+        'name': name,
         'type': element.type.getDisplayString(withNullability: true),
       });
       continue;
@@ -1062,9 +1144,9 @@ class _SecurityVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
-    final element = node.methodName.staticElement;
+    final element = _resolvedElement(node.methodName);
     if (element is MethodElement) {
-      final libraryUri = element.library.source.uri.toString();
+      final libraryUri = _libraryUri(element.library);
       final enclosing = element.enclosingElement?.name;
       if (libraryUri == 'dart:io' && enclosing == 'Process') {
         if (element.name == 'run' || element.name == 'start') {
@@ -1092,10 +1174,11 @@ class _SecurityVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    final constructor = node.constructorName.staticElement;
+    final resolved = _resolvedElement(node.constructorName);
+    final constructor = resolved is ConstructorElement ? resolved : null;
     if (constructor != null) {
       final enclosing = constructor.enclosingElement;
-      final libraryUri = enclosing?.library?.source.uri.toString();
+      final libraryUri = _libraryUri(enclosing?.library);
       if (enclosing?.name == 'Random' && libraryUri == 'dart:math') {
         if (node.constructorName.name == null) {
           collector.addNode(
@@ -1115,7 +1198,7 @@ class _SecurityVisitor extends RecursiveAstVisitor<void> {
     final writeElement = node.writeElement;
     if (writeElement is PropertyAccessorElement) {
       final variable = writeElement.variable;
-      final libraryUri = variable.library?.source.uri.toString();
+      final libraryUri = _libraryUri(variable.library);
       if (variable.name == 'badCertificateCallback' && libraryUri == 'dart:io') {
         collector.addNode(
           'dart.http.badcert',
@@ -1130,8 +1213,8 @@ class _SecurityVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitPrefixedIdentifier(PrefixedIdentifier node) {
-    final element = node.staticElement;
-    final libraryUri = element?.library?.source.uri.toString();
+    final element = _resolvedElement(node);
+    final libraryUri = _elementLibraryUri(element);
     if (node.prefix.name == 'Platform' && node.identifier.name == 'environment' && libraryUri == 'dart:io') {
       collector.addNode(
         'dart.platform.env',
@@ -1145,8 +1228,8 @@ class _SecurityVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitPropertyAccess(PropertyAccess node) {
-    final element = node.propertyName.staticElement;
-    final libraryUri = element?.library?.source.uri.toString();
+    final element = _resolvedElement(node.propertyName);
+    final libraryUri = _elementLibraryUri(element);
     if (node.target is Identifier) {
       final targetName = (node.target as Identifier).name;
       if (targetName == 'Platform' && node.propertyName.name == 'environment' && libraryUri == 'dart:io') {
@@ -1180,35 +1263,35 @@ class _SecretPattern {
 
 final List<_SecretPattern> _secretPatterns = [
   const _SecretPattern(
-    pattern: RegExp(r'AKIA[0-9A-Z]{16}'),
+    pattern: const RegExp(r'AKIA[0-9A-Z]{16}'),
     ruleId: 'dart.secret.aws-access-key',
     severity: 'high',
     message: 'Possible AWS access key detected.',
     reportWhenSanitizedBlank: true,
   ),
   const _SecretPattern(
-    pattern: RegExp(r'xox[baprs]-[0-9A-Za-z-]{10,48}'),
+    pattern: const RegExp(r'xox[baprs]-[0-9A-Za-z-]{10,48}'),
     ruleId: 'dart.secret.slack-token',
     severity: 'high',
     message: 'Possible Slack token detected.',
     reportWhenSanitizedBlank: true,
   ),
   const _SecretPattern(
-    pattern: RegExp(r'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'),
+    pattern: const RegExp(r'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'),
     ruleId: 'dart.secret.jwt',
     severity: 'high',
     message: 'String looks like a JWT token.',
     reportWhenSanitizedBlank: true,
   ),
   const _SecretPattern(
-    pattern: RegExp(r'-----BEGIN (?:RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY-----'),
+    pattern: const RegExp(r'-----BEGIN (?:RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY-----'),
     ruleId: 'dart.secret.private-key',
     severity: 'high',
     message: 'Private key material detected.',
     reportWhenSanitizedBlank: true,
   ),
   const _SecretPattern(
-    pattern: RegExp('http://[^\\s\'"]+'),
+    pattern: const RegExp('http://[^\\s\'"]+'),
     ruleId: 'dart.http.http-url',
     severity: 'medium',
     message: 'HTTP URL detected. Prefer HTTPS to avoid clear-text traffic.',
