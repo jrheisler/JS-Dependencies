@@ -1,157 +1,35 @@
-// dartDependency.dart — V0 Dart dependency crawler (no external packages)
-// Produces: dartDependencies.json in the current working directory.
+// dartDependency.dart — Analyzer-backed Dart dependency and security crawler
 //
-// What it does:
-// - Recursively scans for *.dart (skips .dart_tool, build, ios/android platform dirs, etc).
-// - Parses directives: import/export/part (basic regex; ignores comments).
-// - Detects entries: any file with `main(...)` + common paths (bin/main.dart, lib/main.dart).
-// - Resolves URIs:
-//     * Relative ("./", "../") -> real file under repo
-//     * package:<self>/<path>  -> <cwd>/lib/<path> (internal, using pubspec.yaml name)
-//     * package:<other>/<...>  -> external node "pub:<other>"
-//     * dart:<lib>             -> external node "dart:<lib>"
-// - Builds edges (kind: import|export|part), computes degrees and reachability -> state used/unused.
+// Outputs:
+//   * dartDependencies.json — dependency graph with import/export/public API data
+//   * dartSecurity.json     — security findings detected via analyzer visitors + text sweeps
 //
-// Limitations (V0):
-// - Does not evaluate conditional imports, deferred/as, or mirrors. They’re treated as normal imports.
-// - `part of` resolution to its library file is not guaranteed; we record edges for `part` directives from
-//   library file to part file. (You can add `library`/`part of` linking later if needed.)
-// - Mixed Flutter/web/server projects work fine; entry detection relies on `main()` + common roots.
-//
-// Build:
-//   dart compile exe .\dartDependency.dart -o .\dartDependency.exe
-// Run:
-//   .\dartDependency.exe [--debug] [--explain path.dart] [entry.dart ...]
-//     --debug     : emit extra stderr diagnostics (entries, reachable counts, sample unused)
-//     --explain X : show the import path (if any) from an entry to X (relative or absolute)
+// Workflow:
+//   1. Build a single AnalysisContextCollection for the repo and resolve every Dart unit.
+//   2. Collect per-library import/export metadata, public API signatures, and construct the
+//      file-level dependency graph (nodes/edges).
+//   3. Run AST visitors + textual sweeps for security smells and secrets.
+//   4. Emit JSON reports for downstream tooling.
 
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
+import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/file_system/physical_file_system.dart';
+import 'package:path/path.dart' as p;
+
 import 'hash_utils.dart';
 
-// -------- path helpers (no package:path) --------
-final _sep = Platform.pathSeparator;
-
-String _abs(String p) => File(p).absolute.path;
-String _normalize(String p) {
-  var x = p;
-  if (Platform.isWindows && RegExp(r'^[A-Za-z]:$').hasMatch(x)) {
-    x = '$x\\';
-  }
-  return Uri.file(x, windows: Platform.isWindows)
-      .normalizePath()
-      .toFilePath(windows: Platform.isWindows);
-}
-String _rel(String target, String from) {
-  final T = _normalize(_abs(target));
-  final F = _normalize(_abs(from));
-  if (T == F) return '.';
-  if (T.startsWith(F + _sep)) return T.substring(F.length + 1);
-  return T; // fallback absolute
-}
-bool _isWithinRepo(String target, String root) {
-  final T = _normalize(_abs(target));
-  final R = _normalize(_abs(root));
-  return T == R || T.startsWith(R + _sep);
-}
-String _join(String a, String b) {
-  if (a.isEmpty) return b;
-  if (b.isEmpty) return a;
-  final s = a.endsWith(_sep) ? a.substring(0, a.length - 1) : a;
-  final t = b.startsWith(_sep) ? b.substring(1) : b;
-  return '$s$_sep$t';
-}
-String _dir(String p) {
-  final s = p.replaceAll('\\', '/');
-  final i = s.lastIndexOf('/');
-  if (i < 0) return Platform.isWindows ? '${p.substring(0, 2)}\\' : '/';
-  var d = p.substring(0, i);
-  if (Platform.isWindows && RegExp(r'^[A-Za-z]:$').hasMatch(d)) d = '$d\\';
-  return d;
-}
-String _base(String p) {
-  final s = p.replaceAll('\\', '/');
-  final i = s.lastIndexOf('/');
-  return i < 0 ? p : p.substring(i + 1);
-}
-String _ext(String p) {
-  final b = _base(p);
-  final dot = b.lastIndexOf('.');
-  return dot <= 0 ? '' : b.substring(dot);
-}
-
-// ---------------- models ----------------
-class _Node {
-  String id;            // repo-relative file path for files; external id for externals
-  String type;          // file | external
-  String state;         // used | unused
-  String lang = 'dart';
-  int? sizeLOC;
-  String? packageName;  // from pubspec.yaml (for local files)
-  int inDeg = 0;
-  int outDeg = 0;
-  String? sha256;
-
-  _Node({
-    required this.id,
-    required this.type,
-    required this.state,
-    this.sizeLOC,
-    this.packageName,
-    this.sha256,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'type': type,
-        'state': state,
-        'lang': lang,
-        if (sizeLOC != null) 'sizeLOC': sizeLOC,
-        if (packageName != null) 'package': packageName,
-        'inDeg': inDeg,
-        'outDeg': outDeg,
-        if (sha256 != null) 'sha256': sha256,
-      };
-}
-
-class _Edge {
-  final String source;   // file id (relative path)
-  final String target;   // file id (relative path) OR external id
-  final String kind;     // 'import' | 'export' | 'part' | 'part-of'
-  final String certainty; // 'static'
-  _Edge({required this.source, required this.target, required this.kind, required this.certainty});
-  Map<String, dynamic> toJson() => {
-        'source': source,
-        'target': target,
-        'kind': kind,
-        'certainty': certainty,
-      };
-}
-
-class _Directive {
-  final String kind; // import | export | part | part-of
-  final String reference;
-  final bool isLibraryName;
-  _Directive(this.kind, this.reference, {this.isLibraryName = false});
-}
-
-class _FileFacts {
-  final String absPath;
-  final String relId;
-  final List<_Directive> directives;
-  final bool hasMain;
-  final String? libraryName;
-  _FileFacts(
-      this.absPath, this.relId, this.directives, this.hasMain, this.libraryName);
-}
-
-// ---------------- main ----------------
 class _CliOptions {
   final bool debug;
   final List<String> entryArgs;
   final String? explain;
-  _CliOptions({required this.debug, required this.entryArgs, this.explain});
+
+  const _CliOptions({required this.debug, required this.entryArgs, this.explain});
 }
 
 _CliOptions _parseArgs(List<String> args) {
@@ -179,316 +57,644 @@ _CliOptions _parseArgs(List<String> args) {
   return _CliOptions(debug: debug, entryArgs: entryArgs, explain: explain);
 }
 
-String _coerceToRelId(String input, String cwd) {
-  final abs = _normalize(_abs(input));
-  if (File(abs).existsSync()) {
-    return _rel(abs, cwd);
-  }
-  final joined = _normalize(_join(cwd, input.replaceAll('/', _sep)));
-  if (File(joined).existsSync()) {
-    return _rel(joined, cwd);
-  }
-  return input.replaceAll('\\', '/');
-}
-
-void main(List<String> args) async {
-  final cwd = _normalize(_abs('.'));
-
+Future<void> main(List<String> args) async {
   final cli = _parseArgs(args);
+  final cwd = p.normalize(p.absolute('.'));
 
-  // 1) Discover project info
-  final pub = await _readPubspec(cwd); // get self package name if any
-  final localPackages = await _readPackageConfig(cwd);
+  final packageName = await _readPackageName(cwd);
+  final units = await _resolveUnits(cwd);
 
-  // 2) Collect Dart files
-  final files = await _collectDartFiles(cwd);
+  final explicitEntries = _normalizeEntryArgs(cli.entryArgs, cwd);
 
-  // 3) Parse facts
-  final facts = <_FileFacts>[];
-  final fileHashes = <String, String>{};
-  for (final f in files) {
-    final text = await File(f).readAsString();
-    final fact = _extractFacts(cwd, f, text);
-    facts.add(fact);
-    final hash = await fileSha256(f);
-    if (hash != null) {
-      fileHashes[fact.relId] = hash;
-    }
-  }
+  final graph = await _buildDependencyGraph(
+    cwd,
+    units,
+    packageName,
+    explicitEntries,
+  );
 
-  final explainTarget = cli.explain == null ? null : _coerceToRelId(cli.explain!, cwd);
-
-  // Explicit entry points from CLI args
-  final explicitEntries = <String>{};
-  for (final arg in cli.entryArgs) {
-    final absArg = _normalize(_abs(arg));
-    if (File(absArg).existsSync() && _isWithinRepo(absArg, cwd)) {
-      explicitEntries.add(_rel(absArg, cwd));
-    }
-  }
-
-  // 4) Build edges and externals
-  final edges = <_Edge>[];
-  final externals = <String>{};
-  final referencedFileAbs = <String, String>{};
-  final libraryByName = <String, List<_FileFacts>>{};
-
-  for (final ff in facts) {
-    final name = ff.libraryName;
-    if (name != null && name.isNotEmpty) {
-      libraryByName.putIfAbsent(name, () => []).add(ff);
-    }
-  }
-
-  for (final ff in facts) {
-    for (final d in ff.directives) {
-      if (d.kind == 'part-of' && d.isLibraryName) {
-        final targets = libraryByName[d.reference];
-        if (targets != null && targets.isNotEmpty) {
-          for (final libFacts in targets) {
-            edges.add(_Edge(
-              source: ff.relId,
-              target: libFacts.relId,
-              kind: d.kind,
-              certainty: 'static',
-            ));
-          }
-        } else {
-          final extId = 'library:${d.reference}';
-          externals.add(extId);
-          edges.add(_Edge(
-            source: ff.relId,
-            target: extId,
-            kind: d.kind,
-            certainty: 'static',
-          ));
-        }
-        continue;
-      }
-
-      final resolved =
-          _resolveUri(cwd, ff.absPath, d.reference, pub?.name, localPackages);
-      if (resolved.type == 'file' && resolved.path != null) {
-        final relTarget = _rel(resolved.path!, cwd);
-        referencedFileAbs.putIfAbsent(relTarget, () => resolved.path!);
-        edges.add(_Edge(
-          source: ff.relId,
-          target: relTarget,
-          kind: d.kind,
-          certainty: 'static',
-        ));
-      } else if (resolved.type == 'external' && resolved.extId != null) {
-        externals.add(resolved.extId!);
-        edges.add(_Edge(
-          source: ff.relId,
-          target: resolved.extId!,
-          kind: d.kind,
-          certainty: 'static',
-        ));
-      }
-    }
-  }
-
-  // 5) Nodes (files + externals)
-  final nodes = <_Node>[];
-  final existingIds = <String>{};
-  for (final ff in facts) {
-    nodes.add(_Node(
-      id: ff.relId,
-      type: 'file',
-      state: 'unused', // provisional; set by reachability
-      sizeLOC: await _estimateLOC(ff.absPath),
-      packageName: pub?.name,
-      sha256: fileHashes[ff.relId],
-    ));
-    existingIds.add(ff.relId);
-  }
-
-  for (final entry in referencedFileAbs.entries) {
-    if (existingIds.contains(entry.key)) continue;
-    var hash = fileHashes[entry.key];
-    if (hash == null) {
-      hash = await fileSha256(entry.value);
-      if (hash != null) {
-        fileHashes[entry.key] = hash;
-      }
-    }
-    nodes.add(_Node(
-      id: entry.key,
-      type: 'file',
-      state: 'unused',
-      sizeLOC: await _estimateLOC(entry.value),
-      sha256: hash,
-    ));
-    existingIds.add(entry.key);
-  }
-  for (final ext in externals) {
-    nodes.add(_Node(id: ext, type: 'external', state: 'used'));
-  }
-
-  // 6) Degrees
-  _computeDegrees(nodes, edges);
-
-  // 7) Entry files
-  final fileIds = nodes.where((n) => n.type == 'file').map((n) => n.id).toSet();
-  final autoEntries = _discoverEntryFiles(cwd, facts, pub?.name);
-  final entrySet = <String>{}
-    ..addAll(explicitEntries)
-    ..addAll(autoEntries);
-  entrySet.removeWhere((e) => !fileIds.contains(e));
-  final entries = entrySet.toList();
-
-  // 8) Reachability
-  final usedSet = entries.isEmpty ? <String>{} : _reach(entries, edges);
-  for (final n in nodes) {
-    if (n.type == 'external') {
-      n.state = 'used';
-      continue;
-    }
-    if (usedSet.contains(n.id)) {
-      n.state = 'used';
-      continue;
-    }
-    // Treat any file that participates in the dependency graph as "used".
-    // Nodes with zero degree remain "unused" so isolated files can still
-    // be detected, but connected components without an entry point are
-    // no longer mislabeled as unused.
-    n.state = (n.inDeg > 0 || n.outDeg > 0) ? 'used' : 'unused';
-  }
-
-  // 9) Write output
-  final outPath = _join(cwd, 'dartDependencies.json');
-  final out = {
-    'nodes': nodes.map((n) => n.toJson()).toList(),
-    'edges': edges.map((e) => e.toJson()).toList(),
+  final depsJson = {
+    'nodes': graph.nodes.map((n) => n.toJson()).toList(),
+    'edges': graph.edges.map((e) => e.toJson()).toList(),
+    'libraries': graph.libraries.map((l) => l.toJson()).toList(),
+    'entries': graph.entries,
   };
-  await File(outPath).writeAsString(const JsonEncoder.withIndent('  ').convert(out));
 
-  // 10) Stats
-  final total = nodes.length;
-  final used = nodes.where((n) => n.state == 'used').length;
-  final unused = nodes.where((n) => n.state == 'unused').length;
-  final externCount = nodes.where((n) => n.type == 'external').length;
-  final maxDeg = nodes.fold<int>(0, (m, n) => (n.inDeg + n.outDeg) > m ? (n.inDeg + n.outDeg) : m);
+  final depsPath = p.join(cwd, 'dartDependencies.json');
+  await _writeJson(depsPath, depsJson);
+
+  final security = await _runSecurity(cwd, units);
+  final secPath = p.join(cwd, 'dartSecurity.json');
+  await _writeJson(secPath, security);
+
+  final total = graph.nodes.length;
+  final used = graph.nodes.where((n) => n.state == 'used').length;
+  final unused = graph.nodes.where((n) => n.state == 'unused').length;
+  final externals = graph.nodes.where((n) => n.type == 'external').length;
+  final maxDeg = graph.nodes.fold<int>(0, (acc, n) {
+    final deg = n.inDeg + n.outDeg;
+    return deg > acc ? deg : acc;
+  });
+
   if (cli.debug) {
     stderr.writeln('[debug] cwd=$cwd');
-    stderr.writeln('[debug] explicitEntries=${(explicitEntries.toList()..sort()).join(', ')}');
-    stderr.writeln('[debug] autoEntries=${(autoEntries..sort()).join(', ')}');
-    stderr.writeln('[debug] finalEntries=${(entries..sort()).join(', ')}');
-    stderr.writeln('[debug] reachableFiles=${usedSet.where(fileIds.contains).length}/${fileIds.length}');
-    final unreachable = fileIds.difference(usedSet);
+    stderr.writeln('[debug] explicitEntries=${explicitEntries.toList()..sort()}');
+    stderr.writeln('[debug] autoEntries=${graph.autoEntries.toList()..sort()}');
+    stderr.writeln('[debug] finalEntries=${graph.entries}');
+    stderr.writeln('[debug] reachableFiles=${graph.reachable.length}/${graph.fileIds.length}');
+    final unreachable = graph.fileIds.difference(graph.reachable).toList()..sort();
     if (unreachable.isNotEmpty) {
-      final preview = unreachable.toList()..sort();
-      final sample = preview.length > 10 ? preview.sublist(0, 10) : preview;
-      stderr.writeln('[debug] sampleUnused=${sample.join(', ')}${preview.length > sample.length ? ' ...' : ''}');
+      final sample = unreachable.length > 10 ? unreachable.sublist(0, 10) : unreachable;
+      stderr.writeln('[debug] sampleUnused=${sample.join(', ')}${unreachable.length > sample.length ? ' ...' : ''}');
     }
   }
 
-  if (explainTarget != null) {
-    final path = _findPath(entries, edges, explainTarget, fileIds);
+  if (cli.explain != null) {
+    final target = _coerceToRelId(cli.explain!, cwd);
+    final path = _findPath(graph.entries, graph.edges, target, graph.fileIds);
     if (path != null) {
-      stderr.writeln('[explain] ${explainTarget} reachable via ${path.join(' -> ')}');
+      stderr.writeln('[explain] $target reachable via ${path.join(' -> ')}');
     } else {
-      stderr.writeln('[explain] $explainTarget is not reachable from current entries');
+      stderr.writeln('[explain] $target is not reachable from current entries');
     }
   }
 
-  stderr.writeln('[info] Wrote: ${_rel(outPath, cwd)}');
-  stderr.writeln('[stats] nodes=$total edges=${edges.length} used=$used unused=$unused externals=$externCount maxDeg=$maxDeg');
+  stderr.writeln('[info] Wrote: ${p.relative(depsPath, from: cwd)}');
+  stderr.writeln('[info] Wrote: ${p.relative(secPath, from: cwd)}');
+  stderr.writeln('[stats] nodes=$total edges=${graph.edges.length} used=$used unused=$unused externals=$externals maxDeg=$maxDeg findings=${(security['findings'] as List).length}');
 }
 
-// ---------------- crawl ----------------
-Future<List<String>> _collectDartFiles(String root) async {
-  final ignoreDirs = <String>{
-    '.dart_tool','build','node_modules','dist','out','.git','.idea','.vscode','.cache','android','ios','macos','linux','windows'
-  };
-  final result = <String>[];
-  await for (final ent in Directory(root).list(recursive: true, followLinks: false)) {
-    if (ent is! File) continue;
-    final sp = ent.path;
-    final rel = _rel(sp, root);
-    final parts = rel.split(_sep);
-    if (parts.any((seg) => ignoreDirs.contains(seg))) continue;
-    if (_ext(sp) == '.dart') result.add(_normalize(sp));
+Future<Map<String, ResolvedUnitResult>> _resolveUnits(String root) async {
+  final collection = AnalysisContextCollection(
+    includedPaths: [root],
+    resourceProvider: PhysicalResourceProvider.INSTANCE,
+  );
+
+  final result = <String, ResolvedUnitResult>{};
+  for (final context in collection.contexts) {
+    final session = context.currentSession;
+    final files = context.contextRoot
+        .analyzedFiles()
+        .where((path) => path.endsWith('.dart'))
+        .map(p.normalize);
+
+    for (final file in files) {
+      if (!_isWithinRoot(root, file)) continue;
+      if (_shouldIgnore(root, file)) continue;
+      final resolved = await session.getResolvedUnit(file);
+      if (resolved is ResolvedUnitResult) {
+        result[file] = resolved;
+      }
+    }
   }
   return result;
 }
 
-// ---------------- parse .dart ----------------
-_FileFacts _extractFacts(String cwd, String fileAbs, String text) {
-  // Drop block comments /* */ and doc comments ///? Keep simple; remove /*...*/ and triple-slash style lines via regex
-  final noBlock = text.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
-  final lines = noBlock.split('\n');
+class _DependencyGraphResult {
+  final List<_Node> nodes;
+  final List<_Edge> edges;
+  final List<_LibrarySummary> libraries;
+  final List<String> entries;
+  final Set<String> reachable;
+  final Set<String> fileIds;
+  final Set<String> autoEntries;
 
-  final directives = <_Directive>[];
-  bool hasMain = false;
-  String? libraryName;
-
-  // import '...';  export '...';  part '...';
-  final reImport = RegExp(r'''^\s*import\s+['"]([^'"]+)['"]''');
-  final reExport = RegExp(r'''^\s*export\s+['"]([^'"]+)['"]''');
-  final rePart   = RegExp(r'''^\s*part\s+['"]([^'"]+)['"]''');
-  final reLibrary = RegExp(r'''^\s*library\s+([A-Za-z0-9_.]+)\s*;''');
-  final rePartOfUri = RegExp(r'''^\s*part\s+of\s+['"]([^'"]+)['"]''');
-  final rePartOfName = RegExp(r'''^\s*part\s+of\s+([A-Za-z0-9_.]+)\s*;''');
-  // main(): allow void main(), Future<void> main(), or parameterized
-  // Accept common entry signatures: `void main(...)`, `Future<void> main(...)`,
-  // and their `FutureOr<void>` variants. Some code omits `<void>` (e.g.
-  // `Future main`) so allow a bare Future/FutureOr too. The goal is simply to
-  // detect presence of a `main(` function regardless of modifiers.
-  final reMain = RegExp(
-      r'^\s*(?:void|Future(?:Or)?(?:\s*<\s*void\s*>)?)\s+main\s*\(');
-
-  for (var raw in lines) {
-    final line = raw.replaceFirst(RegExp(r'//.*$'), '');
-
-    final m1 = reImport.firstMatch(line);
-    if (m1 != null) { directives.add(_Directive('import', m1.group(1)!)); continue; }
-
-    final m2 = reExport.firstMatch(line);
-    if (m2 != null) { directives.add(_Directive('export', m2.group(1)!)); continue; }
-
-    final m3 = rePart.firstMatch(line);
-    if (m3 != null) { directives.add(_Directive('part', m3.group(1)!)); continue; }
-
-    final libMatch = reLibrary.firstMatch(line);
-    if (libMatch != null) {
-      libraryName ??= libMatch.group(1)!;
-      continue;
-    }
-
-    final partOfUriMatch = rePartOfUri.firstMatch(line);
-    if (partOfUriMatch != null) {
-      directives.add(_Directive('part-of', partOfUriMatch.group(1)!));
-      continue;
-    }
-
-    final partOfNameMatch = rePartOfName.firstMatch(line);
-    if (partOfNameMatch != null) {
-      directives.add(_Directive('part-of', partOfNameMatch.group(1)!, isLibraryName: true));
-      continue;
-    }
-
-    if (!hasMain && reMain.hasMatch(line)) hasMain = true;
-  }
-
-  return _FileFacts(fileAbs, _rel(fileAbs, cwd), directives, hasMain, libraryName);
+  const _DependencyGraphResult({
+    required this.nodes,
+    required this.edges,
+    required this.libraries,
+    required this.entries,
+    required this.reachable,
+    required this.fileIds,
+    required this.autoEntries,
+  });
 }
 
-// ---------------- pubspec ----------------
-class _Pubspec { final String name; _Pubspec(this.name); }
-Future<_Pubspec?> _readPubspec(String cwd) async {
-  final f = File(_join(cwd, 'pubspec.yaml'));
-  if (!await f.exists()) return null;
+Future<_DependencyGraphResult> _buildDependencyGraph(
+  String root,
+  Map<String, ResolvedUnitResult> units,
+  String? packageName,
+  Set<String> explicitEntries,
+) async {
+  final nodes = <String, _Node>{};
+  final edges = <_Edge>[];
+  final libraries = <_LibrarySummary>[];
+  final externalNodes = <String>{};
+  final processedLibraries = <String>{};
+  final shaCache = <String, String?>{};
+
+  final normalizedUnits = <String, ResolvedUnitResult>{};
+  units.forEach((path, unit) {
+    normalizedUnits[p.normalize(path)] = unit;
+  });
+
+  for (final entry in normalizedUnits.entries) {
+    final unit = entry.value;
+    final lib = unit.libraryElement;
+    if (lib == null || lib.isSynthetic) continue;
+
+    final libPath = p.normalize(lib.source.fullName);
+    if (!_isWithinRoot(root, libPath)) continue;
+    if (entry.key != libPath) continue;
+    if (!processedLibraries.add(libPath)) continue;
+
+    final summary = await _summarizeLibrary(
+      root,
+      lib,
+      unit,
+      normalizedUnits,
+      nodes,
+      edges,
+      externalNodes,
+      packageName,
+      shaCache,
+    );
+    libraries.add(summary);
+  }
+
+  for (final entry in normalizedUnits.entries) {
+    final absPath = entry.key;
+    if (!_isWithinRoot(root, absPath)) continue;
+    final relPath = p.relative(absPath, from: root);
+    await _ensureFileNode(
+      nodes,
+      absPath,
+      relPath,
+      entry.value,
+      packageName,
+      shaCache,
+    );
+  }
+
+  final nodeList = nodes.values.toList();
+  _computeDegrees(nodeList, edges);
+
+  final fileIds = nodeList.where((n) => n.type == 'file').map((n) => n.id).toSet();
+  final autoEntrySet = _discoverEntryFiles(root, libraries, packageName);
+  autoEntrySet.removeWhere((id) => !fileIds.contains(id));
+
+  final entrySet = <String>{}..addAll(explicitEntries)..addAll(autoEntrySet);
+  entrySet.removeWhere((id) => !fileIds.contains(id));
+  final entries = entrySet.toList()..sort();
+
+  final reachable = _reach(entries, edges, fileIds);
+
+  for (final node in nodeList) {
+    if (node.type == 'external') {
+      node.state = 'used';
+      continue;
+    }
+    if (reachable.contains(node.id)) {
+      node.state = 'used';
+    } else if (node.inDeg > 0 || node.outDeg > 0) {
+      node.state = 'used';
+    } else {
+      node.state = 'unused';
+    }
+  }
+
+  return _DependencyGraphResult(
+    nodes: nodeList,
+    edges: edges,
+    libraries: libraries,
+    entries: entries,
+    reachable: reachable,
+    fileIds: fileIds,
+    autoEntries: autoEntrySet,
+  );
+}
+
+Future<_LibrarySummary> _summarizeLibrary(
+  String root,
+  LibraryElement lib,
+  ResolvedUnitResult definingUnit,
+  Map<String, ResolvedUnitResult> units,
+  Map<String, _Node> nodes,
+  List<_Edge> edges,
+  Set<String> externalNodes,
+  String? packageName,
+  Map<String, String?> shaCache,
+) async {
+  final absPath = p.normalize(lib.source.fullName);
+  final relPath = p.relative(absPath, from: root);
+
+  await _ensureFileNode(
+    nodes,
+    absPath,
+    relPath,
+    definingUnit,
+    packageName,
+    shaCache,
+  );
+
+  final imports = <_ImportExportSummary>[];
+  for (final imp in lib.libraryImports) {
+    final target = imp.importedLibrary;
+    String targetId;
+    if (target != null) {
+      final targetPath = p.normalize(target.source.fullName);
+      if (_isWithinRoot(root, targetPath)) {
+        final relTarget = p.relative(targetPath, from: root);
+        final targetUnit = units[targetPath];
+        await _ensureFileNode(
+          nodes,
+          targetPath,
+          relTarget,
+          targetUnit,
+          packageName,
+          shaCache,
+        );
+        edges.add(_Edge(source: relPath, target: relTarget, kind: 'import', certainty: 'static'));
+        targetId = relTarget;
+      } else {
+        final extId = _externalNodeId(target.source.uri, imp.uri);
+        _ensureExternalNode(nodes, externalNodes, extId);
+        edges.add(_Edge(source: relPath, target: extId, kind: 'import', certainty: 'static'));
+        targetId = extId;
+      }
+    } else {
+      final resolved = _resolveRelativeUri(absPath, imp.uri);
+      if (resolved != null && _isWithinRoot(root, resolved) && File(resolved).existsSync()) {
+        final relTarget = p.relative(resolved, from: root);
+        final targetUnit = units[p.normalize(resolved)];
+        await _ensureFileNode(
+          nodes,
+          resolved,
+          relTarget,
+          targetUnit,
+          packageName,
+          shaCache,
+        );
+        edges.add(_Edge(source: relPath, target: relTarget, kind: 'import', certainty: 'static'));
+        targetId = relTarget;
+      } else {
+        final extId = _externalNodeId(null, imp.uri);
+        _ensureExternalNode(nodes, externalNodes, extId);
+        edges.add(_Edge(source: relPath, target: extId, kind: 'import', certainty: 'static'));
+        targetId = extId;
+      }
+    }
+
+    imports.add(_ImportExportSummary(
+      uri: imp.uri,
+      target: targetId,
+      prefix: imp.prefix?.element.name,
+      deferred: imp.isDeferred,
+      show: _collectShown(imp.combinators),
+      hide: _collectHidden(imp.combinators),
+    ));
+  }
+
+  final exports = <_ImportExportSummary>[];
+  for (final ex in lib.libraryExports) {
+    final target = ex.exportedLibrary;
+    String targetId;
+    if (target != null) {
+      final targetPath = p.normalize(target.source.fullName);
+      if (_isWithinRoot(root, targetPath)) {
+        final relTarget = p.relative(targetPath, from: root);
+        final targetUnit = units[targetPath];
+        await _ensureFileNode(
+          nodes,
+          targetPath,
+          relTarget,
+          targetUnit,
+          packageName,
+          shaCache,
+        );
+        edges.add(_Edge(source: relPath, target: relTarget, kind: 'export', certainty: 'static'));
+        targetId = relTarget;
+      } else {
+        final extId = _externalNodeId(target.source.uri, ex.uri);
+        _ensureExternalNode(nodes, externalNodes, extId);
+        edges.add(_Edge(source: relPath, target: extId, kind: 'export', certainty: 'static'));
+        targetId = extId;
+      }
+    } else {
+      final resolved = _resolveRelativeUri(absPath, ex.uri);
+      if (resolved != null && _isWithinRoot(root, resolved) && File(resolved).existsSync()) {
+        final relTarget = p.relative(resolved, from: root);
+        final targetUnit = units[p.normalize(resolved)];
+        await _ensureFileNode(
+          nodes,
+          resolved,
+          relTarget,
+          targetUnit,
+          packageName,
+          shaCache,
+        );
+        edges.add(_Edge(source: relPath, target: relTarget, kind: 'export', certainty: 'static'));
+        targetId = relTarget;
+      } else {
+        final extId = _externalNodeId(null, ex.uri);
+        _ensureExternalNode(nodes, externalNodes, extId);
+        edges.add(_Edge(source: relPath, target: extId, kind: 'export', certainty: 'static'));
+        targetId = extId;
+      }
+    }
+
+    exports.add(_ImportExportSummary(
+      uri: ex.uri,
+      target: targetId,
+      prefix: null,
+      deferred: false,
+      show: _collectShown(ex.combinators),
+      hide: _collectHidden(ex.combinators),
+    ));
+  }
+
+  final parts = <String>{};
+  for (final part in lib.parts) {
+    final partPath = p.normalize(part.source.fullName);
+    if (!_isWithinRoot(root, partPath)) continue;
+    final relPart = p.relative(partPath, from: root);
+    final partUnit = units[partPath];
+    await _ensureFileNode(
+      nodes,
+      partPath,
+      relPart,
+      partUnit,
+      packageName,
+      shaCache,
+    );
+    if (parts.add(relPart)) {
+      edges.add(_Edge(source: relPath, target: relPart, kind: 'part', certainty: 'static'));
+      edges.add(_Edge(source: relPart, target: relPath, kind: 'part-of', certainty: 'static'));
+    }
+  }
+
+  final publicApi = _collectPublicApi(lib);
+
+  return _LibrarySummary(
+    path: relPath,
+    libraryName: lib.name.isEmpty ? null : lib.name,
+    hasMain: lib.entryPoint != null,
+    imports: imports,
+    exports: exports,
+    parts: parts.toList()..sort(),
+    publicApi: publicApi,
+  );
+}
+
+List<String> _collectShown(List<NamespaceCombinator> combinators) {
+  final result = <String>[];
+  for (final combinator in combinators) {
+    if (combinator is ShowElementCombinator) {
+      result.addAll(combinator.shownNames);
+    }
+  }
+  return result;
+}
+
+List<String> _collectHidden(List<NamespaceCombinator> combinators) {
+  final result = <String>[];
+  for (final combinator in combinators) {
+    if (combinator is HideElementCombinator) {
+      result.addAll(combinator.hiddenNames);
+    }
+  }
+  return result;
+}
+
+Future<void> _ensureFileNode(
+  Map<String, _Node> nodes,
+  String absPath,
+  String relPath,
+  ResolvedUnitResult? unit,
+  String? packageName,
+  Map<String, String?> shaCache,
+) async {
+  if (nodes.containsKey(relPath)) return;
+  int? loc;
+  if (unit != null) {
+    loc = _countLoc(unit.content);
+  } else if (File(absPath).existsSync()) {
+    loc = await _estimateLocFromFile(absPath);
+  }
+  final sha = await _cachedSha(absPath, shaCache);
+  nodes[relPath] = _Node(
+    id: relPath,
+    type: 'file',
+    state: 'unused',
+    sizeLOC: loc,
+    packageName: packageName,
+    sha256: sha,
+  );
+}
+
+void _ensureExternalNode(
+  Map<String, _Node> nodes,
+  Set<String> externalNodes,
+  String id,
+) {
+  if (externalNodes.add(id)) {
+    nodes[id] = _Node(id: id, type: 'external', state: 'used');
+  }
+}
+
+String? _resolveRelativeUri(String fromPath, String uri) {
   try {
-    final lines = await f.readAsLines();
+    final base = Uri.file(fromPath);
+    final resolved = base.resolveUri(Uri.parse(uri));
+    if (resolved.scheme == 'file') {
+      return p.normalize(resolved.toFilePath());
+    }
+  } catch (_) {}
+  return null;
+}
+
+String _externalNodeId(Uri? uri, String raw) {
+  if (uri == null) {
+    if (raw.startsWith('dart:') || raw.startsWith('package:')) {
+      return raw;
+    }
+    return 'external:$raw';
+  }
+  if (uri.scheme == 'dart') {
+    return 'dart:${uri.path}';
+  }
+  if (uri.scheme == 'package') {
+    final path = uri.pathSegments.join('/');
+    return 'package:$path';
+  }
+  if (uri.scheme.isEmpty) {
+    return raw;
+  }
+  return uri.toString();
+}
+
+int _countLoc(String content) {
+  return content.split('\n').where((line) => line.trim().isNotEmpty).length;
+}
+
+Future<int?> _estimateLocFromFile(String path) async {
+  try {
+    final text = await File(path).readAsString();
+    return _countLoc(text);
+  } catch (_) {
+    return null;
+  }
+}
+
+Future<String?> _cachedSha(String path, Map<String, String?> cache) async {
+  if (cache.containsKey(path)) {
+    return cache[path];
+  }
+  final sha = await fileSha256(path);
+  cache[path] = sha;
+  return sha;
+}
+
+Set<String> _discoverEntryFiles(String root, List<_LibrarySummary> libraries, String? packageName) {
+  final entries = <String>{};
+  for (final lib in libraries) {
+    if (lib.hasMain) {
+      entries.add(lib.path);
+    }
+  }
+
+  final common = [
+    p.join('bin', 'main.dart'),
+    p.join('lib', 'main.dart'),
+    p.join('web', 'main.dart'),
+    p.join('tool', 'main.dart'),
+    p.join('example', 'main.dart'),
+    p.join('test', 'main.dart'),
+    p.join('lib', 'src', 'main.dart'),
+  ];
+
+  for (final rel in common) {
+    final abs = p.join(root, rel);
+    if (File(abs).existsSync()) {
+      entries.add(p.relative(abs, from: root));
+    }
+  }
+
+  if (packageName != null && packageName.isNotEmpty) {
+    final normalized = packageName.replaceAll('-', '_');
+    final candidates = [
+      p.join(root, 'lib', '$normalized.dart'),
+      p.join(root, 'lib', '$packageName.dart'),
+    ];
+    for (final abs in candidates) {
+      if (File(abs).existsSync()) {
+        entries.add(p.relative(abs, from: root));
+      }
+    }
+  }
+
+  return entries;
+}
+
+void _computeDegrees(List<_Node> nodes, List<_Edge> edges) {
+  final byId = {for (final node in nodes) node.id: node};
+  for (final node in nodes) {
+    node.inDeg = 0;
+    node.outDeg = 0;
+  }
+  for (final edge in edges) {
+    final source = byId[edge.source];
+    final target = byId[edge.target];
+    if (source != null) {
+      source.outDeg++;
+    }
+    if (target != null) {
+      target.inDeg++;
+    }
+  }
+}
+
+Set<String> _reach(List<String> entries, List<_Edge> edges, Set<String> fileIds) {
+  if (entries.isEmpty) return <String>{};
+  final out = <String, List<String>>{};
+  for (final edge in edges) {
+    if (!fileIds.contains(edge.source)) continue;
+    if (!fileIds.contains(edge.target)) continue;
+    out.putIfAbsent(edge.source, () => []).add(edge.target);
+  }
+  final seen = <String>{};
+  final stack = <String>[]..addAll(entries);
+  while (stack.isNotEmpty) {
+    final current = stack.removeLast();
+    if (!seen.add(current)) continue;
+    final next = out[current];
+    if (next == null) continue;
+    for (final target in next) {
+      stack.add(target);
+    }
+  }
+  return seen;
+}
+
+List<String>? _findPath(
+  List<String> entries,
+  List<_Edge> edges,
+  String target,
+  Set<String> fileIds,
+) {
+  if (entries.isEmpty) return null;
+  final queue = <List<String>>[];
+  final seen = <String>{};
+  final out = <String, List<String>>{};
+  for (final edge in edges) {
+    if (!fileIds.contains(edge.source) || !fileIds.contains(edge.target)) continue;
+    out.putIfAbsent(edge.source, () => []).add(edge.target);
+  }
+  for (final entry in entries) {
+    queue.add([entry]);
+    seen.add(entry);
+  }
+  while (queue.isNotEmpty) {
+    final path = queue.removeAt(0);
+    final node = path.last;
+    if (node == target) return path;
+    final next = out[node];
+    if (next == null) continue;
+    for (final candidate in next) {
+      if (seen.add(candidate)) {
+        final newPath = List<String>.from(path)..add(candidate);
+        queue.add(newPath);
+      }
+    }
+  }
+  return null;
+}
+
+Future<void> _writeJson(String path, Map<String, dynamic> data) async {
+  final file = File(path);
+  await file.writeAsString(const JsonEncoder.withIndent('  ').convert(data));
+}
+
+Set<String> _normalizeEntryArgs(List<String> args, String root) {
+  final entries = <String>{};
+  for (final arg in args) {
+    final abs = p.normalize(p.isAbsolute(arg) ? arg : p.join(root, arg));
+    if (File(abs).existsSync()) {
+      entries.add(p.relative(abs, from: root));
+    }
+  }
+  return entries;
+}
+
+String _coerceToRelId(String input, String root) {
+  final absolute = p.normalize(p.isAbsolute(input) ? input : p.join(root, input));
+  if (File(absolute).existsSync()) {
+    return p.relative(absolute, from: root);
+  }
+  return input.replaceAll('\\', '/');
+}
+
+Future<String?> _readPackageName(String root) async {
+  final file = File(p.join(root, 'pubspec.yaml'));
+  if (!await file.exists()) return null;
+  try {
+    final lines = await file.readAsLines();
     for (var raw in lines) {
       var line = raw.trim();
       if (line.isEmpty || line.startsWith('#')) continue;
-      final comment = line.indexOf('#');
-      if (comment >= 0) {
-        line = line.substring(0, comment).trim();
-        if (line.isEmpty) continue;
+      final hashIndex = line.indexOf('#');
+      if (hashIndex >= 0) {
+        line = line.substring(0, hashIndex).trim();
       }
       final colon = line.indexOf(':');
       if (colon <= 0) continue;
@@ -501,222 +707,637 @@ Future<_Pubspec?> _readPubspec(String cwd) async {
         if (value.length <= 2) continue;
         value = value.substring(1, value.length - 1).trim();
       }
-      final hash = value.indexOf('#');
-      if (hash >= 0) {
-        value = value.substring(0, hash).trim();
+      if (value.isNotEmpty) {
+        return value;
       }
-      if (value.isEmpty) continue;
-      return _Pubspec(value);
     }
   } catch (_) {}
   return null;
 }
 
-Future<Map<String, String>> _readPackageConfig(String cwd) async {
-  final result = <String, String>{};
-  final configPath = _join(cwd, '.dart_tool${_sep}package_config.json');
-  final file = File(configPath);
-  if (!await file.exists()) return result;
-  try {
-    final text = await file.readAsString();
-    final data = jsonDecode(text);
-    if (data is Map && data['packages'] is List) {
-      final packages = data['packages'] as List;
-      final configDir = _dir(configPath);
-      final configUri = Uri.directory(configDir, windows: Platform.isWindows);
-      for (final entry in packages) {
-        if (entry is! Map) continue;
-        final name = entry['name'];
-        final rootUriRaw = entry['rootUri'];
-        final packageUriRaw = entry['packageUri'];
-        if (name is! String) continue;
-        final rootUri = rootUriRaw is String
-            ? configUri.resolve(rootUriRaw)
-            : configUri;
-        final packageUri = packageUriRaw is String
-            ? rootUri.resolve(packageUriRaw)
-            : rootUri;
-        final basePath = _normalize(packageUri.toFilePath(windows: Platform.isWindows));
-        if (_isWithinRepo(basePath, cwd)) {
-          result[name] = basePath;
+const Set<String> _ignoredDirs = {
+  '.dart_tool',
+  '.git',
+  '.idea',
+  '.vscode',
+  '.cache',
+  'build',
+  'dist',
+  'node_modules',
+  'out',
+  'android',
+  'ios',
+  'macos',
+  'linux',
+  'windows',
+};
+
+bool _isWithinRoot(String root, String candidate) {
+  final normalizedRoot = p.normalize(root);
+  final normalized = p.normalize(candidate);
+  return normalized == normalizedRoot || p.isWithin(normalizedRoot, normalized);
+}
+
+bool _shouldIgnore(String root, String path) {
+  final rel = p.relative(path, from: root);
+  final segments = p.split(rel);
+  return segments.any(_ignoredDirs.contains);
+}
+
+class _Node {
+  final String id;
+  final String type;
+  String state;
+  final String lang;
+  final int? sizeLOC;
+  final String? packageName;
+  final String? sha256;
+  int inDeg;
+  int outDeg;
+
+  _Node({
+    required this.id,
+    required this.type,
+    required this.state,
+    this.sizeLOC,
+    this.packageName,
+    this.sha256,
+    this.lang = 'dart',
+    this.inDeg = 0,
+    this.outDeg = 0,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'type': type,
+        'state': state,
+        'lang': lang,
+        if (sizeLOC != null) 'sizeLOC': sizeLOC,
+        if (packageName != null) 'package': packageName,
+        'inDeg': inDeg,
+        'outDeg': outDeg,
+        if (sha256 != null) 'sha256': sha256,
+      };
+}
+
+class _Edge {
+  final String source;
+  final String target;
+  final String kind;
+  final String certainty;
+
+  _Edge({
+    required this.source,
+    required this.target,
+    required this.kind,
+    required this.certainty,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'source': source,
+        'target': target,
+        'kind': kind,
+        'certainty': certainty,
+      };
+}
+
+class _ImportExportSummary {
+  final String uri;
+  final String target;
+  final String? prefix;
+  final bool deferred;
+  final List<String> show;
+  final List<String> hide;
+
+  const _ImportExportSummary({
+    required this.uri,
+    required this.target,
+    this.prefix,
+    required this.deferred,
+    required this.show,
+    required this.hide,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'uri': uri,
+        'target': target,
+        if (prefix != null) 'prefix': prefix,
+        if (deferred) 'deferred': deferred,
+        if (show.isNotEmpty) 'show': show,
+        if (hide.isNotEmpty) 'hide': hide,
+      };
+}
+
+class _LibrarySummary {
+  final String path;
+  final String? libraryName;
+  final bool hasMain;
+  final List<_ImportExportSummary> imports;
+  final List<_ImportExportSummary> exports;
+  final List<String> parts;
+  final Map<String, dynamic> publicApi;
+
+  const _LibrarySummary({
+    required this.path,
+    required this.libraryName,
+    required this.hasMain,
+    required this.imports,
+    required this.exports,
+    required this.parts,
+    required this.publicApi,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'path': path,
+        if (libraryName != null && libraryName!.isNotEmpty) 'library': libraryName,
+        'isEntry': hasMain,
+        'imports': imports.map((i) => i.toJson()).toList(),
+        'exports': exports.map((e) => e.toJson()).toList(),
+        if (parts.isNotEmpty) 'parts': parts,
+        'publicApi': publicApi,
+      };
+}
+
+Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
+  final classes = <Map<String, dynamic>>[];
+  final functions = <Map<String, String>>[];
+  final typedefs = <Map<String, String>>[];
+  final extensions = <Map<String, String>>[];
+  final variables = <Map<String, String>>[];
+
+  final namespace = lib.exportNamespace;
+  for (final element in namespace.definedNames.values) {
+    if (!element.isPublic) continue;
+
+    if (element is InterfaceElement) {
+      final kind = element is EnumElement
+          ? 'enum'
+          : element is MixinElement
+              ? 'mixin'
+              : 'class';
+      final members = <String>[];
+      for (final field in element.fields) {
+        if (!field.isPublic || field.isSynthetic) continue;
+        members.add('${field.type.getDisplayString(withNullability: true)} ${field.name}');
+      }
+      for (final method in element.methods) {
+        if (!method.isPublic || method.isSynthetic) continue;
+        members.add(method.getDisplayString(withNullability: true));
+      }
+      for (final ctor in element.constructors) {
+        if (!ctor.isPublic || ctor.isSynthetic) continue;
+        members.add(ctor.getDisplayString(withNullability: true));
+      }
+      final classEntry = <String, dynamic>{
+        'name': element.name,
+        'kind': kind,
+      };
+      if (members.isNotEmpty) {
+        members.sort();
+        classEntry['members'] = members;
+      }
+      classes.add(classEntry);
+      continue;
+    }
+
+    if (element is FunctionElement) {
+      if (element.isGetter || element.isSetter || element.isOperator) continue;
+      functions.add({
+        'name': element.name,
+        'signature': element.getDisplayString(withNullability: true),
+      });
+      continue;
+    }
+
+    if (element is TypeAliasElement) {
+      typedefs.add({
+        'name': element.name,
+        'aliasedType': element.aliasedType.getDisplayString(withNullability: true),
+      });
+      continue;
+    }
+
+    if (element is ExtensionElement) {
+      extensions.add({
+        'name': element.name.isEmpty ? element.displayName : element.name,
+        'on': element.extendedType.getDisplayString(withNullability: true),
+      });
+      continue;
+    }
+
+    if (element is TopLevelVariableElement) {
+      if (element.isSynthetic) continue;
+      variables.add({
+        'name': element.name,
+        'type': element.type.getDisplayString(withNullability: true),
+      });
+      continue;
+    }
+  }
+
+  classes.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
+  functions.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
+  typedefs.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
+  extensions.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
+  variables.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
+
+  return {
+    'classes': classes,
+    'functions': functions,
+    'typedefs': typedefs,
+    'extensions': extensions,
+    'variables': variables,
+  };
+}
+
+Future<Map<String, dynamic>> _runSecurity(
+  String root,
+  Map<String, ResolvedUnitResult> units,
+) async {
+  final findings = <_SecurityFinding>[];
+  for (final entry in units.entries) {
+    final path = entry.key;
+    if (!_isWithinRoot(root, path)) continue;
+    if (_shouldIgnore(root, path)) continue;
+
+    final rel = p.relative(path, from: root);
+    final unit = entry.value;
+    final collector = _SecurityCollector(rel, unit.content, unit.lineInfo);
+
+    unit.unit.accept(_SecurityVisitor(collector));
+
+    for (final directive in unit.unit.directives) {
+      if (directive is ImportDirective) {
+        final uri = directive.uri.stringValue;
+        if (uri == 'dart:mirrors') {
+          collector.addNode(
+            'dart.mirrors.use',
+            'low',
+            'Importing dart:mirrors is discouraged and unsupported on many runtimes.',
+            directive,
+          );
         }
       }
     }
-  } catch (_) {}
-  return result;
+
+    _scanSecretPatterns(collector, unit.content);
+
+    findings.addAll(collector.findings);
+  }
+
+  final summary = <String, int>{};
+  for (final finding in findings) {
+    summary[finding.severity] = (summary[finding.severity] ?? 0) + 1;
+  }
+
+  return {
+    'findings': findings.map((f) => f.toJson()).toList(),
+    'summary': summary,
+  };
 }
 
-// ---------------- resolve URIs ----------------
-class _Resolved {
-  final String type;  // 'file' | 'external'
-  final String? path; // absolute file path if type=file
-  final String? extId; // external id
-  _Resolved.file(this.path) : type = 'file', extId = null;
-  _Resolved.external(this.extId) : type = 'external', path = null;
+class _SecurityCollector {
+  final String file;
+  final String content;
+  final LineInfo lineInfo;
+  final List<_SecurityFinding> findings = [];
+  final Set<String> _seen = {};
+
+  _SecurityCollector(this.file, this.content, this.lineInfo);
+
+  void addNode(String ruleId, String severity, String message, AstNode node) {
+    add(ruleId, severity, message, node.offset, node.end);
+  }
+
+  void add(String ruleId, String severity, String message, int start, int end) {
+    final key = '$ruleId@$start@$end';
+    if (!_seen.add(key)) return;
+    final location = lineInfo.getLocation(start);
+    findings.add(_SecurityFinding(
+      ruleId: ruleId,
+      severity: severity,
+      message: message,
+      file: file,
+      line: location.lineNumber,
+      column: location.columnNumber,
+      snippet: _snippet(content, start, end),
+    ));
+  }
 }
 
-bool _isLikelyRelativeImport(String uri) {
-  if (uri.startsWith('./') || uri.startsWith('../')) return true;
-  if (uri.startsWith('/') || uri.startsWith('\\')) return false;
-  if (uri.contains('://')) return false;
-  if (uri.contains(':')) return false;
-  return true;
+class _SecurityFinding {
+  final String ruleId;
+  final String severity;
+  final String message;
+  final String file;
+  final int line;
+  final int column;
+  final String snippet;
+
+  const _SecurityFinding({
+    required this.ruleId,
+    required this.severity,
+    required this.message,
+    required this.file,
+    required this.line,
+    required this.column,
+    required this.snippet,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'ruleId': ruleId,
+        'severity': severity,
+        'message': message,
+        'file': file,
+        'line': line,
+        'col': column,
+        'snippet': snippet,
+      };
 }
 
-_Resolved _resolveUri(String cwd, String fromFileAbs, String uri, String? selfPkg,
-    Map<String, String> localPackages) {
-  // dart:core, dart:io ...
-  if (uri.startsWith('dart:')) {
-    final name = uri.substring('dart:'.length);
-    return _Resolved.external('dart:$name');
-  }
+class _SecurityVisitor extends RecursiveAstVisitor<void> {
+  final _SecurityCollector collector;
 
-  // package:foo/path.dart
-  if (uri.startsWith('package:')) {
-    final rest = uri.substring('package:'.length); // foo/path.dart
-    final slash = rest.indexOf('/');
-    final pkg = slash >= 0 ? rest.substring(0, slash) : rest;
-    final sub = slash >= 0 ? rest.substring(slash + 1) : '';
-    if (selfPkg != null && pkg == selfPkg) {
-      // Resolve to ./lib/<sub>
-      final abs = _normalize(_join(cwd, _join('lib', sub.replaceAll('/', _sep))));
-      if (File(abs).existsSync() || _isWithinRepo(abs, cwd)) return _Resolved.file(abs);
-      // If not present, treat as external (perhaps build step)
-    }
-    final localBase = localPackages[pkg];
-    if (localBase != null) {
-      final abs = _normalize(_join(localBase, sub.replaceAll('/', _sep)));
-      if (File(abs).existsSync() || _isWithinRepo(abs, cwd)) return _Resolved.file(abs);
-    }
-    return _Resolved.external('pub:$pkg');
-  }
+  _SecurityVisitor(this.collector);
 
-  // Relative URI: './', '../', or bare paths like 'src/foo.dart'
-  if (_isLikelyRelativeImport(uri)) {
-    final baseDir = _dir(fromFileAbs);
-    final candidate = uri.replaceAll('/', _sep).replaceAll('\\', _sep);
-    final abs = _normalize(_join(baseDir, candidate));
-    if (File(abs).existsSync() || _isWithinRepo(abs, cwd)) return _Resolved.file(abs);
-    return _Resolved.external('pub:unknown'); // fallback (should be rare)
-  }
-
-  // Absolute file path (unlikely in Dart imports) — try to normalize
-  if (uri.contains(':') || uri.startsWith(_sep)) {
-    final abs = _normalize(uri);
-    if (File(abs).existsSync() || _isWithinRepo(abs, cwd)) return _Resolved.file(abs);
-    return _Resolved.external('pub:unknown');
-  }
-
-  // Bare library names (uncommon) -> external
-  return _Resolved.external('pub:$uri');
-}
-
-// ---------------- entries ----------------
-List<String> _discoverEntryFiles(
-    String cwd, List<_FileFacts> facts, String? packageName) {
-  final entries = <String>{};
-
-  // (a) Any file with `main(...)`
-  for (final ff in facts) {
-    if (ff.hasMain) entries.add(ff.relId);
-  }
-
-  // (b) Common paths
-  final common = [
-    _join(cwd, 'bin${_sep}main.dart'),
-    _join(cwd, 'lib${_sep}main.dart'),
-    _join(cwd, 'web${_sep}main.dart'),
-    _join(cwd, 'tool${_sep}main.dart'),
-    _join(cwd, 'example${_sep}main.dart'),
-    _join(cwd, 'test${_sep}main.dart'), // sometimes integration test runs a main
-    _join(cwd, 'lib${_sep}src${_sep}main.dart'),
-  ];
-  for (final p in common) {
-    if (File(p).existsSync()) entries.add(_rel(p, cwd));
-  }
-
-  // (c) Package library entry (lib/<package>.dart)
-  if (packageName != null && packageName.isNotEmpty) {
-    final normalized = packageName.replaceAll('-', '_');
-    final candidates = [
-      _join(cwd, 'lib${_sep}$normalized.dart'),
-      _join(cwd, 'lib${_sep}$packageName.dart'),
-    ];
-    for (final candidate in candidates) {
-      if (File(candidate).existsSync()) {
-        entries.add(_rel(candidate, cwd));
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    final element = node.methodName.staticElement;
+    if (element is MethodElement) {
+      final libraryUri = element.library.source.uri.toString();
+      final enclosing = element.enclosingElement?.name;
+      if (libraryUri == 'dart:io' && enclosing == 'Process') {
+        if (element.name == 'run' || element.name == 'start') {
+          final shell = _namedBoolArg(node.argumentList.arguments, 'runInShell') == true;
+          if (shell) {
+            collector.addNode(
+              'dart.process.run.shell',
+              'high',
+              'Process.${element.name} with runInShell:true can allow command injection.',
+              node,
+            );
+          } else {
+            collector.addNode(
+              'dart.process.run',
+              'medium',
+              'Process.${element.name} executes external commands.',
+              node,
+            );
+          }
+        }
       }
     }
+    super.visitMethodInvocation(node);
   }
 
-  return entries.toList();
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    final constructor = node.constructorName.staticElement;
+    if (constructor != null) {
+      final enclosing = constructor.enclosingElement;
+      final libraryUri = enclosing?.library?.source.uri.toString();
+      if (enclosing?.name == 'Random' && libraryUri == 'dart:math') {
+        if (node.constructorName.name == null) {
+          collector.addNode(
+            'dart.random.insecure',
+            'medium',
+            'Random() is not cryptographically secure. Use Random.secure() or a crypto RNG.',
+            node,
+          );
+        }
+      }
+    }
+    super.visitInstanceCreationExpression(node);
+  }
+
+  @override
+  void visitAssignmentExpression(AssignmentExpression node) {
+    final writeElement = node.writeElement;
+    if (writeElement is PropertyAccessorElement) {
+      final variable = writeElement.variable;
+      final libraryUri = variable.library?.source.uri.toString();
+      if (variable.name == 'badCertificateCallback' && libraryUri == 'dart:io') {
+        collector.addNode(
+          'dart.http.badcert',
+          'high',
+          'Setting HttpClient.badCertificateCallback disables TLS certificate validation.',
+          node,
+        );
+      }
+    }
+    super.visitAssignmentExpression(node);
+  }
+
+  @override
+  void visitPrefixedIdentifier(PrefixedIdentifier node) {
+    final element = node.staticElement;
+    final libraryUri = element?.library?.source.uri.toString();
+    if (node.prefix.name == 'Platform' && node.identifier.name == 'environment' && libraryUri == 'dart:io') {
+      collector.addNode(
+        'dart.platform.env',
+        'info',
+        'Platform.environment can expose sensitive environment variables.',
+        node,
+      );
+    }
+    super.visitPrefixedIdentifier(node);
+  }
+
+  @override
+  void visitPropertyAccess(PropertyAccess node) {
+    final element = node.propertyName.staticElement;
+    final libraryUri = element?.library?.source.uri.toString();
+    if (node.target is Identifier) {
+      final targetName = (node.target as Identifier).name;
+      if (targetName == 'Platform' && node.propertyName.name == 'environment' && libraryUri == 'dart:io') {
+        collector.addNode(
+          'dart.platform.env',
+          'info',
+          'Platform.environment can expose sensitive environment variables.',
+          node,
+        );
+      }
+    }
+    super.visitPropertyAccess(node);
+  }
 }
 
-// ---------------- graph utils ----------------
-void _computeDegrees(List<_Node> nodes, List<_Edge> edges) {
-  final byId = {for (final n in nodes) n.id: n};
-  for (final n in nodes) { n.inDeg = 0; n.outDeg = 0; }
-  for (final e in edges) {
-    byId[e.source]?.outDeg++;
-    byId[e.target]?.inDeg++;
+class _SecretPattern {
+  final RegExp pattern;
+  final String ruleId;
+  final String severity;
+  final String message;
+  final bool reportWhenSanitizedBlank;
+
+  const _SecretPattern({
+    required this.pattern,
+    required this.ruleId,
+    required this.severity,
+    required this.message,
+    this.reportWhenSanitizedBlank = false,
+  });
+}
+
+final List<_SecretPattern> _secretPatterns = [
+  const _SecretPattern(
+    pattern: RegExp(r'AKIA[0-9A-Z]{16}'),
+    ruleId: 'dart.secret.aws-access-key',
+    severity: 'high',
+    message: 'Possible AWS access key detected.',
+    reportWhenSanitizedBlank: true,
+  ),
+  const _SecretPattern(
+    pattern: RegExp(r'xox[baprs]-[0-9A-Za-z-]{10,48}'),
+    ruleId: 'dart.secret.slack-token',
+    severity: 'high',
+    message: 'Possible Slack token detected.',
+    reportWhenSanitizedBlank: true,
+  ),
+  const _SecretPattern(
+    pattern: RegExp(r'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'),
+    ruleId: 'dart.secret.jwt',
+    severity: 'high',
+    message: 'String looks like a JWT token.',
+    reportWhenSanitizedBlank: true,
+  ),
+  const _SecretPattern(
+    pattern: RegExp(r'-----BEGIN (?:RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY-----'),
+    ruleId: 'dart.secret.private-key',
+    severity: 'high',
+    message: 'Private key material detected.',
+    reportWhenSanitizedBlank: true,
+  ),
+  const _SecretPattern(
+    pattern: RegExp(r'http://[^\s\'"]+'),
+    ruleId: 'dart.http.http-url',
+    severity: 'medium',
+    message: 'HTTP URL detected. Prefer HTTPS to avoid clear-text traffic.',
+    reportWhenSanitizedBlank: true,
+  ),
+];
+
+void _scanSecretPatterns(_SecurityCollector collector, String content) {
+  final sanitized = _stripStringsAndComments(content);
+  for (final pattern in _secretPatterns) {
+    for (final match in pattern.pattern.allMatches(content)) {
+      final start = match.start;
+      final end = match.end;
+      final sanitizedSlice = sanitized.substring(start, end);
+      if (sanitizedSlice.trim().isEmpty && !pattern.reportWhenSanitizedBlank) {
+        continue;
+      }
+      collector.add(pattern.ruleId, pattern.severity, pattern.message, start, end);
+    }
   }
 }
 
-Set<String> _reach(List<String> entries, List<_Edge> edges) {
-  final gOut = <String, List<String>>{};
-  for (final e in edges) {
-    gOut.putIfAbsent(e.source, () => []).add(e.target);
+String _stripStringsAndComments(String input) {
+  final codes = input.codeUnits;
+  final sanitized = List<int>.from(codes);
+  final length = codes.length;
+  var i = 0;
+  while (i < length) {
+    final c = codes[i];
+    if (c == 47 && i + 1 < length) {
+      final next = codes[i + 1];
+      if (next == 47) {
+        var j = i;
+        while (j < length && codes[j] != 10) {
+          sanitized[j] = 32;
+          j++;
+        }
+        i = j;
+        continue;
+      }
+      if (next == 42) {
+        var j = i + 2;
+        while (j + 1 < length && !(codes[j] == 42 && codes[j + 1] == 47)) {
+          sanitized[j] = 32;
+          j++;
+        }
+        if (j + 1 < length) {
+          sanitized[i] = sanitized[i + 1] = 32;
+          sanitized[j] = sanitized[j + 1] = 32;
+          j += 2;
+          i = j;
+        } else {
+          for (var k = i; k < length; k++) {
+            sanitized[k] = 32;
+          }
+          break;
+        }
+        continue;
+      }
+    }
+    if (c == 39 || c == 34) {
+      final quote = c;
+      var j = i + 1;
+      var triple = false;
+      if (j + 1 < length && codes[j] == quote && codes[j + 1] == quote) {
+        triple = true;
+        sanitized[j] = sanitized[j + 1] = 32;
+        j += 2;
+      }
+      sanitized[i] = 32;
+      while (j < length) {
+        sanitized[j] = 32;
+        if (!triple) {
+          if (codes[j] == quote && (j == i + 1 || codes[j - 1] != 92)) {
+            break;
+          }
+          if (codes[j] == 92 && j + 1 < length) {
+            sanitized[j + 1] = 32;
+            j += 2;
+            continue;
+          }
+          j++;
+        } else {
+          if (codes[j] == quote &&
+              j + 2 < length &&
+              codes[j + 1] == quote &&
+              codes[j + 2] == quote) {
+            sanitized[j + 1] = 32;
+            sanitized[j + 2] = 32;
+            j += 2;
+            break;
+          }
+          j++;
+        }
+      }
+      if (j < length) {
+        sanitized[j] = 32;
+      }
+      i = j + 1;
+      continue;
+    }
+    i++;
   }
-  final seen = <String>{};
-  final stack = <String>[];
-  stack.addAll(entries);
-  while (stack.isNotEmpty) {
-    final x = stack.removeLast();
-    if (!seen.add(x)) continue;
-    final outs = gOut[x] ?? const [];
-    for (final y in outs) stack.add(y);
-  }
-  return seen;
+  return String.fromCharCodes(sanitized);
 }
 
-List<String>? _findPath(
-    List<String> entries, List<_Edge> edges, String target, Set<String> fileIds) {
-  if (entries.isEmpty) return null;
-  final queue = <List<String>>[];
-  final seen = <String>{};
-  final gOut = <String, List<String>>{};
-  for (final e in edges) {
-    if (!fileIds.contains(e.target)) continue;
-    gOut.putIfAbsent(e.source, () => []).add(e.target);
+String _snippet(String content, int start, int end, {int maxLength = 200}) {
+  if (start < 0 || start >= content.length) return '';
+  final safeEnd = end < 0
+      ? 0
+      : (end > content.length
+          ? content.length
+          : end);
+  var snippet = content.substring(start, safeEnd);
+  snippet = snippet.replaceAll('\r\n', '\n').replaceAll('\r', '\n').trim();
+  if (snippet.length > maxLength) {
+    snippet = snippet.substring(0, maxLength) + '...';
   }
+  return snippet;
+}
 
-  for (final entry in entries) {
-    queue.add([entry]);
-    seen.add(entry);
-  }
-
-  while (queue.isNotEmpty) {
-    final path = queue.removeAt(0);
-    final node = path.last;
-    if (node == target) return path;
-    final outs = gOut[node];
-    if (outs == null) continue;
-    for (final next in outs) {
-      if (seen.add(next)) {
-        final nextPath = List<String>.from(path)..add(next);
-        queue.add(nextPath);
+bool? _namedBoolArg(NodeList<Expression> args, String name) {
+  for (final arg in args) {
+    if (arg is NamedExpression && arg.name.label.name == name) {
+      final expression = arg.expression;
+      if (expression is BooleanLiteral) {
+        return expression.value;
       }
     }
   }
   return null;
-}
-
-// ---------------- misc ----------------
-Future<int> _estimateLOC(String file) async {
-  try {
-    final s = await File(file).readAsString();
-    return s.split('\n').where((l) => l.trim().isNotEmpty).length;
-  } catch (_) {
-    return 0;
-  }
 }
