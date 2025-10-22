@@ -1208,7 +1208,7 @@ final List<_SecretPattern> _secretPatterns = [
     reportWhenSanitizedBlank: true,
   ),
   const _SecretPattern(
-    pattern: RegExp(r'http://[^\s\'"]+'),
+    pattern: RegExp('http://[^\\s\'"]+'),
     ruleId: 'dart.http.http-url',
     severity: 'medium',
     message: 'HTTP URL detected. Prefer HTTPS to avoid clear-text traffic.',
