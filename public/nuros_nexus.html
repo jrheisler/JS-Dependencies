@@ -45,7 +45,7 @@
     *::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(124,92,255,.85), rgba(29,209,161,.85)); border-radius: 999px; border: 2px solid rgba(9,11,18,.65); box-shadow: 0 2px 6px rgba(0,0,0,.35) inset; }
     *::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgba(124,92,255,1), rgba(29,209,161,1)); }
     html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
-    #app { position: relative; display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 48px 1fr auto; height: 100%; transition: grid-template-columns .25s ease; }
+    #app { position: relative; display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 48px 1fr; height: 100%; transition: grid-template-columns .25s ease; }
     body.sidebar-collapsed #app { grid-template-columns: 0 1fr; }
     header { grid-column: 1 / -1; grid-row: 1; display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.02)); border-bottom: 1px solid rgba(255,255,255,.06); }
     header .title { font-weight: 700; letter-spacing:.2px; }
@@ -138,15 +138,16 @@
     .legend .metric[disabled] { opacity: .4; cursor: not-allowed; box-shadow: none; }
     .legend .metric[disabled]:hover, .legend .metric[disabled]:focus-visible { background: transparent; color: var(--text); box-shadow: none; }
 
-    section#sbomPanel { grid-column: 1 / -1; grid-row: 3; padding: 12px; background: linear-gradient(180deg, rgba(9,11,18,.92), rgba(9,11,18,.86)); border-top: 1px solid rgba(255,255,255,.06); overflow: auto; }
-    #sbomPanel .group { margin: 0; }
+    .modal-shell.sbom-modal { width: min(1100px, 92vw); height: min(780px, 90vh); }
+    section#sbomPanel { padding: 18px; background: linear-gradient(180deg, rgba(9,11,18,.92), rgba(9,11,18,.86)); border-top: 1px solid rgba(255,255,255,.06); overflow: auto; flex: 1; display: flex; flex-direction: column; }
+    #sbomPanel .group { margin: 0; display: flex; flex-direction: column; gap: 16px; flex: 1; }
     .sbom-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; justify-content: space-between; }
     .sbom-header h3 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
     .sbom-controls { display: flex; gap: 8px; align-items: center; }
     #sbomSearch { width: 220px; background: #0d1220; border: 1px solid rgba(255,255,255,.08); color: var(--text); padding: 8px 10px; border-radius: 10px; outline: none; font-size: 12px; }
     #sbomSearch::placeholder { color: rgba(232,236,241,.45); }
     .sbom-count { color: var(--muted); font-size: 12px; }
-    .sbom-table-wrap { position: relative; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; background: #0d1220; overflow: auto; max-height: 360px; }
+    .sbom-table-wrap { position: relative; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; background: #0d1220; overflow: auto; flex: 1; }
     table.sbom-table { width: 100%; border-collapse: collapse; font-size: 13px; color: var(--text); min-width: 720px; }
     table.sbom-table th, table.sbom-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.06); text-align: left; vertical-align: top; }
     table.sbom-table th { position: sticky; top: 0; background: rgba(255,255,255,.04); z-index: 1; font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
@@ -219,6 +220,7 @@
     <button class="btn" id="openJson">Load graph.json</button>
     <button class="btn" id="exportJson" title="Download current graph JSON" disabled>Graph JSON</button>
     <input type="file" id="fileInput" accept="application/json" hidden />
+    <button class="btn" id="openSbom" title="Open SBOM view" aria-haspopup="dialog" aria-expanded="false">View SBOM</button>
     <button class="btn" id="exportSbom" title="Download SBOM CSV">SBOM CSV</button>
     <label class="btn" title="Export only the currently filtered nodes">
       <input type="checkbox" id="exportFiltered" checked style="margin-right:6px;"> Filtered only
@@ -394,29 +396,35 @@
     </div>
   </section>
 
-  <section id="sbomPanel" aria-labelledby="sbomPanelTitle">
-    <div class="group sbom-group">
-      <div class="sbom-header">
-        <h3 id="sbomPanelTitle">SBOM Inventory</h3>
-        <div class="sbom-controls">
-          <input type="search" id="sbomSearch" placeholder="Search rows…" aria-label="Search SBOM rows" />
-          <div class="sbom-count" id="sbomCount" aria-live="polite"></div>
-        </div>
-      </div>
-      <div class="sbom-table-wrap" role="region" aria-live="polite" aria-label="Software bill of materials table">
-        <table id="sbomTable" class="sbom-table">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
-        <div id="sbomEmpty">No SBOM entries to display. Load a graph or adjust filters.</div>
-      </div>
-      <details class="sbom-legend" open>
-        <summary>Column legend</summary>
-        <dl id="sbomLegendList"></dl>
-      </details>
-    </div>
-  </section>
+</div>
 
+<div class="modal-overlay" id="sbomModal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sbomPanelTitle">
+  <div class="modal-shell sbom-modal">
+    <div class="modal-header">SBOM Inventory</div>
+    <button class="modal-close" id="sbomClose" aria-label="Close SBOM view">✕</button>
+    <section id="sbomPanel" aria-labelledby="sbomPanelTitle">
+      <div class="group sbom-group">
+        <div class="sbom-header">
+          <h3 id="sbomPanelTitle">SBOM Inventory</h3>
+          <div class="sbom-controls">
+            <input type="search" id="sbomSearch" placeholder="Search rows…" aria-label="Search SBOM rows" />
+            <div class="sbom-count" id="sbomCount" aria-live="polite"></div>
+          </div>
+        </div>
+        <div class="sbom-table-wrap" role="region" aria-live="polite" aria-label="Software bill of materials table">
+          <table id="sbomTable" class="sbom-table">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+          <div id="sbomEmpty">No SBOM entries to display. Load a graph or adjust filters.</div>
+        </div>
+        <details class="sbom-legend" open>
+          <summary>Column legend</summary>
+          <dl id="sbomLegendList"></dl>
+        </details>
+      </div>
+    </section>
+  </div>
 </div>
 
 <div class="modal-overlay" id="helpModal" hidden aria-hidden="true" role="dialog" aria-modal="true">
@@ -2052,15 +2060,70 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   updateSidebarState();
 
+  const sbomModal = $('sbomModal');
+  const sbomClose = $('sbomClose');
+  const openSbomBtn = $('openSbom');
   const helpModal = $('helpModal');
   const helpFrame = $('helpFrame');
   const helpLink = $('helpLink');
   const helpClose = $('helpClose');
-  let lastFocusedEl = null;
+  let lastHelpTrigger = null;
+  let lastSbomTrigger = null;
+  const openSbomView = () => {
+    if(!sbomModal) return;
+    if(sbomModal.hasAttribute('hidden')){
+      const trigger = document.activeElement;
+      closeHelp();
+      lastSbomTrigger = trigger;
+      sbomModal.removeAttribute('hidden');
+      sbomModal.setAttribute('aria-hidden', 'false');
+      if(sbomClose){
+        sbomClose.focus();
+      }
+      if(openSbomBtn){
+        openSbomBtn.setAttribute('aria-expanded', 'true');
+      }
+    }
+  };
+  const closeSbomView = () => {
+    if(!sbomModal) return;
+    if(!sbomModal.hasAttribute('hidden')){
+      sbomModal.setAttribute('hidden', '');
+      sbomModal.setAttribute('aria-hidden', 'true');
+      if(lastSbomTrigger && typeof lastSbomTrigger.focus === 'function'){
+        lastSbomTrigger.focus();
+      }
+      lastSbomTrigger = null;
+      if(openSbomBtn){
+        openSbomBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  };
+  if(openSbomBtn){
+    openSbomBtn.addEventListener('click', ()=>{
+      if(sbomModal && sbomModal.hasAttribute('hidden')){
+        openSbomView();
+      } else {
+        closeSbomView();
+      }
+    });
+  }
+  if(sbomClose){
+    sbomClose.addEventListener('click', closeSbomView);
+  }
+  if(sbomModal){
+    sbomModal.addEventListener('click', (e)=>{
+      if(e.target === sbomModal){
+        closeSbomView();
+      }
+    });
+  }
   const openHelp = () => {
     if(!helpModal) return;
     if(helpModal.hasAttribute('hidden')){
-      lastFocusedEl = document.activeElement;
+      const trigger = document.activeElement;
+      closeSbomView();
+      lastHelpTrigger = trigger;
       helpModal.removeAttribute('hidden');
       helpModal.setAttribute('aria-hidden', 'false');
       if(helpFrame && !helpFrame.getAttribute('src')){
@@ -2076,9 +2139,10 @@ window.addEventListener('DOMContentLoaded', () => {
     if(!helpModal.hasAttribute('hidden')){
       helpModal.setAttribute('hidden', '');
       helpModal.setAttribute('aria-hidden', 'true');
-      if(lastFocusedEl && typeof lastFocusedEl.focus === 'function'){
-        lastFocusedEl.focus();
+      if(lastHelpTrigger && typeof lastHelpTrigger.focus === 'function'){
+        lastHelpTrigger.focus();
       }
+      lastHelpTrigger = null;
     }
   };
   if(helpLink){
@@ -2098,7 +2162,10 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
   document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape'){ closeHelp(); }
+    if(e.key === 'Escape'){
+      closeHelp();
+      closeSbomView();
+    }
   });
 
   const searchEl = $('search');
