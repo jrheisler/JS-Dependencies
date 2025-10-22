@@ -45,7 +45,7 @@
     *::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(124,92,255,.85), rgba(29,209,161,.85)); border-radius: 999px; border: 2px solid rgba(9,11,18,.65); box-shadow: 0 2px 6px rgba(0,0,0,.35) inset; }
     *::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgba(124,92,255,1), rgba(29,209,161,1)); }
     html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
-    #app { position: relative; display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 48px 1fr; height: 100%; transition: grid-template-columns .25s ease; }
+    #app { position: relative; display: grid; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: 48px 1fr auto; height: 100%; transition: grid-template-columns .25s ease; }
     body.sidebar-collapsed #app { grid-template-columns: 0 1fr; }
     header { grid-column: 1 / -1; grid-row: 1; display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.02)); border-bottom: 1px solid rgba(255,255,255,.06); }
     header .title { font-weight: 700; letter-spacing:.2px; }
@@ -137,6 +137,33 @@
     .legend .metric.active { background: linear-gradient(135deg, rgba(255,71,216,.9), rgba(255,226,89,.9)); color: #11131d; box-shadow: 0 0 12px rgba(255,226,120,.45); }
     .legend .metric[disabled] { opacity: .4; cursor: not-allowed; box-shadow: none; }
     .legend .metric[disabled]:hover, .legend .metric[disabled]:focus-visible { background: transparent; color: var(--text); box-shadow: none; }
+
+    section#sbomPanel { grid-column: 1 / -1; grid-row: 3; padding: 12px; background: linear-gradient(180deg, rgba(9,11,18,.92), rgba(9,11,18,.86)); border-top: 1px solid rgba(255,255,255,.06); overflow: auto; }
+    #sbomPanel .group { margin: 0; }
+    .sbom-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; justify-content: space-between; }
+    .sbom-header h3 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+    .sbom-controls { display: flex; gap: 8px; align-items: center; }
+    #sbomSearch { width: 220px; background: #0d1220; border: 1px solid rgba(255,255,255,.08); color: var(--text); padding: 8px 10px; border-radius: 10px; outline: none; font-size: 12px; }
+    #sbomSearch::placeholder { color: rgba(232,236,241,.45); }
+    .sbom-count { color: var(--muted); font-size: 12px; }
+    .sbom-table-wrap { position: relative; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; background: #0d1220; overflow: auto; max-height: 360px; }
+    table.sbom-table { width: 100%; border-collapse: collapse; font-size: 13px; color: var(--text); min-width: 720px; }
+    table.sbom-table th, table.sbom-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.06); text-align: left; vertical-align: top; }
+    table.sbom-table th { position: sticky; top: 0; background: rgba(255,255,255,.04); z-index: 1; font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+    table.sbom-table tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+    table.sbom-table tbody tr:hover { background: rgba(124,92,255,.14); }
+    .sbom-sort-btn { display: inline-flex; align-items: center; gap: 6px; background: transparent; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0; }
+    .sbom-sort-btn:focus-visible { outline: 2px solid rgba(124,92,255,.55); outline-offset: 2px; border-radius: 6px; }
+    .sbom-sort-indicator { font-size: 11px; opacity: .7; }
+    .sbom-num { text-align: right; font-variant-numeric: tabular-nums; }
+    .sbom-boolean { text-align: center; font-variant-numeric: tabular-nums; }
+    #sbomEmpty { padding: 18px; text-align: center; color: var(--muted); font-size: 13px; }
+    details.sbom-legend { background: #0d1220; border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px 14px; color: var(--muted); font-size: 12px; }
+    details.sbom-legend[open] summary { margin-bottom: 8px; }
+    details.sbom-legend summary { cursor: pointer; color: var(--text); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+    details.sbom-legend dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; }
+    details.sbom-legend dt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text); }
+    details.sbom-legend dd { margin: 0; color: var(--muted); }
     .legend .metric-sep { align-self: center; color: rgba(255,255,255,.4); }
 
     .stat { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 13px; }
@@ -364,6 +391,29 @@
       <button type="button" class="metric" data-highlight="dynamic">Dynamic-only: <span id="dCount" class="mono">0</span></button>
       <span class="metric-sep" aria-hidden="true">·</span>
       <button type="button" class="metric" data-highlight="security">Security: <span id="secCount" class="mono">0/0</span></button>
+    </div>
+  </section>
+
+  <section id="sbomPanel" aria-labelledby="sbomPanelTitle">
+    <div class="group sbom-group">
+      <div class="sbom-header">
+        <h3 id="sbomPanelTitle">SBOM Inventory</h3>
+        <div class="sbom-controls">
+          <input type="search" id="sbomSearch" placeholder="Search rows…" aria-label="Search SBOM rows" />
+          <div class="sbom-count" id="sbomCount" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="sbom-table-wrap" role="region" aria-live="polite" aria-label="Software bill of materials table">
+        <table id="sbomTable" class="sbom-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+        <div id="sbomEmpty">No SBOM entries to display. Load a graph or adjust filters.</div>
+      </div>
+      <details class="sbom-legend" open>
+        <summary>Column legend</summary>
+        <dl id="sbomLegendList"></dl>
+      </details>
     </div>
   </section>
 
@@ -763,6 +813,316 @@ window.addEventListener('DOMContentLoaded', () => {
   const profileLegend = $('profileLegend');
   const keepRuleBtn = $('markKeepRule');
   const keepRuleNote = $('keepRuleNote');
+  const exportFilteredToggle = $('exportFiltered');
+  const sbomTableEl = $('sbomTable');
+  const sbomTableHead = sbomTableEl ? sbomTableEl.querySelector('thead') : null;
+  const sbomTableBody = sbomTableEl ? sbomTableEl.querySelector('tbody') : null;
+  const sbomEmptyState = $('sbomEmpty');
+  const sbomLegendList = $('sbomLegendList');
+  const sbomSearchInput = $('sbomSearch');
+  const sbomCountEl = $('sbomCount');
+
+  const SBOM_COLUMN_DEFINITIONS = [
+    { key: 'id', label: 'Id', description: 'Node identifier (typically path or package name)' },
+    { key: 'hash', label: 'Hash', description: 'Hash of the node contents or artifact when provided.' },
+    { key: 'statusPrimary', label: 'Primary status', description: 'Primary status classification for the node' },
+    { key: 'statuses', label: 'Statuses', description: 'All status labels applied to the node (pipe-delimited)' },
+    { key: 'type', label: 'Type', description: 'Node type (for example, file or package)' },
+    { key: 'package', label: 'Package', description: 'Package name associated with the node' },
+    { key: 'exports', label: 'Exports', description: 'List of export symbols recorded for the node (pipe-delimited)' },
+    { key: 'sizeLOC', label: 'LOC', description: 'Lines of code attributed to the node', numeric: true },
+    { key: 'hasSideEffects', label: 'Side-effects', description: 'Whether the node is marked as having side effects', boolean: true },
+    { key: 'external', label: 'External', description: 'True if the node represents an external dependency', boolean: true },
+    { key: 'inDegree', label: 'In', description: 'Number of incoming edges referencing the node', numeric: true },
+    { key: 'outDegree', label: 'Out', description: 'Number of outgoing edges from the node', numeric: true },
+    { key: 'degree', label: 'Degree', description: 'Total graph degree (inDegree + outDegree)', numeric: true },
+    { key: 'securityFindingCount', label: 'Security findings', description: 'Number of security findings associated with the node', numeric: true },
+    { key: 'securitySeverityNormalized', label: 'Severity (normalized)', description: 'Pipe-delimited list of normalized severity levels for security findings' },
+    { key: 'securitySeverityLabels', label: 'Severity labels', description: 'Pipe-delimited list of human readable severity labels for security findings' },
+    { key: 'securityFindingIds', label: 'Finding IDs', description: 'Pipe-delimited list of security finding identifiers' },
+    { key: 'securityFindingMessages', label: 'Finding messages', description: 'Pipe-delimited list of security finding messages' },
+    { key: 'securityFindingLines', label: 'Finding lines', description: 'Pipe-delimited list of source line numbers associated with the findings' },
+    { key: 'securityFindingCodes', label: 'Finding codes', description: 'Pipe-delimited list of codes or snippet identifiers associated with the findings' }
+  ];
+
+  const shouldUseFilteredForSbom = () => !!(exportFilteredToggle && exportFilteredToggle.checked);
+
+  function extractNodeHash(node){
+    if(!node || typeof node !== 'object') return '';
+    const preferredKeys = ['contentHash', 'content_hash', 'hash', 'checksum', 'integrity', 'sha256', 'sha1', 'md5'];
+    for(const key of preferredKeys){
+      const value = node[key];
+      if(typeof value === 'string' && value.trim()) return value.trim();
+    }
+    const hashField = node.hash;
+    if(typeof hashField === 'string' && hashField.trim()){
+      return hashField.trim();
+    }
+    if(hashField && typeof hashField === 'object'){
+      for(const value of Object.values(hashField)){
+        if(typeof value === 'string' && value.trim()) return value.trim();
+      }
+    }
+    const hashesField = node.hashes;
+    if(Array.isArray(hashesField)){
+      for(const value of hashesField){
+        if(typeof value === 'string' && value.trim()) return value.trim();
+      }
+    }
+    if(hashesField && typeof hashesField === 'object'){
+      for(const value of Object.values(hashesField)){
+        if(typeof value === 'string' && value.trim()) return value.trim();
+      }
+    }
+    return '';
+  }
+
+  function buildSbomDataset(nodes){
+    const list = Array.isArray(nodes) ? nodes.filter(item => item && typeof item === 'object') : [];
+    const rows = list.map(node => {
+      const inDeg = node.inDeg || 0;
+      const outDeg = node.outDeg || 0;
+      const degree = inDeg + outDeg;
+      const statusPrimary = primaryStatusFor(node);
+      const statuses = statusesFor(node);
+      const exportsSummary = exportSymbolsSummary(node?.exports);
+      const securityFindings = collectNodeSecurityFindings(node).map(item => {
+        const norm = normalizeSecuritySeverityLocal(item.severityNormalized != null ? item.severityNormalized : item.severity);
+        return {
+          severityNorm: norm,
+          severityLabel: severityLabelFor(item.severityNormalized != null ? item.severityNormalized : item.severity),
+          id: item.id != null ? String(item.id) : '',
+          message: item.message != null ? String(item.message) : '',
+          line: Number.isFinite(item.line) ? String(Number(item.line)) : '',
+          code: item.code != null ? String(item.code) : ''
+        };
+      });
+      const loc = Number(node.sizeLOC);
+      const values = {
+        id: node.id || '',
+        hash: extractNodeHash(node),
+        statusPrimary,
+        statuses: statuses.join('|'),
+        type: node.type || '',
+        package: node.package || '',
+        exports: exportsSummary,
+        sizeLOC: Number.isFinite(loc) ? loc : null,
+        hasSideEffects: node.hasSideEffects === true ? true : (node.hasSideEffects === false ? false : null),
+        external: !!isExternal(node),
+        inDegree: inDeg,
+        outDegree: outDeg,
+        degree,
+        securityFindingCount: securityFindings.length,
+        securitySeverityNormalized: securityFindings.map(item => item.severityNorm || '').filter(Boolean).join('|'),
+        securitySeverityLabels: securityFindings.map(item => item.severityLabel || '').filter(Boolean).join('|'),
+        securityFindingIds: securityFindings.map(item => item.id).filter(Boolean).join('|'),
+        securityFindingMessages: securityFindings.map(item => item.message).filter(Boolean).join('|'),
+        securityFindingLines: securityFindings.map(item => item.line).filter(Boolean).join('|'),
+        securityFindingCodes: securityFindings.map(item => item.code).filter(Boolean).join('|')
+      };
+      const searchParts = SBOM_COLUMN_DEFINITIONS.map(column => serializeSbomValue(column, values[column.key]));
+      const searchable = searchParts.join(' ').toLowerCase();
+      return { node, values, searchable };
+    });
+    return { columns: SBOM_COLUMN_DEFINITIONS, rows };
+  }
+
+  let sbomState = {
+    dataset: { columns: SBOM_COLUMN_DEFINITIONS, rows: [] },
+    sortKey: 'id',
+    sortDir: 'asc',
+    query: ''
+  };
+
+  let sbomNeedsDataset = false;
+
+  function requestSbomDatasetUpdate(){
+    sbomNeedsDataset = true;
+  }
+
+  function ensureSbomSortKey(dataset){
+    if(!dataset || !Array.isArray(dataset.columns)) return;
+    const available = new Set(dataset.columns.map(column => column.key));
+    if(!available.has(sbomState.sortKey)){
+      sbomState.sortKey = dataset.columns.length ? dataset.columns[0].key : 'id';
+      sbomState.sortDir = 'asc';
+    }
+  }
+
+  function renderSbomHeader(columns){
+    if(!sbomTableHead) return;
+    sbomTableHead.innerHTML = '';
+    if(!Array.isArray(columns) || !columns.length) return;
+    const row = document.createElement('tr');
+    columns.forEach(column => {
+      const th = document.createElement('th');
+      th.scope = 'col';
+      th.dataset.sbomColumn = column.key;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sbom-sort-btn';
+      btn.setAttribute('data-sbom-sort', column.key);
+      btn.innerHTML = `<span>${escapeHtml(column.label)}</span><span class="sbom-sort-indicator" aria-hidden="true">↕</span>`;
+      th.appendChild(btn);
+      row.appendChild(th);
+    });
+    sbomTableHead.appendChild(row);
+    updateSbomHeaderSortIndicators();
+  }
+
+  function updateSbomHeaderSortIndicators(){
+    if(!sbomTableHead) return;
+    const ths = Array.from(sbomTableHead.querySelectorAll('th'));
+    ths.forEach(th => {
+      const key = th.dataset.sbomColumn;
+      const btn = th.querySelector('[data-sbom-sort]');
+      const indicator = btn ? btn.querySelector('.sbom-sort-indicator') : null;
+      if(!indicator) return;
+      if(key === sbomState.sortKey){
+        indicator.textContent = sbomState.sortDir === 'desc' ? '▼' : '▲';
+        th.setAttribute('aria-sort', sbomState.sortDir === 'desc' ? 'descending' : 'ascending');
+      } else {
+        indicator.textContent = '↕';
+        th.setAttribute('aria-sort', 'none');
+      }
+    });
+  }
+
+  function renderSbomLegend(columns){
+    if(!sbomLegendList) return;
+    sbomLegendList.innerHTML = '';
+    if(!Array.isArray(columns)) return;
+    columns.forEach(column => {
+      const dt = document.createElement('dt');
+      dt.textContent = column.key;
+      const dd = document.createElement('dd');
+      dd.textContent = column.description || '';
+      sbomLegendList.appendChild(dt);
+      sbomLegendList.appendChild(dd);
+    });
+  }
+
+  function serializeSbomValue(column, value){
+    if(value == null || value === '') return '';
+    if(column && column.boolean){
+      if(value === true || value === 'true') return 'true';
+      if(value === false || value === 'false') return 'false';
+      return String(value);
+    }
+    if(column && column.numeric){
+      if(typeof value === 'number' && Number.isFinite(value)) return String(value);
+      if(typeof value === 'string'){
+        const trimmed = value.trim();
+        if(!trimmed) return '';
+        const numeric = Number(trimmed);
+        return Number.isFinite(numeric) ? String(numeric) : '';
+      }
+      const numeric = Number(value);
+      return Number.isFinite(numeric) ? String(numeric) : '';
+    }
+    return String(value);
+  }
+
+  function formatSbomCell(column, value){
+    if(value == null || value === '') return '';
+    if(column && column.boolean){
+      if(value === true || value === 'true') return 'Yes';
+      if(value === false || value === 'false') return 'No';
+      return String(value);
+    }
+    return serializeSbomValue(column, value);
+  }
+
+  function compareSbomRows(a, b, column, direction){
+    const factor = direction === 'desc' ? -1 : 1;
+    const av = a?.values?.[column.key];
+    const bv = b?.values?.[column.key];
+    let diff = 0;
+    if(column.numeric){
+      const an = typeof av === 'number' ? av : Number(av);
+      const bn = typeof bv === 'number' ? bv : Number(bv);
+      const aValid = Number.isFinite(an);
+      const bValid = Number.isFinite(bn);
+      if(aValid && bValid){
+        diff = an - bn;
+      } else if(aValid){
+        diff = -1;
+      } else if(bValid){
+        diff = 1;
+      }
+    } else if(column.boolean){
+      const order = (value) => {
+        if(value === true || value === 'true') return 2;
+        if(value === false || value === 'false') return 1;
+        return 0;
+      };
+      diff = order(av) - order(bv);
+    } else {
+      const astr = serializeSbomValue(column, av).toLowerCase();
+      const bstr = serializeSbomValue(column, bv).toLowerCase();
+      diff = astr.localeCompare(bstr);
+    }
+    if(diff === 0){
+      const aid = serializeSbomValue({ key: 'id' }, a?.values?.id || '').toLowerCase();
+      const bid = serializeSbomValue({ key: 'id' }, b?.values?.id || '').toLowerCase();
+      diff = aid.localeCompare(bid);
+    }
+    return diff * factor;
+  }
+
+  function applySbomView(){
+    if(!sbomTableBody || !sbomTableEl) return;
+    const dataset = sbomState.dataset || { columns: [], rows: [] };
+    const columns = Array.isArray(dataset.columns) ? dataset.columns : [];
+    const sourceRows = Array.isArray(dataset.rows) ? dataset.rows : [];
+    const totalRows = sourceRows.length;
+    const query = (sbomState.query || '').trim().toLowerCase();
+    const column = columns.find(col => col.key === sbomState.sortKey) || columns[0];
+    let rows = sourceRows.slice();
+    if(query){
+      rows = rows.filter(row => row.searchable.includes(query));
+    }
+    if(column){
+      rows.sort((a, b) => compareSbomRows(a, b, column, sbomState.sortDir));
+    }
+    sbomTableBody.innerHTML = '';
+    rows.forEach(row => {
+      const tr = document.createElement('tr');
+      columns.forEach(column => {
+        const td = document.createElement('td');
+        if(column.numeric) td.classList.add('sbom-num');
+        if(column.boolean) td.classList.add('sbom-boolean');
+        td.textContent = formatSbomCell(column, row.values[column.key]);
+        tr.appendChild(td);
+      });
+      sbomTableBody.appendChild(tr);
+    });
+    if(sbomEmptyState){
+      sbomEmptyState.style.display = rows.length ? 'none' : 'block';
+    }
+    sbomTableEl.style.display = rows.length && columns.length ? 'table' : 'none';
+    if(sbomCountEl){
+      if(totalRows === 0){
+        sbomCountEl.textContent = 'No nodes';
+      } else if(rows.length === totalRows){
+        sbomCountEl.textContent = `${totalRows} node${totalRows === 1 ? '' : 's'}`;
+      } else {
+        sbomCountEl.textContent = `Showing ${rows.length} of ${totalRows} nodes`;
+      }
+    }
+  }
+
+  function rebuildSbomDataset(){
+    sbomNeedsDataset = false;
+    const nodes = shouldUseFilteredForSbom() ? filtered.nodes : graph.nodes;
+    const dataset = buildSbomDataset(nodes);
+    sbomState = { ...sbomState, dataset };
+    ensureSbomSortKey(dataset);
+    renderSbomHeader(dataset.columns);
+    renderSbomLegend(dataset.columns);
+    updateSbomHeaderSortIndicators();
+    applySbomView();
+  }
   const highlightedNodeIds = new Set();
   let appliedHighlightIds = new Set();
   const nodeIndexById = new Map();
@@ -1628,6 +1988,37 @@ window.addEventListener('DOMContentLoaded', () => {
   $('resetView').addEventListener('click', ()=>{ svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity); });
   $('pause').addEventListener('click', ()=>{ paused = !paused; $('pause').textContent = paused ? 'Resume ▶' : 'Pause ⏸'; if(paused){ sim.stop(); } else { warmSimulation(); pendingSimWarmup = false; pendingGentleWarm = false; } lowMotionTickCount = 0; });
   $('exportSbom').addEventListener('click', exportSbom);
+  if(exportFilteredToggle){
+    exportFilteredToggle.addEventListener('change', ()=>{
+      rebuildSbomDataset();
+    });
+  }
+  if(sbomTableHead){
+    sbomTableHead.addEventListener('click', (event)=>{
+      const target = event.target instanceof HTMLElement ? event.target.closest('[data-sbom-sort]') : null;
+      if(!target) return;
+      const key = target.getAttribute('data-sbom-sort');
+      if(!key) return;
+      if(sbomState.sortKey === key){
+        sbomState = { ...sbomState, sortDir: sbomState.sortDir === 'asc' ? 'desc' : 'asc' };
+      } else {
+        sbomState = { ...sbomState, sortKey: key, sortDir: 'asc' };
+      }
+      updateSbomHeaderSortIndicators();
+      applySbomView();
+    });
+  }
+  if(sbomSearchInput){
+    sbomSearchInput.addEventListener('input', (event)=>{
+      const target = event.target;
+      const value = (target && typeof target === 'object' && 'value' in target && typeof target.value === 'string')
+        ? target.value
+        : '';
+      sbomState = { ...sbomState, query: value };
+      applySbomView();
+    });
+  }
+  rebuildSbomDataset();
   const toggleSidebarBtn = $('toggleSidebar');
   const sidebarLatch = $('sidebarLatch');
   const sidebarEl = $('sidebar');
@@ -1870,6 +2261,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if(keepRuleBtn){ keepRuleBtn.style.display = 'none'; }
     if(keepRuleNote){ keepRuleNote.textContent = ''; }
     if(exportJsonBtn){ exportJsonBtn.disabled = true; }
+    rebuildSbomDataset();
   }
 
   const captureNodePositions = ()=>{
@@ -2128,6 +2520,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const gentle = opts.gentle === true;
     if(reheat) pendingSimWarmup = true;
     if(gentle) pendingGentleWarm = true;
+    requestSbomDatasetUpdate();
     if(renderPending) return;
     renderPending = true;
     requestAnimationFrame(()=>{
@@ -2138,6 +2531,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function performRender(){
     applyFilters();
+    if(sbomNeedsDataset){
+      sbomNeedsDataset = false;
+      rebuildSbomDataset();
+    }
 
     function summarizeFiltered(){
       const summary = {
@@ -2627,34 +3024,12 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function exportSbom(){
-    const onlyFiltered = !!($('exportFiltered') && $('exportFiltered').checked);
-    const nodes = onlyFiltered ? filtered.nodes : graph.nodes;
-    if(!nodes.length){
+    const nodes = shouldUseFilteredForSbom() ? filtered.nodes : graph.nodes;
+    const dataset = buildSbomDataset(nodes);
+    if(!dataset.rows.length){
       setStatus('No graph data to export');
       return;
     }
-
-    const headers = [
-      'id',
-      'statusPrimary',
-      'statuses',
-      'type',
-      'package',
-      'exports',
-      'sizeLOC',
-      'hasSideEffects',
-      'external',
-      'inDegree',
-      'outDegree',
-      'degree',
-      'securityFindingCount',
-      'securitySeverityNormalized',
-      'securitySeverityLabels',
-      'securityFindingIds',
-      'securityFindingMessages',
-      'securityFindingLines',
-      'securityFindingCodes'
-    ];
     const escape = (value) => {
       const v = value == null ? '' : String(value);
       if(/[",\n]/.test(v)){
@@ -2662,76 +3037,17 @@ window.addEventListener('DOMContentLoaded', () => {
       }
       return v;
     };
-
-    const rows = [headers.join(',')];
-    rows.push(...nodes.map(n => {
-      const inDeg = n.inDeg || 0;
-      const outDeg = n.outDeg || 0;
-      const degree = inDeg + outDeg;
-      const external = isExternal(n);
-      const statuses = statusesFor(n);
-      const exportsSummary = exportSymbolsSummary(n?.exports);
-      const securityFindings = collectNodeSecurityFindings(n).map(item => ({
-        severityNorm: normalizeSecuritySeverityLocal(item.severityNormalized != null ? item.severityNormalized : item.severity),
-        severityLabel: severityLabelFor(item.severityNormalized != null ? item.severityNormalized : item.severity),
-        id: item.id != null ? String(item.id) : '',
-        message: item.message != null ? String(item.message) : '',
-        line: Number.isFinite(item.line) ? String(Number(item.line)) : '',
-        code: item.code != null ? String(item.code) : ''
-      }));
-      const values = [
-        n.id || '',
-        primaryStatusFor(n),
-        statuses.join('|'),
-        n.type || '',
-        n.package || '',
-        exportsSummary,
-        n.sizeLOC ?? '',
-        n.hasSideEffects ?? '',
-        external,
-        inDeg,
-        outDeg,
-        degree,
-        securityFindings.length,
-        securityFindings.map(item => item.severityNorm || '').filter(Boolean).join('|'),
-        securityFindings.map(item => item.severityLabel || '').filter(Boolean).join('|'),
-        securityFindings.map(item => item.id).filter(Boolean).join('|'),
-        securityFindings.map(item => item.message).filter(Boolean).join('|'),
-        securityFindings.map(item => item.line).filter(Boolean).join('|'),
-        securityFindings.map(item => item.code).filter(Boolean).join('|')
-      ];
-      return values.map(escape).join(',');
-    }));
-
-    const legendDescriptions = {
-      id: 'Node identifier (typically path or package name)',
-      statusPrimary: 'Primary status classification for the node',
-      statuses: 'All status labels applied to the node (pipe-delimited)',
-      type: 'Node type (for example, file or package)',
-      package: 'Package name associated with the node',
-      sizeLOC: 'Lines of code attributed to the node',
-      exports: 'List of export symbols recorded for the node (pipe-delimited)',
-      hasSideEffects: 'Whether the node is marked as having side effects',
-      external: 'True if the node represents an external dependency',
-      inDegree: 'Number of incoming edges referencing the node',
-      outDegree: 'Number of outgoing edges from the node',
-      degree: 'Total graph degree (inDegree + outDegree)',
-      securityFindingCount: 'Number of security findings associated with the node',
-      securitySeverityNormalized: 'Pipe-delimited list of normalized severity levels for security findings',
-      securitySeverityLabels: 'Pipe-delimited list of human readable severity labels for security findings',
-      securityFindingIds: 'Pipe-delimited list of security finding identifiers',
-      securityFindingMessages: 'Pipe-delimited list of security finding messages',
-      securityFindingLines: 'Pipe-delimited list of source line numbers associated with the findings',
-      securityFindingCodes: 'Pipe-delimited list of codes or snippet identifiers associated with the findings'
-    };
-
+    const headers = dataset.columns.map(column => column.key);
+    const rows = [headers.map(header => escape(header)).join(',')];
+    dataset.rows.forEach(row => {
+      const values = dataset.columns.map(column => serializeSbomValue(column, row.values[column.key]));
+      rows.push(values.map(escape).join(','));
+    });
     rows.push('');
     rows.push(['Legend', 'Description'].map(escape).join(','));
-    headers.forEach(header => {
-      const description = legendDescriptions[header] || '';
-      rows.push([header, description].map(escape).join(','));
+    dataset.columns.forEach(column => {
+      rows.push([column.key, column.description || ''].map(escape).join(','));
     });
-
     const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
