@@ -77,18 +77,18 @@ Source _librarySource(LibraryElement lib) {
   throw StateError('Unable to determine source for library ${lib.name ?? '<unnamed>'}');
 }
 
-List<ImportElement> _libraryImports(LibraryElement lib) {
+Iterable<dynamic> _libraryImports(LibraryElement lib) {
   final dynamic dyn = lib;
-  return _tryGetter(() => dyn.libraryImports as List<ImportElement>?) ??
-      _tryGetter(() => dyn.imports as List<ImportElement>?) ??
-      const <ImportElement>[];
+  return _tryGetter(() => dyn.libraryImports as Iterable<dynamic>?) ??
+      _tryGetter(() => dyn.imports as Iterable<dynamic>?) ??
+      const <dynamic>[];
 }
 
-List<ExportElement> _libraryExports(LibraryElement lib) {
+Iterable<dynamic> _libraryExports(LibraryElement lib) {
   final dynamic dyn = lib;
-  return _tryGetter(() => dyn.libraryExports as List<ExportElement>?) ??
-      _tryGetter(() => dyn.exports as List<ExportElement>?) ??
-      const <ExportElement>[];
+  return _tryGetter(() => dyn.libraryExports as Iterable<dynamic>?) ??
+      _tryGetter(() => dyn.exports as Iterable<dynamic>?) ??
+      const <dynamic>[];
 }
 
 Iterable<dynamic> _libraryParts(LibraryElement lib) {
@@ -103,7 +103,7 @@ Source? _partElementSource(dynamic element) {
       _tryGetter(() => (element as dynamic).librarySource as Source?);
 }
 
-Map<String, Element> _namespaceElements(Namespace namespace) {
+Map<String, Element> _namespaceElements(dynamic namespace) {
   return _tryGetter(() => namespace.definedNames as Map<String, Element>?) ??
       _tryGetter(() => namespace.definedElements as Map<String, Element>?) ??
       const <String, Element>{};
@@ -960,11 +960,11 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
       }
       for (final method in element.methods) {
         if (!method.isPublic || method.isSynthetic) continue;
-        members.add(method.getDisplayString(withNullability: true));
+        members.add(_elementDisplay(method));
       }
       for (final ctor in element.constructors) {
         if (!ctor.isPublic || ctor.isSynthetic) continue;
-        members.add(ctor.getDisplayString(withNullability: true));
+        members.add(_elementDisplay(ctor));
       }
       final classEntry = <String, dynamic>{
         'name': element.name ?? element.displayName,
@@ -979,7 +979,6 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
     }
 
     if (element is ExecutableElement && element.kind == ElementKind.FUNCTION) {
-      if (element.isGetter || element.isSetter || element.isOperator) continue;
       final name = element.name ?? element.displayName;
       functions.add({
         'name': name,
@@ -1262,36 +1261,36 @@ class _SecretPattern {
 }
 
 final List<_SecretPattern> _secretPatterns = [
-  const _SecretPattern(
-    pattern: const RegExp(r'AKIA[0-9A-Z]{16}'),
+  _SecretPattern(
+    pattern: RegExp(r'AKIA[0-9A-Z]{16}'),
     ruleId: 'dart.secret.aws-access-key',
     severity: 'high',
     message: 'Possible AWS access key detected.',
     reportWhenSanitizedBlank: true,
   ),
-  const _SecretPattern(
-    pattern: const RegExp(r'xox[baprs]-[0-9A-Za-z-]{10,48}'),
+  _SecretPattern(
+    pattern: RegExp(r'xox[baprs]-[0-9A-Za-z-]{10,48}'),
     ruleId: 'dart.secret.slack-token',
     severity: 'high',
     message: 'Possible Slack token detected.',
     reportWhenSanitizedBlank: true,
   ),
-  const _SecretPattern(
-    pattern: const RegExp(r'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'),
+  _SecretPattern(
+    pattern: RegExp(r'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'),
     ruleId: 'dart.secret.jwt',
     severity: 'high',
     message: 'String looks like a JWT token.',
     reportWhenSanitizedBlank: true,
   ),
-  const _SecretPattern(
-    pattern: const RegExp(r'-----BEGIN (?:RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY-----'),
+  _SecretPattern(
+    pattern: RegExp(r'-----BEGIN (?:RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY-----'),
     ruleId: 'dart.secret.private-key',
     severity: 'high',
     message: 'Private key material detected.',
     reportWhenSanitizedBlank: true,
   ),
-  const _SecretPattern(
-    pattern: const RegExp('http://[^\\s\'"]+'),
+  _SecretPattern(
+    pattern: RegExp('http://[^\\s\'"]+'),
     ruleId: 'dart.http.http-url',
     severity: 'medium',
     message: 'HTTP URL detected. Prefer HTTPS to avoid clear-text traffic.',
