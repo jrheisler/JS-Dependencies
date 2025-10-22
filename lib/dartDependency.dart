@@ -223,6 +223,14 @@ String _missingSdkMessage({
   return buffer.toString().trimRight();
 }
 
+String _canonicalizePathForMap(String path) {
+  final normalized = p.normalize(path);
+  if (Platform.isWindows) {
+    return normalized.toLowerCase();
+  }
+  return normalized;
+}
+
 T? _tryGetter<T>(T? Function() getter) {
   try {
     return getter();
@@ -458,18 +466,21 @@ Future<_DependencyGraphResult> _buildDependencyGraph(
 
   final normalizedUnits = <String, ResolvedUnitResult>{};
   units.forEach((path, unit) {
-    normalizedUnits[p.normalize(path)] = unit;
+    normalizedUnits[_canonicalizePathForMap(path)] = unit;
   });
 
-  for (final entry in normalizedUnits.entries) {
-    final unit = entry.value;
+  for (final unit in normalizedUnits.values) {
     final lib = unit.libraryElement;
     if (lib == null || lib.isSynthetic) continue;
 
-    final libPath = p.normalize(_librarySource(lib).fullName);
+    final libSource = _librarySource(lib);
+    final libPath = libSource.fullName;
     if (!_isWithinRoot(root, libPath)) continue;
-    if (entry.key != libPath) continue;
-    if (!processedLibraries.add(libPath)) continue;
+
+    final libKey = _canonicalizePathForMap(libPath);
+    final unitKey = _canonicalizePathForMap(unit.path);
+    if (unitKey != libKey) continue;
+    if (!processedLibraries.add(libKey)) continue;
 
     final summary = await _summarizeLibrary(
       root,
@@ -485,15 +496,15 @@ Future<_DependencyGraphResult> _buildDependencyGraph(
     libraries.add(summary);
   }
 
-  for (final entry in normalizedUnits.entries) {
-    final absPath = entry.key;
+  for (final unit in normalizedUnits.values) {
+    final absPath = p.normalize(unit.path);
     if (!_isWithinRoot(root, absPath)) continue;
     final relPath = p.relative(absPath, from: root);
     await _ensureFileNode(
       nodes,
       absPath,
       relPath,
-      entry.value,
+      unit,
       packageName,
       shaCache,
     );
@@ -568,7 +579,7 @@ Future<_LibrarySummary> _summarizeLibrary(
       final targetPath = p.normalize(_librarySource(target).fullName);
       if (_isWithinRoot(root, targetPath)) {
         final relTarget = p.relative(targetPath, from: root);
-        final targetUnit = units[targetPath];
+        final targetUnit = units[_canonicalizePathForMap(targetPath)];
         await _ensureFileNode(
           nodes,
           targetPath,
@@ -589,7 +600,7 @@ Future<_LibrarySummary> _summarizeLibrary(
       final resolved = _resolveRelativeUri(absPath, imp.uri);
       if (resolved != null && _isWithinRoot(root, resolved) && File(resolved).existsSync()) {
         final relTarget = p.relative(resolved, from: root);
-        final targetUnit = units[p.normalize(resolved)];
+        final targetUnit = units[_canonicalizePathForMap(resolved)];
         await _ensureFileNode(
           nodes,
           resolved,
@@ -626,7 +637,7 @@ Future<_LibrarySummary> _summarizeLibrary(
       final targetPath = p.normalize(_librarySource(target).fullName);
       if (_isWithinRoot(root, targetPath)) {
         final relTarget = p.relative(targetPath, from: root);
-        final targetUnit = units[targetPath];
+        final targetUnit = units[_canonicalizePathForMap(targetPath)];
         await _ensureFileNode(
           nodes,
           targetPath,
@@ -647,7 +658,7 @@ Future<_LibrarySummary> _summarizeLibrary(
       final resolved = _resolveRelativeUri(absPath, ex.uri);
       if (resolved != null && _isWithinRoot(root, resolved) && File(resolved).existsSync()) {
         final relTarget = p.relative(resolved, from: root);
-        final targetUnit = units[p.normalize(resolved)];
+        final targetUnit = units[_canonicalizePathForMap(resolved)];
         await _ensureFileNode(
           nodes,
           resolved,
@@ -683,7 +694,7 @@ Future<_LibrarySummary> _summarizeLibrary(
     final partPath = p.normalize(source.fullName);
     if (!_isWithinRoot(root, partPath)) continue;
     final relPart = p.relative(partPath, from: root);
-    final partUnit = units[partPath];
+    final partUnit = units[_canonicalizePathForMap(partPath)];
     await _ensureFileNode(
       nodes,
       partPath,
@@ -1011,7 +1022,18 @@ const Set<String> _ignoredDirs = {
 bool _isWithinRoot(String root, String candidate) {
   final normalizedRoot = p.normalize(root);
   final normalized = p.normalize(candidate);
-  return normalized == normalizedRoot || p.isWithin(normalizedRoot, normalized);
+  if (p.equals(normalized, normalizedRoot)) {
+    return true;
+  }
+  if (Platform.isWindows) {
+    final lowerRoot = normalizedRoot.toLowerCase();
+    final lowerCandidate = normalized.toLowerCase();
+    if (lowerCandidate == lowerRoot) {
+      return true;
+    }
+    return p.isWithin(lowerRoot, lowerCandidate);
+  }
+  return p.isWithin(normalizedRoot, normalized);
 }
 
 bool _shouldIgnore(String root, String path) {
@@ -1325,6 +1347,7 @@ class _SecurityFinding {
 
   Map<String, dynamic> toJson() => {
         'ruleId': ruleId,
+        'id': ruleId,
         'severity': severity,
         'message': message,
         'file': file,
