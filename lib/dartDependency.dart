@@ -96,9 +96,15 @@ _CliOptions _parseArgs(List<String> args) {
   );
 }
 
-_SdkSearchResult _discoverSdkPath(String root, _CliOptions cli) {
+_SdkSearchResult _discoverSdkPath(
+  String root,
+  _CliOptions cli, {
+  Map<String, String>? environment,
+}) {
   final attempted = <String>[];
   final seen = <String>{};
+
+  final env = environment ?? Platform.environment;
 
   String? check(String? candidate) {
     if (candidate == null || candidate.trim().isEmpty) return null;
@@ -113,12 +119,12 @@ _SdkSearchResult _discoverSdkPath(String root, _CliOptions cli) {
     return _SdkSearchResult(path: explicit, attempted: attempted);
   }
 
-  final envSdk = check(Platform.environment['DART_SDK']);
+  final envSdk = check(env['DART_SDK']);
   if (envSdk != null) {
     return _SdkSearchResult(path: envSdk, attempted: attempted);
   }
 
-  final flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  final flutterRoot = env['FLUTTER_ROOT'];
   if (flutterRoot != null && flutterRoot.trim().isNotEmpty) {
     final flutterSdk = check(p.join(flutterRoot, 'bin', 'cache', 'dart-sdk'));
     if (flutterSdk != null) {
@@ -150,7 +156,30 @@ _SdkSearchResult _discoverSdkPath(String root, _CliOptions cli) {
     }
   }
 
+  final pathEnv = env['PATH'];
+  for (final candidate in _pathDerivedSdkCandidates(pathEnv)) {
+    final resolved = check(candidate);
+    if (resolved != null) {
+      return _SdkSearchResult(path: resolved, attempted: attempted);
+    }
+  }
+
   return _SdkSearchResult(path: null, attempted: attempted);
+}
+
+Iterable<String> _pathDerivedSdkCandidates(String? pathEnv) sync* {
+  if (pathEnv == null || pathEnv.trim().isEmpty) return;
+  final separator = Platform.isWindows ? ';' : ':';
+  for (final entry in pathEnv.split(separator)) {
+    final normalized = entry.trim();
+    if (normalized.isEmpty) continue;
+    final resolved = p.normalize(normalized);
+    yield resolved;
+    yield p.dirname(resolved);
+    yield p.join(resolved, 'cache', 'dart-sdk');
+    yield p.join(resolved, '..', 'cache', 'dart-sdk');
+    yield p.join(resolved, '..', 'dart-sdk');
+  }
 }
 
 bool _looksLikeSdk(String path) {
