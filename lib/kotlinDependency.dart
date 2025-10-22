@@ -21,6 +21,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'hash_utils.dart';
+
 // -------- path helpers (no package:path) --------
 final _sep = Platform.pathSeparator;
 
@@ -75,6 +77,7 @@ class _Node {
   bool hasMain;
   int inDeg = 0;
   int outDeg = 0;
+  String? sha256;
 
   _Node({
     required this.id,
@@ -86,6 +89,7 @@ class _Node {
     this.declarationName,
     this.fqn,
     this.hasMain = false,
+    this.sha256,
   });
 
   Map<String, dynamic> toJson() => {
@@ -100,6 +104,7 @@ class _Node {
         if (hasMain) 'main': hasMain,
         'inDeg': inDeg,
         'outDeg': outDeg,
+        if (sha256 != null) 'sha256': sha256,
       };
 }
 
@@ -158,10 +163,16 @@ Future<void> main(List<String> args) async {
 
   final files = await _collectKtFiles(cwd);
   final facts = <_KtFacts>[];
+  final fileHashes = <String, String>{};
   for (final file in files) {
     final abs = _normalize(file);
     final text = await File(abs).readAsString();
-    facts.add(_extractFacts(cwd, abs, text));
+    final fact = _extractFacts(cwd, abs, text);
+    facts.add(fact);
+    final hash = await fileSha256(abs);
+    if (hash != null) {
+      fileHashes[fact.fileIdRel] = hash;
+    }
   }
 
   final fqnToFile = <String, String>{};
@@ -193,6 +204,7 @@ Future<void> main(List<String> args) async {
       declarationName: fact.declarationName,
       fqn: fact.fqn,
       hasMain: fact.hasMain,
+      sha256: fileHashes[fact.fileIdRel],
     );
   }
 

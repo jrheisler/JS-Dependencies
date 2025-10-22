@@ -3,6 +3,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'hash_utils.dart';
+
 // -------- path helpers (no package:path) --------
 final _sep = Platform.pathSeparator;
 
@@ -57,10 +59,15 @@ void main(List<String> args) async {
 
   // Parse imports
   final factsByPath = <String, _FileFacts>{};
+  final fileHashes = <String, String>{};
   for (final f in files) {
     final text = await File(f).readAsString();
     final facts = _extractFacts(f, text);
     factsByPath[f] = facts;
+    final hash = await fileSha256(f);
+    if (hash != null) {
+      fileHashes[_normalize(f)] = hash;
+    }
   }
 
   // Build edges + external nodes
@@ -108,6 +115,7 @@ void main(List<String> args) async {
       hasSideEffects: facts?.hasSideEffectImport ?? false,
       absPath: normalized,
       exports: nodeExports,
+      sha256: fileHashes[normalized],
     ));
   }
   for (final e in externals) {
@@ -233,6 +241,7 @@ class _Node {
   final String? absPath;
   String lang = 'js';
   final Map<String, List<String>>? exports;
+  final String? sha256;
 
   _Node({
     required this.id,
@@ -243,6 +252,7 @@ class _Node {
     this.hasSideEffects,
     required this.absPath,
     this.exports,
+    this.sha256,
   });
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{
@@ -256,6 +266,7 @@ class _Node {
       'inDeg': inDeg,
       'outDeg': outDeg,
       if (absPath != null) 'absPath': absPath,
+      if (sha256 != null) 'sha256': sha256,
     };
     if (exports != null && exports!.isNotEmpty) {
       map['exports'] = {
