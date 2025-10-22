@@ -28,6 +28,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'hash_utils.dart';
+
 // -------- path helpers (no package:path) --------
 final _sep = Platform.pathSeparator;
 
@@ -89,6 +91,7 @@ class _Node {
   String? packageName;  // from pubspec.yaml (for local files)
   int inDeg = 0;
   int outDeg = 0;
+  String? sha256;
 
   _Node({
     required this.id,
@@ -96,6 +99,7 @@ class _Node {
     required this.state,
     this.sizeLOC,
     this.packageName,
+    this.sha256,
   });
 
   Map<String, dynamic> toJson() => {
@@ -107,6 +111,7 @@ class _Node {
         if (packageName != null) 'package': packageName,
         'inDeg': inDeg,
         'outDeg': outDeg,
+        if (sha256 != null) 'sha256': sha256,
       };
 }
 
@@ -200,9 +205,15 @@ void main(List<String> args) async {
 
   // 3) Parse facts
   final facts = <_FileFacts>[];
+  final fileHashes = <String, String>{};
   for (final f in files) {
     final text = await File(f).readAsString();
-    facts.add(_extractFacts(cwd, f, text));
+    final fact = _extractFacts(cwd, f, text);
+    facts.add(fact);
+    final hash = await fileSha256(f);
+    if (hash != null) {
+      fileHashes[fact.relId] = hash;
+    }
   }
 
   final explainTarget = cli.explain == null ? null : _coerceToRelId(cli.explain!, cwd);
@@ -288,17 +299,26 @@ void main(List<String> args) async {
       state: 'unused', // provisional; set by reachability
       sizeLOC: await _estimateLOC(ff.absPath),
       packageName: pub?.name,
+      sha256: fileHashes[ff.relId],
     ));
     existingIds.add(ff.relId);
   }
 
   for (final entry in referencedFileAbs.entries) {
     if (existingIds.contains(entry.key)) continue;
+    var hash = fileHashes[entry.key];
+    if (hash == null) {
+      hash = await fileSha256(entry.value);
+      if (hash != null) {
+        fileHashes[entry.key] = hash;
+      }
+    }
     nodes.add(_Node(
       id: entry.key,
       type: 'file',
       state: 'unused',
       sizeLOC: await _estimateLOC(entry.value),
+      sha256: hash,
     ));
     existingIds.add(entry.key);
   }

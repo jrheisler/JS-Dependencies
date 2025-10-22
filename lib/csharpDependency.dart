@@ -24,6 +24,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'hash_utils.dart';
+
 final _sep = Platform.pathSeparator;
 
 // ---- tiny path utils (no package:path)
@@ -83,8 +85,16 @@ class _Node {
   String? namespaceName;
   int inDeg = 0;
   int outDeg = 0;
+  String? sha256;
 
-  _Node({required this.id, required this.type, required this.state, this.sizeLOC, this.namespaceName});
+  _Node({
+    required this.id,
+    required this.type,
+    required this.state,
+    this.sizeLOC,
+    this.namespaceName,
+    this.sha256,
+  });
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -95,6 +105,7 @@ class _Node {
     if (namespaceName != null) 'namespace': namespaceName,
     'inDeg': inDeg,
     'outDeg': outDeg,
+    if (sha256 != null) 'sha256': sha256,
   };
 }
 
@@ -124,11 +135,16 @@ void main(List<String> args) async {
   // 2) parse facts
   final facts = <_CsFacts>[];
   final factsByAbs = <String, _CsFacts>{};
+  final fileHashes = <String, String>{};
   for (final f in files) {
     final text = await File(f).readAsString();
     final fact = _extractFacts(cwd, f, text);
     facts.add(fact);
     factsByAbs[fact.absPath] = fact;
+    final hash = await fileSha256(f);
+    if (hash != null) {
+      fileHashes[fact.relId] = hash;
+    }
   }
 
   // 3) build namespace -> files map
@@ -232,6 +248,7 @@ void main(List<String> args) async {
       state: 'unused', // will be updated after reachability
       sizeLOC: await _estimateLOC(ff.absPath),
       namespaceName: ff.namespaceName,
+      sha256: fileHashes[ff.relId],
     ));
   }
   for (final ext in externals) {

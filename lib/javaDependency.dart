@@ -17,6 +17,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'hash_utils.dart';
+
 // -------- path helpers (no package:path) --------
 final _sep = Platform.pathSeparator;
 
@@ -64,6 +66,7 @@ class _Node {
   String lang = 'java';
   int inDeg = 0;
   int outDeg = 0;
+  String? sha256;
 
   _Node({
     required this.id,
@@ -73,6 +76,7 @@ class _Node {
     this.packageName,
     this.className,
     this.fqn,
+    this.sha256,
   });
 
   Map<String, dynamic> toJson() => {
@@ -86,6 +90,7 @@ class _Node {
         if (fqn != null) 'fqn': fqn,
         'inDeg': inDeg,
         'outDeg': outDeg,
+        if (sha256 != null) 'sha256': sha256,
       };
 }
 
@@ -138,9 +143,15 @@ void main(List<String> args) async {
 
   // 2) Parse facts (package, imports, class, main)
   final facts = <_JavaFacts>[];
+  final fileHashes = <String, String>{};
   for (final f in files) {
     final text = await File(f).readAsString();
-    facts.add(_extractJavaFacts(cwd, f, text));
+    final javaFacts = _extractJavaFacts(cwd, f, text);
+    facts.add(javaFacts);
+    final hash = await fileSha256(f);
+    if (hash != null) {
+      fileHashes[javaFacts.fileIdRel] = hash;
+    }
   }
 
   // 3) Build FQN -> fileId map (project classes only)
@@ -201,6 +212,7 @@ void main(List<String> args) async {
       packageName: ff.packageName,
       className: ff.className,
       fqn: ff.fqn,
+      sha256: fileHashes[ff.fileIdRel],
     ));
   }
   for (final ext in externals) {

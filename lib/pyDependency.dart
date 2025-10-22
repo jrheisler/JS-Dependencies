@@ -22,6 +22,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'hash_utils.dart';
+
 // -------- path helpers (no package:path) --------
 final _sep = Platform.pathSeparator;
 
@@ -104,6 +106,7 @@ class _Node {
   String? module;       // e.g., pkg.sub.mod (best-effort)
   int inDeg = 0;
   int outDeg = 0;
+  String? sha256;
 
   _Node({
     required this.id,
@@ -111,6 +114,7 @@ class _Node {
     required this.state,
     this.sizeLOC,
     this.module,
+    this.sha256,
   });
 
   Map<String, dynamic> toJson() => {
@@ -122,6 +126,7 @@ class _Node {
         if (module != null) 'module': module,
         'inDeg': inDeg,
         'outDeg': outDeg,
+        if (sha256 != null) 'sha256': sha256,
       };
 }
 
@@ -205,9 +210,15 @@ void main(List<String> args) async {
 
   // 3) Parse facts
   final facts = <_FileFacts>[];
+  final fileHashes = <String, String>{};
   for (final f in files) {
     final text = await File(f).readAsString();
-    facts.add(_extractFacts(cwd, f, text, packageRoots));
+    final ff = _extractFacts(cwd, f, text, packageRoots);
+    facts.add(ff);
+    final hash = await fileSha256(f);
+    if (hash != null) {
+      fileHashes[ff.relId] = hash;
+    }
   }
 
   // 4) Build module->file map (for absolute resolution)
@@ -247,6 +258,7 @@ void main(List<String> args) async {
       state: 'unused',
       sizeLOC: await _estimateLOC(ff.absPath),
       module: ff.module,
+      sha256: fileHashes[ff.relId],
     ));
   }
   for (final ext in externals) {

@@ -23,6 +23,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'hash_utils.dart';
+
 // -------- path helpers (no package:path) --------
 final _sep = Platform.pathSeparator;
 
@@ -84,8 +86,9 @@ class _Node {
   String? pkg;          // crate name (from Cargo.toml [package].name), if known
   int inDeg = 0;
   int outDeg = 0;
+  String? sha256;
 
-  _Node({required this.id, required this.type, required this.state, this.sizeLOC, this.pkg});
+  _Node({required this.id, required this.type, required this.state, this.sizeLOC, this.pkg, this.sha256});
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -96,6 +99,7 @@ class _Node {
         if (pkg != null) 'crate': pkg,
         'inDeg': inDeg,
         'outDeg': outDeg,
+        if (sha256 != null) 'sha256': sha256,
       };
 }
 
@@ -139,9 +143,15 @@ void main(List<String> args) async {
 
   // 3) Parse facts
   final facts = <_RustFacts>[];
+  final fileHashes = <String, String>{};
   for (final f in files) {
     final text = await File(f).readAsString();
-    facts.add(_extractFacts(cwd, f, text, crateName ?? ''));
+    final fact = _extractFacts(cwd, f, text, crateName ?? '');
+    facts.add(fact);
+    final hash = await fileSha256(f);
+    if (hash != null) {
+      fileHashes[fact.relId] = hash;
+    }
   }
 
   // Precompute directory -> files map
@@ -205,6 +215,7 @@ void main(List<String> args) async {
       state: 'unused',
       sizeLOC: await _estimateLOC(ff.absPath),
       pkg: crateName,
+      sha256: fileHashes[ff.relId],
     ));
   }
   for (final ext in externals) {
