@@ -367,9 +367,9 @@ Future<Graph> _loadInitialGraph() async {
 }
 
 Future<Map<String, dynamic>?> _loadBundledGraph() async {
-  const candidates = [    
+  const candidates = [
     'jsDependencies.json',
-    'samples/jsDependencies.json',        
+    'samples/jsDependencies.json',
   ];
 
   final locations = <String>{};
@@ -452,6 +452,10 @@ final Map<String, String> _defaultOutput = {
   'kotlin': 'kotlinDependencies.json',
   'csharp': 'csharpDependencies.json',
   'dart': 'dartDependencies.json',
+};
+
+final Map<String, List<String>> _additionalOutputs = {
+  'dart': ['dartSecurity.json'],
 };
 
 // ----------------------------
@@ -601,16 +605,33 @@ Future<void> _route(HttpRequest req, int port) async {
         _warn('$exe exited with code $code');
       }
       // read the default output (if present)
-      final outFile = File(_join(root, _defaultOutput[lang] ?? '${lang}Dependencies.json'));
+      final defaultName = _defaultOutput[lang] ?? '${lang}Dependencies.json';
+      final outFile = File(_join(root, defaultName));
       if (await outFile.exists()) {
-        try {
-          final data = jsonDecode(await outFile.readAsString()) as Map<String, dynamic>;
-          collected.add(data);
-        } catch (e) {
-          _warn('Failed to parse ${outFile.path}: $e');
+        final baseGraph = await _readJsonFileIfExists(outFile);
+        if (baseGraph != null) {
+          collected.add(baseGraph);
         }
       } else {
         _warn('Expected output not found for "$lang": ${outFile.path}');
+      }
+
+      final extras = _additionalOutputs[lang] ?? const <String>[];
+      for (final extra in extras) {
+        final extraFile = File(_join(root, extra));
+        if (!await extraFile.exists()) {
+          continue;
+        }
+        final rawExtra = await _readJsonFileIfExists(extraFile);
+        if (rawExtra == null) {
+          continue;
+        }
+        final fragment = _graphFromAdditionalOutput(lang, extra, rawExtra);
+        if (fragment != null) {
+          collected.add(fragment);
+        } else {
+          _warn('Unsupported additional output for "$lang": ${extraFile.path}');
+        }
       }
     }
 
@@ -728,6 +749,57 @@ Future<File?> _locateResource(String relativePath) async {
   }
 
   return await searchVariants(variants);
+}
+
+Future<Map<String, dynamic>?> _readJsonFileIfExists(File file) async {
+  if (!await file.exists()) return null;
+  try {
+    final decoded = jsonDecode(await file.readAsString());
+    if (decoded is Map<String, dynamic>) return decoded;
+    _warn('Expected JSON object in ${file.path} but found ${decoded.runtimeType}');
+  } catch (e) {
+    _warn('Failed to read ${file.path}: $e');
+  }
+  return null;
+}
+
+Map<String, dynamic>? _graphFromAdditionalOutput(
+  String lang,
+  String fileName,
+  Map<String, dynamic> data,
+) {
+  if (lang == 'dart' && fileName.toLowerCase().contains('security')) {
+    return _securityGraphFragment(data);
+  }
+  return null;
+}
+
+Map<String, dynamic>? _securityGraphFragment(Map<String, dynamic> data) {
+  final findingsByFile = <String, List<Map<String, dynamic>>>{};
+  final findings = data['findings'];
+  if (findings is List) {
+    for (final entry in findings) {
+      if (entry is! Map) continue;
+      final file = entry['file'];
+      if (file == null) continue;
+      final key = file.toString().trim();
+      if (key.isEmpty) continue;
+      final cloned = _cloneJsonLike(entry);
+      if (cloned is Map<String, dynamic>) {
+        findingsByFile.putIfAbsent(key, () => []).add(cloned);
+      }
+    }
+  }
+
+  if (findingsByFile.isEmpty && (findings is! List || findings.isEmpty)) {
+    // If there are no findings, still return the security summary so the UI can show totals.
+    return {'security': _cloneJsonLike(data)};
+  }
+
+  return {
+    'security': _cloneJsonLike(data),
+    if (findingsByFile.isNotEmpty) 'securityFindings': findingsByFile,
+  };
 }
 
 bool _isSafeStaticPath(String relative) {
