@@ -26,6 +26,9 @@
     'name',
     'value'
   ];
+  const EDGE_SOURCE_KEYS = ['source', 'sourceId', 'src', 'srcId', 'from', 'fromId', 'origin', 'start', 'u'];
+  const EDGE_TARGET_KEYS = ['target', 'targetId', 'to', 'toId', 'dst', 'dstId', 'dest', 'destination', 'end', 'v'];
+  const EDGE_CONTAINER_KEYS = new Set(['edges', 'links', 'relationships', 'relations', 'dependencies']);
 
   function extractNodeId(ref, visited = new Set()){
     if(ref == null) return null;
@@ -902,20 +905,7 @@
     const keepRuleConfig = Array.isArray(payload?.keepRuleConfig) ? payload.keepRuleConfig : [];
     const localKeepRules = Array.isArray(payload?.localKeepRules) ? payload.localKeepRules : [];
 
-    const EDGE_SOURCE_KEYS = ['source', 'sourceId', 'src', 'srcId', 'from', 'fromId', 'origin', 'start', 'u'];
-    const EDGE_TARGET_KEYS = ['target', 'targetId', 'to', 'toId', 'dst', 'dstId', 'dest', 'destination', 'end', 'v'];
-    const normalizedEdges = Array.isArray(rawGraph.edges || rawGraph.links)
-      ? (rawGraph.edges || rawGraph.links)
-          .map(edge => {
-            const rawSource = EDGE_SOURCE_KEYS.map(key => edge[key]).find(value => value !== undefined);
-            const rawTarget = EDGE_TARGET_KEYS.map(key => edge[key]).find(value => value !== undefined);
-            const srcId = extractNodeId(rawSource);
-            const tgtId = extractNodeId(rawTarget);
-            if(!srcId || !tgtId) return null;
-            return { ...edge, source: srcId, target: tgtId };
-          })
-          .filter(edge => edge !== null)
-      : [];
+    const normalizedEdges = collectGraphEdges(rawGraph);
     const graph = {
       nodes: Array.isArray(rawGraph.nodes) ? rawGraph.nodes.map(node => ({ ...node })) : [],
       edges: normalizedEdges
@@ -1060,6 +1050,76 @@
         security: securitySummary
       }
     };
+  }
+
+  function collectGraphEdges(root){
+    const normalized = [];
+    const seen = new Set();
+    const visited = new Set();
+
+    function normalizeEdge(edge){
+      if(!edge || typeof edge !== 'object') return;
+      const rawSource = EDGE_SOURCE_KEYS.map(key => edge[key]).find(value => value !== undefined);
+      const rawTarget = EDGE_TARGET_KEYS.map(key => edge[key]).find(value => value !== undefined);
+      const srcId = extractNodeId(rawSource);
+      const tgtId = extractNodeId(rawTarget);
+      if(!srcId || !tgtId) return;
+      const normalizedEdge = { ...edge, source: srcId, target: tgtId };
+      const kind = typeof normalizedEdge.kind === 'string' ? normalizedEdge.kind : (typeof normalizedEdge.type === 'string' ? normalizedEdge.type : '');
+      const key = `${srcId}=>${tgtId}:${kind || ''}`;
+      if(seen.has(key)) return;
+      seen.add(key);
+      normalized.push(normalizedEdge);
+    }
+
+    function ingestEdgeContainer(container){
+      if(container == null) return;
+      if(Array.isArray(container)){
+        container.forEach(item => {
+          if(item && typeof item === 'object'){
+            normalizeEdge(item);
+          }
+        });
+        return;
+      }
+      if(typeof container === 'object'){
+        const list = Array.isArray(container.list) ? container.list : Array.isArray(container.items) ? container.items : null;
+        if(list){
+          ingestEdgeContainer(list);
+        }
+      }
+    }
+
+    function looksLikeEdgeObject(obj){
+      if(!obj || typeof obj !== 'object') return false;
+      return EDGE_SOURCE_KEYS.some(key => Object.prototype.hasOwnProperty.call(obj, key)) || EDGE_TARGET_KEYS.some(key => Object.prototype.hasOwnProperty.call(obj, key));
+    }
+
+    function traverse(value){
+      if(value == null || typeof value !== 'object') return;
+      if(visited.has(value)) return;
+      visited.add(value);
+
+      if(Array.isArray(value)){
+        if(value.some(looksLikeEdgeObject)){
+          ingestEdgeContainer(value);
+          return;
+        }
+        value.forEach(traverse);
+        return;
+      }
+
+      for(const [key, child] of Object.entries(value)){
+        if(EDGE_CONTAINER_KEYS.has(key)){
+          ingestEdgeContainer(child);
+          continue;
+        }
+        traverse(child);
+      }
+    }
+
+    traverse(root);
+    return normalized;
   }
 
   global.GraphPreprocessing = {
