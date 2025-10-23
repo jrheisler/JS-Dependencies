@@ -224,7 +224,23 @@ String _missingSdkMessage({
 }
 
 String _canonicalizePathForMap(String path) {
-  final normalized = p.normalize(path);
+  var normalized = path;
+  if (Platform.isWindows) {
+    const extendedPrefix = '\\?\\';
+    const extendedPrefixForward = '//?/';
+    if (normalized.startsWith(extendedPrefix)) {
+      normalized = normalized.substring(extendedPrefix.length);
+    } else if (normalized.startsWith(extendedPrefixForward)) {
+      normalized = normalized.substring(extendedPrefixForward.length);
+    }
+    if (normalized.startsWith('UNC\\')) {
+      normalized = '\\' + normalized.substring(3);
+    }
+    normalized = normalized.replaceAll('/', '\\');
+  } else {
+    normalized = normalized.replaceAll('\\', '/');
+  }
+  normalized = p.normalize(normalized);
   if (Platform.isWindows) {
     return normalized.toLowerCase();
   }
@@ -332,17 +348,56 @@ Future<void> main(List<String> args) async {
     explicitEntries,
   );
 
-  final depsJson = {
+  final exportsByFile = <String, Map<String, dynamic>>{};
+  for (final libSummary in graph.libraries) {
+    final groups = <String, dynamic>{};
+    libSummary.publicApi.forEach((kind, value) {
+      if (value is List && value.isNotEmpty) {
+        groups[kind] = value.map(_cloneJsonLike).toList();
+      }
+    });
+    if (groups.isNotEmpty) {
+      exportsByFile[libSummary.path] = groups;
+    }
+  }
+
+  final depsJson = <String, dynamic>{
     'nodes': graph.nodes.map((n) => n.toJson()).toList(),
     'edges': graph.edges.map((e) => e.toJson()).toList(),
     'libraries': graph.libraries.map((l) => l.toJson()).toList(),
     'entries': graph.entries,
   };
+  if (exportsByFile.isNotEmpty) {
+    depsJson['exports'] = exportsByFile;
+  }
+
+  final security = await _runSecurity(cwd, units);
+  final findingsByFile = <String, List<Map<String, dynamic>>>{};
+  final rawFindings = security['findings'];
+  if (rawFindings is List) {
+    for (final entry in rawFindings) {
+      if (entry is! Map) continue;
+      final file = entry['file'];
+      if (file == null) continue;
+      final key = file.toString().trim();
+      if (key.isEmpty) continue;
+      final cloned = _cloneJsonLike(entry);
+      if (cloned is Map<String, dynamic>) {
+        findingsByFile.putIfAbsent(key, () => []);
+        findingsByFile[key]!.add(cloned);
+      }
+    }
+  }
+  if (findingsByFile.isNotEmpty) {
+    depsJson['securityFindings'] = findingsByFile;
+  }
+  if ((security['findings'] is List && (security['findings'] as List).isNotEmpty) ||
+      (security['summary'] is Map && (security['summary'] as Map).isNotEmpty)) {
+    depsJson['security'] = _cloneJsonLike(security);
+  }
 
   final depsPath = p.join(cwd, 'dartDependencies.json');
   await _writeJson(depsPath, depsJson);
-
-  final security = await _runSecurity(cwd, units);
   final secPath = p.join(cwd, 'dartSecurity.json');
   await _writeJson(secPath, security);
 
@@ -777,6 +832,21 @@ void _ensureExternalNode(
   if (externalNodes.add(id)) {
     nodes[id] = _Node(id: id, type: 'external', state: 'used');
   }
+}
+
+dynamic _cloneJsonLike(dynamic value) {
+  if (value is Map) {
+    final result = <String, dynamic>{};
+    value.forEach((key, val) {
+      if (key == null) return;
+      result[key.toString()] = _cloneJsonLike(val);
+    });
+    return result;
+  }
+  if (value is List) {
+    return value.map(_cloneJsonLike).toList();
+  }
+  return value;
 }
 
 String? _resolveRelativeUri(String fromPath, String uri) {
