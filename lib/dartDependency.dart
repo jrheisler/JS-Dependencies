@@ -1748,6 +1748,7 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
   final typedefs = <Map<String, String>>[];
   final extensions = <Map<String, String>>[];
   final variables = <Map<String, String>>[];
+  final seenVariableNames = <String>{};
 
   final namespace = lib.exportNamespace;
   for (final element in _namespaceElements(namespace).values) {
@@ -1814,10 +1815,26 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
     if (element is TopLevelVariableElement) {
       if (element.isSynthetic) continue;
       final name = element.name ?? element.displayName;
-      variables.add({
-        'name': name,
-        'type': element.type.getDisplayString(withNullability: true),
-      });
+      if (seenVariableNames.add(name)) {
+        variables.add({
+          'name': name,
+          'type': element.type.getDisplayString(withNullability: true),
+        });
+      }
+      continue;
+    }
+
+    if (element is PropertyAccessorElement) {
+      final variable = element.variable;
+      if (variable is TopLevelVariableElement && !variable.isSynthetic) {
+        final name = variable.name ?? variable.displayName;
+        if (seenVariableNames.add(name)) {
+          variables.add({
+            'name': name,
+            'type': variable.type.getDisplayString(withNullability: true),
+          });
+        }
+      }
       continue;
     }
   }
