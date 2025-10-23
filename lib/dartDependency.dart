@@ -494,6 +494,28 @@ Future<void> main(List<String> args) async {
         groups[kind] = value.map(_cloneJsonLike).toList();
       }
     });
+    if (libSummary.exports.isNotEmpty) {
+      groups['reexports'] = libSummary.exports.map((ex) {
+        final entry = <String, dynamic>{
+          'symbol': ex.uri,
+          'target': ex.target,
+        };
+        if (ex.prefix != null && ex.prefix!.isNotEmpty) {
+          entry['as'] = ex.prefix;
+        }
+        if (ex.deferred) {
+          entry['deferred'] = true;
+        }
+        if (ex.show.isNotEmpty) {
+          entry['show'] = ex.show.toList();
+        }
+        if (ex.hide.isNotEmpty) {
+          entry['hide'] = ex.hide.toList();
+        }
+        entry['uri'] = ex.uri;
+        return entry;
+      }).toList();
+    }
     if (groups.isNotEmpty) {
       exportsByFile[libSummary.path] = groups;
       exportsByCanonical[_canonicalizePathForMap(libSummary.path)] = groups;
@@ -1748,96 +1770,128 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
   final typedefs = <Map<String, String>>[];
   final extensions = <Map<String, String>>[];
   final variables = <Map<String, String>>[];
-  final seenVariableNames = <String>{};
+  final seenClassKeys = <String>{};
+  final seenFunctionKeys = <String>{};
+  final seenTypedefKeys = <String>{};
+  final seenExtensionKeys = <String>{};
+  final seenVariableKeys = <String>{};
 
-  final namespace = lib.exportNamespace;
-  for (final element in _namespaceElements(namespace).values) {
-    if (!element.isPublic) continue;
-
-    if (element is InterfaceElement) {
-      final kind = element is EnumElement
-          ? 'enum'
-          : element is MixinElement
-              ? 'mixin'
-              : 'class';
-      final members = <String>[];
-      for (final field in element.fields) {
-        if (!field.isPublic || field.isSynthetic) continue;
-        members.add('${field.type.getDisplayString(withNullability: true)} ${field.name}');
-      }
-      for (final method in element.methods) {
-        if (!method.isPublic || method.isSynthetic) continue;
-        members.add(_elementDisplay(method));
-      }
-      for (final ctor in element.constructors) {
-        if (!ctor.isPublic || ctor.isSynthetic) continue;
-        members.add(_elementDisplay(ctor));
-      }
-      final classEntry = <String, dynamic>{
-        'name': element.name ?? element.displayName,
-        'kind': kind,
-      };
-      if (members.isNotEmpty) {
-        members.sort();
-        classEntry['members'] = members;
-      }
-      classes.add(classEntry);
-      continue;
+  void addInterface(InterfaceElement element) {
+    if (!element.isPublic) return;
+    final name = element.name ?? element.displayName;
+    if (name.isEmpty) return;
+    final kind = element is EnumElement
+        ? 'enum'
+        : element is MixinElement
+            ? 'mixin'
+            : 'class';
+    final key = '${_elementLibraryUri(element) ?? ''}::$kind::$name';
+    if (!seenClassKeys.add(key)) return;
+    final members = <String>[];
+    for (final field in element.fields) {
+      if (!field.isPublic || field.isSynthetic) continue;
+      members.add('${field.type.getDisplayString(withNullability: true)} ${field.name}');
     }
-
-    if (element is ExecutableElement && element.kind == ElementKind.FUNCTION) {
-      final name = element.name ?? element.displayName;
-      functions.add({
-        'name': name,
-        'signature': _elementDisplay(element),
-      });
-      continue;
+    for (final method in element.methods) {
+      if (!method.isPublic || method.isSynthetic) continue;
+      members.add(_elementDisplay(method));
     }
-
-    if (element is TypeAliasElement) {
-      final name = element.name ?? element.displayName;
-      typedefs.add({
-        'name': name,
-        'aliasedType': element.aliasedType.getDisplayString(withNullability: true),
-      });
-      continue;
+    for (final ctor in element.constructors) {
+      if (!ctor.isPublic || ctor.isSynthetic) continue;
+      members.add(_elementDisplay(ctor));
     }
-
-    if (element is ExtensionElement) {
-      final name = element.name;
-      extensions.add({
-        'name': (name == null || name.isEmpty) ? element.displayName : name,
-        'on': element.extendedType.getDisplayString(withNullability: true),
-      });
-      continue;
+    final classEntry = <String, dynamic>{
+      'name': name,
+      'kind': kind,
+    };
+    if (members.isNotEmpty) {
+      members.sort();
+      classEntry['members'] = members;
     }
+    classes.add(classEntry);
+  }
 
-    if (element is TopLevelVariableElement) {
-      if (element.isSynthetic) continue;
-      final name = element.name ?? element.displayName;
-      if (seenVariableNames.add(name)) {
-        variables.add({
-          'name': name,
-          'type': element.type.getDisplayString(withNullability: true),
-        });
-      }
-      continue;
-    }
+  void addFunction(ExecutableElement element) {
+    if (!element.isPublic || element.kind != ElementKind.FUNCTION) return;
+    final name = element.name ?? element.displayName;
+    if (name.isEmpty) return;
+    final signature = _elementDisplay(element);
+    final key = '${_elementLibraryUri(element) ?? ''}::function::$signature';
+    if (!seenFunctionKeys.add(key)) return;
+    functions.add({
+      'name': name,
+      'signature': signature,
+    });
+  }
 
-    if (element is PropertyAccessorElement) {
-      final variable = element.variable;
-      if (variable is TopLevelVariableElement && !variable.isSynthetic) {
-        final name = variable.name ?? variable.displayName;
-        if (seenVariableNames.add(name)) {
-          variables.add({
-            'name': name,
-            'type': variable.type.getDisplayString(withNullability: true),
-          });
-        }
-      }
-      continue;
+  void addTypedef(TypeAliasElement element) {
+    if (!element.isPublic) return;
+    final name = element.name ?? element.displayName;
+    if (name.isEmpty) return;
+    final key = '${_elementLibraryUri(element) ?? ''}::typedef::$name';
+    if (!seenTypedefKeys.add(key)) return;
+    typedefs.add({
+      'name': name,
+      'aliasedType': element.aliasedType.getDisplayString(withNullability: true),
+    });
+  }
+
+  void addExtension(ExtensionElement element) {
+    if (!element.isPublic) return;
+    final rawName = element.name;
+    final name = (rawName == null || rawName.isEmpty) ? element.displayName : rawName;
+    if (name.isEmpty) return;
+    final key = '${_elementLibraryUri(element) ?? ''}::extension::$name';
+    if (!seenExtensionKeys.add(key)) return;
+    extensions.add({
+      'name': name,
+      'on': element.extendedType.getDisplayString(withNullability: true),
+    });
+  }
+
+  void addVariable(TopLevelVariableElement element) {
+    if (!element.isPublic || element.isSynthetic) return;
+    final name = element.name ?? element.displayName;
+    if (name.isEmpty) return;
+    final key = '${_elementLibraryUri(element) ?? ''}::variable::$name';
+    if (!seenVariableKeys.add(key)) return;
+    variables.add({
+      'name': name,
+      'type': element.type.getDisplayString(withNullability: true),
+    });
+  }
+
+  void addPropertyAccessor(PropertyAccessorElement element) {
+    final variable = element.variable;
+    if (variable is TopLevelVariableElement) {
+      addVariable(variable);
     }
   }
+
+  void collectElement(Element element) {
+    if (element is InterfaceElement) {
+      addInterface(element);
+    } else if (element is ExecutableElement) {
+      addFunction(element);
+    } else if (element is TypeAliasElement) {
+      addTypedef(element);
+    } else if (element is ExtensionElement) {
+      addExtension(element);
+    } else if (element is TopLevelVariableElement) {
+      addVariable(element);
+    } else if (element is PropertyAccessorElement) {
+      addPropertyAccessor(element);
+    }
+  }
+
+  void collectElements(Iterable<Element> elements) {
+    for (final element in elements) {
+      collectElement(element);
+    }
+  }
+
+  collectElements(_namespaceElements(lib.exportNamespace).values);
+  collectElements(lib.topLevelElements);
 
   classes.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
   functions.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
@@ -1845,13 +1899,14 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
   extensions.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
   variables.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
 
-  return {
-    'classes': classes,
-    'functions': functions,
-    'typedefs': typedefs,
-    'extensions': extensions,
-    'variables': variables,
-  };
+  final publicApi = <String, dynamic>{};
+  if (classes.isNotEmpty) publicApi['classes'] = classes;
+  if (functions.isNotEmpty) publicApi['functions'] = functions;
+  if (typedefs.isNotEmpty) publicApi['typedefs'] = typedefs;
+  if (extensions.isNotEmpty) publicApi['extensions'] = extensions;
+  if (variables.isNotEmpty) publicApi['variables'] = variables;
+
+  return publicApi;
 }
 
 Future<Map<String, dynamic>> _runSecurity(
