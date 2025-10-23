@@ -247,6 +247,48 @@ String _canonicalizePathForMap(String path) {
   return normalized;
 }
 
+String _relativePathWithinRoot(String root, String path) {
+  final normalizedRoot = p.normalize(root);
+  final normalizedPath = p.normalize(path);
+  final separator = Platform.isWindows ? '\\' : '/';
+
+  final relative = p.relative(normalizedPath, from: normalizedRoot);
+  final altSeparator = separator == '/' ? '\\' : '/';
+  final climbsAboveRoot =
+      relative == '..' ||
+      relative.startsWith('..$separator') ||
+      relative.startsWith('..$altSeparator');
+  final looksRelative = !p.isAbsolute(relative) && !climbsAboveRoot;
+  if (looksRelative) {
+    return relative;
+  }
+
+  final canonicalRoot = _canonicalizePathForMap(normalizedRoot);
+  final canonicalPath = _canonicalizePathForMap(normalizedPath);
+  final prefix = canonicalRoot.endsWith(separator)
+      ? canonicalRoot
+      : '$canonicalRoot$separator';
+  if (!canonicalPath.startsWith(prefix)) {
+    return relative;
+  }
+
+  final remainderCanonical = canonicalPath.substring(prefix.length);
+  if (remainderCanonical.isEmpty) {
+    return '.';
+  }
+
+  final remainderLength = remainderCanonical.length;
+  final startIndex = normalizedPath.length - remainderLength;
+  if (startIndex >= 0 && startIndex <= normalizedPath.length) {
+    return normalizedPath.substring(startIndex);
+  }
+
+  if (Platform.isWindows) {
+    return remainderCanonical.replaceAll('/', '\\');
+  }
+  return remainderCanonical.replaceAll('\\', '/');
+}
+
 T? _tryGetter<T>(T? Function() getter) {
   try {
     return getter();
@@ -651,7 +693,7 @@ Future<_DependencyGraphResult> _buildDependencyGraph(
   for (final unit in normalizedUnits.values) {
     final absPath = p.normalize(unit.path);
     if (!_isWithinRoot(root, absPath)) continue;
-    final relPath = p.relative(absPath, from: root);
+    final relPath = _relativePathWithinRoot(root, absPath);
     await _ensureFileNode(
       nodes,
       absPath,
@@ -726,7 +768,7 @@ Future<_LibrarySummary> _summarizeLibrary(
   Map<String, String?> shaCache,
 ) async {
   final absPath = p.normalize(_librarySource(lib).fullName);
-  final relPath = p.relative(absPath, from: root);
+  final relPath = _relativePathWithinRoot(root, absPath);
 
   await _ensureFileNode(
     nodes,
@@ -744,7 +786,7 @@ Future<_LibrarySummary> _summarizeLibrary(
     if (target != null) {
       final targetPath = p.normalize(_librarySource(target).fullName);
       if (_isWithinRoot(root, targetPath)) {
-        final relTarget = p.relative(targetPath, from: root);
+        final relTarget = _relativePathWithinRoot(root, targetPath);
         final targetUnit = units[_canonicalizePathForMap(targetPath)];
         await _ensureFileNode(
           nodes,
@@ -773,7 +815,7 @@ Future<_LibrarySummary> _summarizeLibrary(
     } else {
       final resolved = _resolveRelativeUri(absPath, imp.uri);
       if (resolved != null && _isWithinRoot(root, resolved) && File(resolved).existsSync()) {
-        final relTarget = p.relative(resolved, from: root);
+        final relTarget = _relativePathWithinRoot(root, resolved);
         final targetUnit = units[_canonicalizePathForMap(resolved)];
         await _ensureFileNode(
           nodes,
@@ -818,7 +860,7 @@ Future<_LibrarySummary> _summarizeLibrary(
     if (target != null) {
       final targetPath = p.normalize(_librarySource(target).fullName);
       if (_isWithinRoot(root, targetPath)) {
-        final relTarget = p.relative(targetPath, from: root);
+        final relTarget = _relativePathWithinRoot(root, targetPath);
         final targetUnit = units[_canonicalizePathForMap(targetPath)];
         await _ensureFileNode(
           nodes,
@@ -847,7 +889,7 @@ Future<_LibrarySummary> _summarizeLibrary(
     } else {
       final resolved = _resolveRelativeUri(absPath, ex.uri);
       if (resolved != null && _isWithinRoot(root, resolved) && File(resolved).existsSync()) {
-        final relTarget = p.relative(resolved, from: root);
+        final relTarget = _relativePathWithinRoot(root, resolved);
         final targetUnit = units[_canonicalizePathForMap(resolved)];
         await _ensureFileNode(
           nodes,
@@ -891,7 +933,7 @@ Future<_LibrarySummary> _summarizeLibrary(
     if (source == null) continue;
     final partPath = p.normalize(source.fullName);
     if (!_isWithinRoot(root, partPath)) continue;
-    final relPart = p.relative(partPath, from: root);
+    final relPart = _relativePathWithinRoot(root, partPath);
     final partUnit = units[_canonicalizePathForMap(partPath)];
     await _ensureFileNode(
       nodes,
@@ -1055,7 +1097,7 @@ Future<void> _collectEdgesFromAst(
   for (final unit in units.values) {
     final absPath = p.normalize(unit.path);
     if (!_isWithinRoot(root, absPath)) continue;
-    final relPath = p.relative(absPath, from: root);
+    final relPath = _relativePathWithinRoot(root, absPath);
 
     for (final directive in unit.unit.directives.whereType<ImportDirective>()) {
       final importElement = _importDirectiveElement(directive);
@@ -1064,7 +1106,7 @@ Future<void> _collectEdgesFromAst(
       if (targetLibrary != null) {
         final targetPath = p.normalize(_librarySource(targetLibrary).fullName);
         if (_isWithinRoot(root, targetPath)) {
-          final relTarget = p.relative(targetPath, from: root);
+          final relTarget = _relativePathWithinRoot(root, targetPath);
           final targetUnit = units[_canonicalizePathForMap(targetPath)];
           await _ensureFileNode(
             nodes,
@@ -1099,7 +1141,7 @@ Future<void> _collectEdgesFromAst(
       if (resolved != null &&
           _isWithinRoot(root, resolved) &&
           File(resolved).existsSync()) {
-        final relTarget = p.relative(resolved, from: root);
+        final relTarget = _relativePathWithinRoot(root, resolved);
         final targetUnit = units[_canonicalizePathForMap(resolved)];
         await _ensureFileNode(
           nodes,
@@ -1132,7 +1174,7 @@ Future<void> _collectEdgesFromAst(
       if (targetLibrary != null) {
         final targetPath = p.normalize(_librarySource(targetLibrary).fullName);
         if (_isWithinRoot(root, targetPath)) {
-          final relTarget = p.relative(targetPath, from: root);
+          final relTarget = _relativePathWithinRoot(root, targetPath);
           final targetUnit = units[_canonicalizePathForMap(targetPath)];
           await _ensureFileNode(
             nodes,
@@ -1167,7 +1209,7 @@ Future<void> _collectEdgesFromAst(
       if (resolved != null &&
           _isWithinRoot(root, resolved) &&
           File(resolved).existsSync()) {
-        final relTarget = p.relative(resolved, from: root);
+        final relTarget = _relativePathWithinRoot(root, resolved);
         final targetUnit = units[_canonicalizePathForMap(resolved)];
         await _ensureFileNode(
           nodes,
@@ -1204,7 +1246,7 @@ Future<void> _collectEdgesFromAst(
           !File(resolved).existsSync()) {
         continue;
       }
-      final relPart = p.relative(resolved, from: root);
+      final relPart = _relativePathWithinRoot(root, resolved);
       final partUnit = units[_canonicalizePathForMap(resolved)];
       await _ensureFileNode(
         nodes,
@@ -1240,7 +1282,7 @@ Future<void> _collectEdgesFromAst(
       if (!_isWithinRoot(root, libraryPath)) {
         continue;
       }
-      final relLibrary = p.relative(libraryPath, from: root);
+      final relLibrary = _relativePathWithinRoot(root, libraryPath);
       final libraryUnit = units[_canonicalizePathForMap(libraryPath)];
       await _ensureFileNode(
         nodes,
@@ -1389,7 +1431,7 @@ Set<String> _discoverEntryFiles(String root, List<_LibrarySummary> libraries, St
   for (final rel in common) {
     final abs = p.join(root, rel);
     if (File(abs).existsSync()) {
-      entries.add(p.relative(abs, from: root));
+      entries.add(_relativePathWithinRoot(root, abs));
     }
   }
 
@@ -1401,7 +1443,7 @@ Set<String> _discoverEntryFiles(String root, List<_LibrarySummary> libraries, St
     ];
     for (final abs in candidates) {
       if (File(abs).existsSync()) {
-        entries.add(p.relative(abs, from: root));
+        entries.add(_relativePathWithinRoot(root, abs));
       }
     }
   }
@@ -1493,7 +1535,7 @@ Set<String> _normalizeEntryArgs(List<String> args, String root) {
   for (final arg in args) {
     final abs = p.normalize(p.isAbsolute(arg) ? arg : p.join(root, arg));
     if (File(abs).existsSync()) {
-      entries.add(p.relative(abs, from: root));
+      entries.add(_relativePathWithinRoot(root, abs));
     }
   }
   return entries;
@@ -1502,7 +1544,7 @@ Set<String> _normalizeEntryArgs(List<String> args, String root) {
 String _coerceToRelId(String input, String root) {
   final absolute = p.normalize(p.isAbsolute(input) ? input : p.join(root, input));
   if (File(absolute).existsSync()) {
-    return p.relative(absolute, from: root);
+    return _relativePathWithinRoot(root, absolute);
   }
   return input.replaceAll('\\', '/');
 }
@@ -1569,7 +1611,7 @@ bool _isWithinRoot(String root, String candidate) {
 }
 
 bool _shouldIgnore(String root, String path) {
-  final rel = p.relative(path, from: root);
+  final rel = _relativePathWithinRoot(root, path);
   final segments = p.split(rel);
   return segments.any(_ignoredDirs.contains);
 }
@@ -1793,7 +1835,7 @@ Future<Map<String, dynamic>> _runSecurity(
     if (!_isWithinRoot(root, path)) continue;
     if (_shouldIgnore(root, path)) continue;
 
-    final rel = p.relative(path, from: root);
+    final rel = _relativePathWithinRoot(root, path);
     final unit = entry.value;
     final collector = _SecurityCollector(rel, unit.content, unit.lineInfo);
 
