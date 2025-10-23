@@ -861,9 +861,43 @@ String? _resolveRelativeUri(String fromPath, String uri) {
 }
 
 String _externalNodeId(Uri? uri, String raw) {
+  String? _pubIdFromUri(Uri? candidate) {
+    if (candidate == null) return null;
+    if (candidate.scheme != 'package') return null;
+    if (candidate.pathSegments.isNotEmpty) {
+      return 'pub:${candidate.pathSegments.first}';
+    }
+    final path = candidate.path;
+    if (path.isNotEmpty) {
+      final slash = path.indexOf('/');
+      final pkg = slash >= 0 ? path.substring(0, slash) : path;
+      if (pkg.isNotEmpty) {
+        return 'pub:$pkg';
+      }
+    }
+    return null;
+  }
+
   if (uri == null) {
-    if (raw.startsWith('dart:') || raw.startsWith('package:')) {
+    if (raw.startsWith('dart:')) {
       return raw;
+    }
+    if (raw.startsWith('package:')) {
+      final parsed = Uri.tryParse(raw);
+      final pubId = _pubIdFromUri(parsed);
+      if (pubId != null) {
+        return pubId;
+      }
+      final remainder = raw.substring('package:'.length);
+      final slash = remainder.indexOf('/');
+      final pkg = slash >= 0 ? remainder.substring(0, slash) : remainder;
+      if (pkg.isNotEmpty) {
+        return 'pub:$pkg';
+      }
+      if (remainder.isNotEmpty) {
+        return 'pub:$remainder';
+      }
+      return 'external:$raw';
     }
     return 'external:$raw';
   }
@@ -871,8 +905,10 @@ String _externalNodeId(Uri? uri, String raw) {
     return 'dart:${uri.path}';
   }
   if (uri.scheme == 'package') {
-    final path = uri.pathSegments.join('/');
-    return 'package:$path';
+    final pubId = _pubIdFromUri(uri);
+    if (pubId != null) {
+      return pubId;
+    }
   }
   if (uri.scheme.isEmpty) {
     return raw;
