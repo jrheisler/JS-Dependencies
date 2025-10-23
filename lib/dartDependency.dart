@@ -770,12 +770,50 @@ Future<_LibrarySummary> _summarizeLibrary(
   return _LibrarySummary(
     path: relPath,
     libraryName: (libName == null || libName.isEmpty) ? null : libName,
-    hasMain: lib.entryPoint != null,
+    hasMain: _libraryHasMain(lib, definingUnit, units),
     imports: imports,
     exports: exports,
     parts: parts.toList()..sort(),
     publicApi: publicApi,
   );
+}
+
+bool _libraryHasMain(
+  LibraryElement lib,
+  ResolvedUnitResult definingUnit,
+  Map<String, ResolvedUnitResult> units,
+) {
+  if (lib.entryPoint != null) {
+    return true;
+  }
+
+  bool unitDeclaresMain(ResolvedUnitResult? unit) {
+    if (unit == null) return false;
+    for (final declaration in unit.unit.declarations) {
+      if (declaration is FunctionDeclaration) {
+        final name = declaration.name.lexeme;
+        if (name == 'main' && !declaration.isGetter && !declaration.isSetter) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  if (unitDeclaresMain(definingUnit)) {
+    return true;
+  }
+
+  for (final part in _libraryParts(lib)) {
+    final source = _partElementSource(part);
+    if (source == null) continue;
+    final partPath = _canonicalizePathForMap(p.normalize(source.fullName));
+    if (unitDeclaresMain(units[partPath])) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 List<String> _collectShown(List<NamespaceCombinator> combinators) {
