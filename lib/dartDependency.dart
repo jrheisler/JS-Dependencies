@@ -265,6 +265,86 @@ Source _librarySource(LibraryElement lib) {
   throw StateError('Unable to determine source for library ${lib.name ?? '<unnamed>'}');
 }
 
+LibraryElement? _importedLibraryFrom(dynamic element) {
+  if (element == null) return null;
+  final lib = _tryGetter(() => (element as dynamic).importedLibrary as LibraryElement?);
+  if (lib != null) {
+    return lib;
+  }
+  final alt = _tryGetter(() => (element as dynamic).importedLibrary2);
+  if (alt != null) {
+    final library = _tryGetter(() => (alt as dynamic).library as LibraryElement?);
+    if (library != null) {
+      return library;
+    }
+    final elementField = _tryGetter(() => (alt as dynamic).element as LibraryElement?);
+    if (elementField != null) {
+      return elementField;
+    }
+  }
+  return null;
+}
+
+String? _importedLibraryUri(dynamic element) {
+  if (element == null) return null;
+  final uri = _tryGetter(() => (element as dynamic).uri as String?);
+  if (uri != null) {
+    return uri;
+  }
+  final alt = _tryGetter(() => (element as dynamic).uri2);
+  if (alt != null) {
+    final value = _tryGetter(() => (alt as dynamic).stringValue as String?);
+    if (value != null) {
+      return value;
+    }
+    final uriStr = _tryGetter(() => (alt as dynamic).uriStr as String?);
+    if (uriStr != null) {
+      return uriStr;
+    }
+  }
+  return null;
+}
+
+LibraryElement? _exportedLibraryFrom(dynamic element) {
+  if (element == null) return null;
+  final lib = _tryGetter(() => (element as dynamic).exportedLibrary as LibraryElement?);
+  if (lib != null) {
+    return lib;
+  }
+  final alt = _tryGetter(() => (element as dynamic).exportedLibrary2);
+  if (alt != null) {
+    final library = _tryGetter(() => (alt as dynamic).library as LibraryElement?);
+    if (library != null) {
+      return library;
+    }
+    final elementField = _tryGetter(() => (alt as dynamic).element as LibraryElement?);
+    if (elementField != null) {
+      return elementField;
+    }
+  }
+  return null;
+}
+
+String? _exportedLibraryUri(dynamic element) {
+  if (element == null) return null;
+  final uri = _tryGetter(() => (element as dynamic).uri as String?);
+  if (uri != null) {
+    return uri;
+  }
+  final alt = _tryGetter(() => (element as dynamic).uri2);
+  if (alt != null) {
+    final value = _tryGetter(() => (alt as dynamic).stringValue as String?);
+    if (value != null) {
+      return value;
+    }
+    final uriStr = _tryGetter(() => (alt as dynamic).uriStr as String?);
+    if (uriStr != null) {
+      return uriStr;
+    }
+  }
+  return null;
+}
+
 Iterable<dynamic> _libraryImports(LibraryElement lib) {
   final dynamic dyn = lib;
   return _tryGetter(() => dyn.libraryImports as Iterable<dynamic>?) ??
@@ -514,6 +594,7 @@ Future<_DependencyGraphResult> _buildDependencyGraph(
 ) async {
   final nodes = <String, _Node>{};
   final edges = <_Edge>[];
+  final edgeKeys = <String>{};
   final libraries = <_LibrarySummary>[];
   final externalNodes = <String>{};
   final processedLibraries = <String>{};
@@ -544,6 +625,7 @@ Future<_DependencyGraphResult> _buildDependencyGraph(
       normalizedUnits,
       nodes,
       edges,
+      edgeKeys,
       externalNodes,
       packageName,
       shaCache,
@@ -560,6 +642,19 @@ Future<_DependencyGraphResult> _buildDependencyGraph(
       absPath,
       relPath,
       unit,
+      packageName,
+      shaCache,
+    );
+  }
+
+  if (edges.isEmpty) {
+    await _collectEdgesFromAst(
+      root,
+      normalizedUnits,
+      nodes,
+      edges,
+      edgeKeys,
+      externalNodes,
       packageName,
       shaCache,
     );
@@ -610,6 +705,7 @@ Future<_LibrarySummary> _summarizeLibrary(
   Map<String, ResolvedUnitResult> units,
   Map<String, _Node> nodes,
   List<_Edge> edges,
+  Set<String> edgeKeys,
   Set<String> externalNodes,
   String? packageName,
   Map<String, String?> shaCache,
@@ -643,12 +739,20 @@ Future<_LibrarySummary> _summarizeLibrary(
           packageName,
           shaCache,
         );
-        edges.add(_Edge(source: relPath, target: relTarget, kind: 'import', certainty: 'static'));
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: relTarget,
+            kind: 'import',
+            certainty: 'static');
         targetId = relTarget;
       } else {
         final extId = _externalNodeId(_librarySource(target).uri, imp.uri);
         _ensureExternalNode(nodes, externalNodes, extId);
-        edges.add(_Edge(source: relPath, target: extId, kind: 'import', certainty: 'static'));
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: extId,
+            kind: 'import',
+            certainty: 'static');
         targetId = extId;
       }
     } else {
@@ -664,12 +768,20 @@ Future<_LibrarySummary> _summarizeLibrary(
           packageName,
           shaCache,
         );
-        edges.add(_Edge(source: relPath, target: relTarget, kind: 'import', certainty: 'static'));
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: relTarget,
+            kind: 'import',
+            certainty: 'static');
         targetId = relTarget;
       } else {
         final extId = _externalNodeId(null, imp.uri);
         _ensureExternalNode(nodes, externalNodes, extId);
-        edges.add(_Edge(source: relPath, target: extId, kind: 'import', certainty: 'static'));
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: extId,
+            kind: 'import',
+            certainty: 'static');
         targetId = extId;
       }
     }
@@ -701,12 +813,20 @@ Future<_LibrarySummary> _summarizeLibrary(
           packageName,
           shaCache,
         );
-        edges.add(_Edge(source: relPath, target: relTarget, kind: 'export', certainty: 'static'));
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: relTarget,
+            kind: 'export',
+            certainty: 'static');
         targetId = relTarget;
       } else {
         final extId = _externalNodeId(_librarySource(target).uri, ex.uri);
         _ensureExternalNode(nodes, externalNodes, extId);
-        edges.add(_Edge(source: relPath, target: extId, kind: 'export', certainty: 'static'));
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: extId,
+            kind: 'export',
+            certainty: 'static');
         targetId = extId;
       }
     } else {
@@ -722,12 +842,20 @@ Future<_LibrarySummary> _summarizeLibrary(
           packageName,
           shaCache,
         );
-        edges.add(_Edge(source: relPath, target: relTarget, kind: 'export', certainty: 'static'));
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: relTarget,
+            kind: 'export',
+            certainty: 'static');
         targetId = relTarget;
       } else {
         final extId = _externalNodeId(null, ex.uri);
         _ensureExternalNode(nodes, externalNodes, extId);
-        edges.add(_Edge(source: relPath, target: extId, kind: 'export', certainty: 'static'));
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: extId,
+            kind: 'export',
+            certainty: 'static');
         targetId = extId;
       }
     }
@@ -759,8 +887,16 @@ Future<_LibrarySummary> _summarizeLibrary(
       shaCache,
     );
     if (parts.add(relPart)) {
-      edges.add(_Edge(source: relPath, target: relPart, kind: 'part', certainty: 'static'));
-      edges.add(_Edge(source: relPart, target: relPath, kind: 'part-of', certainty: 'static'));
+      _pushEdge(edges, edgeKeys,
+          source: relPath,
+          target: relPart,
+          kind: 'part',
+          certainty: 'static');
+      _pushEdge(edges, edgeKeys,
+          source: relPart,
+          target: relPath,
+          kind: 'part-of',
+          certainty: 'static');
     }
   }
 
@@ -869,6 +1005,247 @@ void _ensureExternalNode(
 ) {
   if (externalNodes.add(id)) {
     nodes[id] = _Node(id: id, type: 'external', state: 'used');
+  }
+}
+
+void _pushEdge(
+  List<_Edge> edges,
+  Set<String> edgeKeys, {
+  required String source,
+  required String target,
+  required String kind,
+  required String certainty,
+}) {
+  final key = '$source::$target::$kind::$certainty';
+  if (edgeKeys.add(key)) {
+    edges.add(_Edge(
+      source: source,
+      target: target,
+      kind: kind,
+      certainty: certainty,
+    ));
+  }
+}
+
+Future<void> _collectEdgesFromAst(
+  String root,
+  Map<String, ResolvedUnitResult> units,
+  Map<String, _Node> nodes,
+  List<_Edge> edges,
+  Set<String> edgeKeys,
+  Set<String> externalNodes,
+  String? packageName,
+  Map<String, String?> shaCache,
+) async {
+  for (final unit in units.values) {
+    final absPath = p.normalize(unit.path);
+    if (!_isWithinRoot(root, absPath)) continue;
+    final relPath = p.relative(absPath, from: root);
+
+    for (final directive in unit.unit.directives.whereType<ImportDirective>()) {
+      final importElement = directive.element;
+      final rawUri = directive.uri.stringValue ?? _importedLibraryUri(importElement);
+      final targetLibrary = _importedLibraryFrom(importElement);
+      if (targetLibrary != null) {
+        final targetPath = p.normalize(_librarySource(targetLibrary).fullName);
+        if (_isWithinRoot(root, targetPath)) {
+          final relTarget = p.relative(targetPath, from: root);
+          final targetUnit = units[_canonicalizePathForMap(targetPath)];
+          await _ensureFileNode(
+            nodes,
+            targetPath,
+            relTarget,
+            targetUnit,
+            packageName,
+            shaCache,
+          );
+          _pushEdge(edges, edgeKeys,
+              source: relPath,
+              target: relTarget,
+              kind: 'import',
+              certainty: 'static');
+        } else {
+          final uri = _librarySource(targetLibrary).uri;
+          final extId = _externalNodeId(uri, rawUri ?? uri.toString());
+          _ensureExternalNode(nodes, externalNodes, extId);
+          _pushEdge(edges, edgeKeys,
+              source: relPath,
+              target: extId,
+              kind: 'import',
+              certainty: 'static');
+        }
+        continue;
+      }
+
+      if (rawUri == null || rawUri.isEmpty) {
+        continue;
+      }
+      final resolved = _resolveRelativeUri(absPath, rawUri);
+      if (resolved != null &&
+          _isWithinRoot(root, resolved) &&
+          File(resolved).existsSync()) {
+        final relTarget = p.relative(resolved, from: root);
+        final targetUnit = units[_canonicalizePathForMap(resolved)];
+        await _ensureFileNode(
+          nodes,
+          resolved,
+          relTarget,
+          targetUnit,
+          packageName,
+          shaCache,
+        );
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: relTarget,
+            kind: 'import',
+            certainty: 'static');
+      } else {
+        final extId = _externalNodeId(null, rawUri);
+        _ensureExternalNode(nodes, externalNodes, extId);
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: extId,
+            kind: 'import',
+            certainty: 'static');
+      }
+    }
+
+    for (final directive in unit.unit.directives.whereType<ExportDirective>()) {
+      final exportElement = directive.element;
+      final rawUri = directive.uri.stringValue ?? _exportedLibraryUri(exportElement);
+      final targetLibrary = _exportedLibraryFrom(exportElement);
+      if (targetLibrary != null) {
+        final targetPath = p.normalize(_librarySource(targetLibrary).fullName);
+        if (_isWithinRoot(root, targetPath)) {
+          final relTarget = p.relative(targetPath, from: root);
+          final targetUnit = units[_canonicalizePathForMap(targetPath)];
+          await _ensureFileNode(
+            nodes,
+            targetPath,
+            relTarget,
+            targetUnit,
+            packageName,
+            shaCache,
+          );
+          _pushEdge(edges, edgeKeys,
+              source: relPath,
+              target: relTarget,
+              kind: 'export',
+              certainty: 'static');
+        } else {
+          final uri = _librarySource(targetLibrary).uri;
+          final extId = _externalNodeId(uri, rawUri ?? uri.toString());
+          _ensureExternalNode(nodes, externalNodes, extId);
+          _pushEdge(edges, edgeKeys,
+              source: relPath,
+              target: extId,
+              kind: 'export',
+              certainty: 'static');
+        }
+        continue;
+      }
+
+      if (rawUri == null || rawUri.isEmpty) {
+        continue;
+      }
+      final resolved = _resolveRelativeUri(absPath, rawUri);
+      if (resolved != null &&
+          _isWithinRoot(root, resolved) &&
+          File(resolved).existsSync()) {
+        final relTarget = p.relative(resolved, from: root);
+        final targetUnit = units[_canonicalizePathForMap(resolved)];
+        await _ensureFileNode(
+          nodes,
+          resolved,
+          relTarget,
+          targetUnit,
+          packageName,
+          shaCache,
+        );
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: relTarget,
+            kind: 'export',
+            certainty: 'static');
+      } else {
+        final extId = _externalNodeId(null, rawUri);
+        _ensureExternalNode(nodes, externalNodes, extId);
+        _pushEdge(edges, edgeKeys,
+            source: relPath,
+            target: extId,
+            kind: 'export',
+            certainty: 'static');
+      }
+    }
+
+    for (final directive in unit.unit.directives.whereType<PartDirective>()) {
+      final rawUri = directive.uri.stringValue;
+      if (rawUri == null || rawUri.isEmpty) {
+        continue;
+      }
+      final resolved = _resolveRelativeUri(absPath, rawUri);
+      if (resolved == null ||
+          !_isWithinRoot(root, resolved) ||
+          !File(resolved).existsSync()) {
+        continue;
+      }
+      final relPart = p.relative(resolved, from: root);
+      final partUnit = units[_canonicalizePathForMap(resolved)];
+      await _ensureFileNode(
+        nodes,
+        resolved,
+        relPart,
+        partUnit,
+        packageName,
+        shaCache,
+      );
+      _pushEdge(edges, edgeKeys,
+          source: relPath,
+          target: relPart,
+          kind: 'part',
+          certainty: 'static');
+      _pushEdge(edges, edgeKeys,
+          source: relPart,
+          target: relPath,
+          kind: 'part-of',
+          certainty: 'static');
+    }
+
+    for (final directive in unit.unit.directives.whereType<PartOfDirective>()) {
+      LibraryElement? library = unit.libraryElement;
+      final element = directive.element;
+      final resolvedLibrary = _tryGetter(
+        () => (element as dynamic).library as LibraryElement?,
+      );
+      library ??= resolvedLibrary;
+      if (library == null) {
+        continue;
+      }
+      final libraryPath = p.normalize(_librarySource(library).fullName);
+      if (!_isWithinRoot(root, libraryPath)) {
+        continue;
+      }
+      final relLibrary = p.relative(libraryPath, from: root);
+      final libraryUnit = units[_canonicalizePathForMap(libraryPath)];
+      await _ensureFileNode(
+        nodes,
+        libraryPath,
+        relLibrary,
+        libraryUnit,
+        packageName,
+        shaCache,
+      );
+      _pushEdge(edges, edgeKeys,
+          source: relLibrary,
+          target: relPath,
+          kind: 'part',
+          certainty: 'static');
+      _pushEdge(edges, edgeKeys,
+          source: relPath,
+          target: relLibrary,
+          kind: 'part-of',
+          certainty: 'static');
+    }
   }
 }
 
