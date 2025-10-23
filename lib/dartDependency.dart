@@ -486,6 +486,7 @@ Future<void> main(List<String> args) async {
   );
 
   final exportsByFile = <String, Map<String, dynamic>>{};
+  final exportsByCanonical = <String, Map<String, dynamic>>{};
   for (final libSummary in graph.libraries) {
     final groups = <String, dynamic>{};
     libSummary.publicApi.forEach((kind, value) {
@@ -495,11 +496,22 @@ Future<void> main(List<String> args) async {
     });
     if (groups.isNotEmpty) {
       exportsByFile[libSummary.path] = groups;
+      exportsByCanonical[_canonicalizePathForMap(libSummary.path)] = groups;
     }
   }
 
+  final nodesJson = graph.nodes.map((n) {
+    final nodeJson = n.toJson();
+    Map<String, dynamic>? exports = exportsByFile[n.id];
+    exports ??= exportsByCanonical[_canonicalizePathForMap(n.id)];
+    if (exports != null && exports.isNotEmpty) {
+      nodeJson['exports'] = _cloneJsonLike(exports);
+    }
+    return nodeJson;
+  }).toList();
+
   final depsJson = <String, dynamic>{
-    'nodes': graph.nodes.map((n) => n.toJson()).toList(),
+    'nodes': nodesJson,
     'edges': graph.edges.map((e) => e.toJson()).toList(),
     'libraries': graph.libraries.map((l) => l.toJson()).toList(),
     'entries': graph.entries,
