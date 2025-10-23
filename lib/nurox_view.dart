@@ -26,6 +26,7 @@ class Graph {
   final List<Map<String, dynamic>> edges = [];
   final Map<String, List<Map<String, dynamic>>> securityFindings = {};
   final Map<String, Map<String, dynamic>> exports = {};
+  final Set<String> entrypoints = <String>{};
 
   void addGraph(Map<String, dynamic> g) {
     final ns = (g['nodes'] as List?) ?? const [];
@@ -72,11 +73,13 @@ class Graph {
 
     _mergeSecurityFindings(this, g);
     _mergeExports(this, g);
+    _mergeEntrypoints(this, g);
   }
 
   Map<String, dynamic> toJson() => {
         'nodes': nodes.values.toList(),
         'edges': edges,
+        if (entrypoints.isNotEmpty) 'entrypoints': entrypoints.toList(),
         if (securityFindings.isNotEmpty)
           'securityFindings': securityFindings.map(
             (key, value) => MapEntry(
@@ -89,6 +92,46 @@ class Graph {
             (key, value) => MapEntry(key, _cloneJsonLike(value)),
           ),
       };
+}
+
+void _mergeEntrypoints(Graph graph, Map<String, dynamic> source) {
+  void addEntrypoint(String? raw) {
+    final value = raw?.trim();
+    if (value == null || value.isEmpty) return;
+    graph.entrypoints.add(value);
+  }
+
+  void ingest(dynamic data) {
+    if (data == null) return;
+    if (data is Iterable) {
+      for (final item in data) {
+        ingest(item);
+      }
+      return;
+    }
+    if (data is Map) {
+      if (data['id'] != null) addEntrypoint(data['id'].toString());
+      if (data['path'] != null) addEntrypoint(data['path'].toString());
+      final list = data['list'];
+      if (list is Iterable) {
+        ingest(list);
+      }
+      return;
+    }
+    addEntrypoint(data.toString());
+  }
+
+  const candidateKeys = [
+    'entrypoints',
+    'entryPoints',
+    'entry_points',
+    'entries',
+    'entrances',
+  ];
+
+  for (final key in candidateKeys) {
+    ingest(source[key]);
+  }
 }
 
 void _mergeSecurityFindings(Graph graph, Map<String, dynamic> source) {

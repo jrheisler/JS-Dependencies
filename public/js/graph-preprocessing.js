@@ -203,7 +203,7 @@
   }
 
   function normalizeEntrypoints(raw, graph){
-    const sources = [raw?.entrypoints, raw?.entryPoints, raw?.entry_points, raw?.entrances];
+    const sources = [raw?.entrypoints, raw?.entryPoints, raw?.entry_points, raw?.entries, raw?.entrances];
     const collected = [];
     sources.forEach(item => {
       if(item == null) return;

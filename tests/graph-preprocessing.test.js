@@ -182,4 +182,20 @@ test('exports survive repeated preprocessing on same payload', () => {
   assert.strictEqual(secondNode.exports.functions[0], 'beta');
 });
 
+test('normalizeEntrypoints understands entries field', () => {
+  const rawGraph = {
+    nodes: [
+      { id: 'lib/main.dart' },
+      { id: 'lib/cli.dart' }
+    ],
+    entries: ['lib/main.dart', { id: 'lib/cli.dart' }]
+  };
+
+  const result = preprocessGraph({ rawGraph });
+  assert(Array.isArray(result.entrypoints), 'entrypoints should be an array');
+  assert.strictEqual(result.entrypoints.length, 2, 'should capture both entrypoints');
+  assert(result.entrypoints.includes('lib/main.dart'));
+  assert(result.entrypoints.includes('lib/cli.dart'));
+});
+
 console.log('All GraphPreprocessing tests passed.');
