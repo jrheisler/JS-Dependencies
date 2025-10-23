@@ -66,6 +66,14 @@ void main() {
     }
   });
 
+  graph.addGraph({
+    'entrypoints': ['C:/repo/src/a.js'],
+    'entries': [
+      {'id': 'C:/repo/src/b.js'},
+      'C:/repo/src/c.js'
+    ]
+  });
+
   final merged = graph.toJson();
   final security = merged['securityFindings'] as Map<String, dynamic>?;
   assert(security != null && security!.isNotEmpty, 'security findings should be preserved');
@@ -84,4 +92,11 @@ void main() {
   final reexports = exportGroups['reexports'] as List<dynamic>?;
   assert(named != null && named.length == 1 && (named.first as Map)['name'] == 'alpha');
   assert(reexports != null && reexports.length == 1 && (reexports.first as Map)['name'] == 'beta');
+
+  final entrypoints = merged['entrypoints'] as List<dynamic>?;
+  assert(entrypoints != null && entrypoints!.length == 3, 'entrypoints should merge from multiple keys');
+  final entrySet = entrypoints!.toSet();
+  assert(entrySet.contains('C:/repo/src/a.js'));
+  assert(entrySet.contains('C:/repo/src/b.js'));
+  assert(entrySet.contains('C:/repo/src/c.js'));
 }
