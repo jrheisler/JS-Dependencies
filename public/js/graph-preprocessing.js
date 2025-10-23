@@ -1,7 +1,64 @@
 (function(global){
   'use strict';
 
-  const nodeId = (ref) => (ref && typeof ref === 'object') ? ref.id : ref;
+  const NODE_ID_KEYS = [
+    'id',
+    'nodeId',
+    'node',
+    'path',
+    'file',
+    'module',
+    'source',
+    'sourceId',
+    'srcId',
+    'target',
+    'targetId',
+    'dstId',
+    'from',
+    'fromId',
+    'to',
+    'toId',
+    'absPath',
+    'realPath',
+    'canonicalPath',
+    'uri',
+    'ref',
+    'name',
+    'value'
+  ];
+
+  function extractNodeId(ref, visited = new Set()){
+    if(ref == null) return null;
+    if(typeof ref === 'string'){
+      const trimmed = ref.trim();
+      return trimmed ? trimmed : null;
+    }
+    if(typeof ref === 'number'){
+      return Number.isFinite(ref) ? String(ref) : null;
+    }
+    if(typeof ref !== 'object'){
+      return null;
+    }
+    if(visited.has(ref)) return null;
+    visited.add(ref);
+
+    if(Array.isArray(ref)){
+      for(const item of ref){
+        const candidate = extractNodeId(item, visited);
+        if(candidate) return candidate;
+      }
+      return null;
+    }
+
+    for(const key of NODE_ID_KEYS){
+      if(!Object.prototype.hasOwnProperty.call(ref, key)) continue;
+      const candidate = extractNodeId(ref[key], visited);
+      if(candidate) return candidate;
+    }
+    return null;
+  }
+
+  const nodeId = (ref) => extractNodeId(ref) ?? ref;
 
   function computeDegrees(graph){
     const idMap = new Map(graph.nodes.map(node => [node.id, node]));
@@ -845,8 +902,19 @@
     const keepRuleConfig = Array.isArray(payload?.keepRuleConfig) ? payload.keepRuleConfig : [];
     const localKeepRules = Array.isArray(payload?.localKeepRules) ? payload.localKeepRules : [];
 
+    const EDGE_SOURCE_KEYS = ['source', 'sourceId', 'src', 'srcId', 'from', 'fromId', 'origin', 'start', 'u'];
+    const EDGE_TARGET_KEYS = ['target', 'targetId', 'to', 'toId', 'dst', 'dstId', 'dest', 'destination', 'end', 'v'];
     const normalizedEdges = Array.isArray(rawGraph.edges || rawGraph.links)
-      ? (rawGraph.edges || rawGraph.links).map(edge => ({ ...edge, source: edge.source, target: edge.target }))
+      ? (rawGraph.edges || rawGraph.links)
+          .map(edge => {
+            const rawSource = EDGE_SOURCE_KEYS.map(key => edge[key]).find(value => value !== undefined);
+            const rawTarget = EDGE_TARGET_KEYS.map(key => edge[key]).find(value => value !== undefined);
+            const srcId = extractNodeId(rawSource);
+            const tgtId = extractNodeId(rawTarget);
+            if(!srcId || !tgtId) return null;
+            return { ...edge, source: srcId, target: tgtId };
+          })
+          .filter(edge => edge !== null)
       : [];
     const graph = {
       nodes: Array.isArray(rawGraph.nodes) ? rawGraph.nodes.map(node => ({ ...node })) : [],
