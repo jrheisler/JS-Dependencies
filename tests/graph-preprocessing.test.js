@@ -198,4 +198,41 @@ test('normalizeEntrypoints understands entries field', () => {
   assert(result.entrypoints.includes('lib/cli.dart'));
 });
 
+test('collects edges from nested graph containers', () => {
+  const rawGraph = {
+    nodes: [
+      { id: 'lib/a.dart' },
+      { id: 'lib/b.dart' },
+      { id: 'pub:flutter' }
+    ],
+    graph: {
+      edges: [
+        {
+          source: { path: 'lib/a.dart' },
+          target: { realPath: 'lib/b.dart' },
+          kind: 'import'
+        }
+      ],
+      relationships: {
+        list: [
+          {
+            from: { id: 'lib/a.dart' },
+            to: { id: 'pub:flutter' },
+            type: 'import'
+          }
+        ]
+      }
+    }
+  };
+
+  const result = preprocessGraph({ rawGraph });
+  const edges = result.graph.edges;
+  assert(Array.isArray(edges), 'edges should be collected into an array');
+  assert.strictEqual(edges.length, 2, 'should collect edges from both nested containers');
+  const key = edge => `${edge.source}->${edge.target}:${edge.kind || edge.type}`;
+  const ids = new Set(edges.map(key));
+  assert(ids.has('lib/a.dart->lib/b.dart:import'));
+  assert(ids.has('lib/a.dart->pub:flutter:import'));
+});
+
 console.log('All GraphPreprocessing tests passed.');
