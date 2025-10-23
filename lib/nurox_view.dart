@@ -20,6 +20,187 @@ import 'dart:math';
 // ----------------------------
 // Types
 // ----------------------------
+const _edgeSourceKeys = [
+  'source',
+  'sourceId',
+  'src',
+  'srcId',
+  'from',
+  'fromId',
+  'origin',
+  'start',
+  'u',
+];
+
+const _edgeTargetKeys = [
+  'target',
+  'targetId',
+  'to',
+  'toId',
+  'dst',
+  'dstId',
+  'dest',
+  'destination',
+  'end',
+  'v',
+];
+
+const _edgeKindKeys = ['kind', 'type', 'label', 'edgeType'];
+const _edgeCertaintyKeys = ['certainty', 'confidence'];
+
+const _nodeIdCandidateKeys = [
+  'id',
+  'nodeId',
+  'node',
+  'path',
+  'file',
+  'module',
+  'source',
+  'sourceId',
+  'src',
+  'srcId',
+  'target',
+  'targetId',
+  'dst',
+  'dstId',
+  'from',
+  'fromId',
+  'to',
+  'toId',
+  'absPath',
+  'realPath',
+  'canonicalPath',
+  'uri',
+  'ref',
+  'name',
+  'value',
+];
+
+const _edgePassthroughKeys = {
+  'dynamic',
+  'reflection',
+  'mode',
+  'phase',
+  'stage',
+  'scope',
+  'context',
+  'profiles',
+  'profile',
+  'when',
+  'flags',
+  'test',
+  'build',
+  'id',
+  'weight',
+  'strength',
+  'evidence',
+  'notes',
+  'metadata',
+  'tags',
+};
+
+dynamic _firstNonNullEdgeValue(Map<dynamic, dynamic> edge, List<String> keys) {
+  for (final key in keys) {
+    if (!edge.containsKey(key)) continue;
+    final value = edge[key];
+    if (value != null) return value;
+  }
+  return null;
+}
+
+String? _extractGraphNodeId(dynamic raw, [Set<Object?>? visited]) {
+  if (raw == null) return null;
+  if (raw is String) {
+    final trimmed = raw.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+  if (raw is num) {
+    if (raw is double && !raw.isFinite) return null;
+    return raw.toString();
+  }
+  visited ??= <Object?>{};
+  if (raw is Map) {
+    if (!visited.add(raw)) return null;
+    for (final key in _nodeIdCandidateKeys) {
+      if (!raw.containsKey(key)) continue;
+      final candidate = _extractGraphNodeId(raw[key], visited);
+      if (candidate != null) return candidate;
+    }
+    for (final value in raw.values) {
+      final candidate = _extractGraphNodeId(value, visited);
+      if (candidate != null) return candidate;
+    }
+    return null;
+  }
+  if (raw is Iterable) {
+    for (final item in raw) {
+      final candidate = _extractGraphNodeId(item, visited);
+      if (candidate != null) return candidate;
+    }
+    return null;
+  }
+  final text = raw.toString().trim();
+  return text.isEmpty ? null : text;
+}
+
+String _edgeString(dynamic value) {
+  if (value == null) return '';
+  final text = value.toString().trim();
+  return text;
+}
+
+dynamic _normalizeEdgeCertainty(dynamic value) {
+  if (value == null) return null;
+  if (value is String) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+  if (value is num) {
+    if (value is double && !value.isFinite) return null;
+    return value;
+  }
+  if (value is bool) return value;
+  final text = value.toString().trim();
+  return text.isEmpty ? null : text;
+}
+
+Map<String, dynamic> _normalizeEdgeRecord(Map<dynamic, dynamic> raw) {
+  final sourceValue = _firstNonNullEdgeValue(raw, _edgeSourceKeys);
+  final targetValue = _firstNonNullEdgeValue(raw, _edgeTargetKeys);
+  final sourceId = _extractGraphNodeId(sourceValue);
+  final targetId = _extractGraphNodeId(targetValue);
+  if (sourceId == null || targetId == null) {
+    return const <String, dynamic>{};
+  }
+
+  final kindValue = _firstNonNullEdgeValue(raw, _edgeKindKeys);
+  final certaintyValue = _firstNonNullEdgeValue(raw, _edgeCertaintyKeys);
+
+  final normalized = <String, dynamic>{
+    'source': sourceId,
+    'target': targetId,
+  };
+
+  final kind = _edgeString(kindValue);
+  if (kind.isNotEmpty) {
+    normalized['kind'] = kind;
+  }
+
+  final certainty = _normalizeEdgeCertainty(certaintyValue);
+  if (certainty != null) {
+    normalized['certainty'] = certainty;
+  }
+
+  for (final key in _edgePassthroughKeys) {
+    if (!raw.containsKey(key)) continue;
+    final value = raw[key];
+    if (value == null) continue;
+    normalized[key] = _cloneJsonLike(value);
+  }
+
+  return normalized;
+}
+
 class Graph {
   final Map<String, Map<String, dynamic>> nodes = {};
   final Set<String> edgeKeys = {};
@@ -55,20 +236,16 @@ class Graph {
         }
       }
     }
-    for (final e in es) {
-      final src = (e['source'] is Map) ? e['source']['id'] : e['source'];
-      final tgt = (e['target'] is Map) ? e['target']['id'] : e['target'];
-      final s = src?.toString() ?? '';
-      final t = tgt?.toString() ?? '';
-      final k = (e['kind'] ?? '').toString();
-      final key = '$s=>$t:$k';
-      if (s.isEmpty || t.isEmpty) continue;
-      if (edgeKeys.add(key)) edges.add({
-        'source': s,
-        'target': t,
-        if (k.isNotEmpty) 'kind': k,
-        if (e['certainty'] != null) 'certainty': e['certainty'],
-      });
+    for (final rawEdge in es) {
+      if (rawEdge is! Map) continue;
+      final normalized = _normalizeEdgeRecord(rawEdge);
+      if (normalized.isEmpty) continue;
+      final src = normalized['source']?.toString() ?? '';
+      final tgt = normalized['target']?.toString() ?? '';
+      final kind = normalized['kind']?.toString() ?? '';
+      final key = '$src=>$tgt:$kind';
+      if (!edgeKeys.add(key)) continue;
+      edges.add(normalized);
     }
 
     _mergeSecurityFindings(this, g);
