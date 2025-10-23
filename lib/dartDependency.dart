@@ -255,6 +255,21 @@ T? _tryGetter<T>(T? Function() getter) {
   }
 }
 
+dynamic _importDirectiveElement(ImportDirective directive) {
+  return _tryGetter(() => (directive as dynamic).element) ??
+      _tryGetter(() => (directive as dynamic).element2);
+}
+
+dynamic _exportDirectiveElement(ExportDirective directive) {
+  return _tryGetter(() => (directive as dynamic).element) ??
+      _tryGetter(() => (directive as dynamic).element2);
+}
+
+dynamic _partOfDirectiveElement(PartOfDirective directive) {
+  return _tryGetter(() => (directive as dynamic).element) ??
+      _tryGetter(() => (directive as dynamic).element2);
+}
+
 Source _librarySource(LibraryElement lib) {
   final dynamic dyn = lib;
   final source = _tryGetter(() => dyn.source as Source?) ??
@@ -1043,7 +1058,7 @@ Future<void> _collectEdgesFromAst(
     final relPath = p.relative(absPath, from: root);
 
     for (final directive in unit.unit.directives.whereType<ImportDirective>()) {
-      final importElement = directive.element;
+      final importElement = _importDirectiveElement(directive);
       final rawUri = directive.uri.stringValue ?? _importedLibraryUri(importElement);
       final targetLibrary = _importedLibraryFrom(importElement);
       if (targetLibrary != null) {
@@ -1111,7 +1126,7 @@ Future<void> _collectEdgesFromAst(
     }
 
     for (final directive in unit.unit.directives.whereType<ExportDirective>()) {
-      final exportElement = directive.element;
+      final exportElement = _exportDirectiveElement(directive);
       final rawUri = directive.uri.stringValue ?? _exportedLibraryUri(exportElement);
       final targetLibrary = _exportedLibraryFrom(exportElement);
       if (targetLibrary != null) {
@@ -1213,7 +1228,7 @@ Future<void> _collectEdgesFromAst(
 
     for (final directive in unit.unit.directives.whereType<PartOfDirective>()) {
       LibraryElement? library = unit.libraryElement;
-      final element = directive.element;
+      final element = _partOfDirectiveElement(directive);
       final resolvedLibrary = _tryGetter(
         () => (element as dynamic).library as LibraryElement?,
       );
