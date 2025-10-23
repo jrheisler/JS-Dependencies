@@ -1126,20 +1126,16 @@ const Set<String> _ignoredDirs = {
 };
 
 bool _isWithinRoot(String root, String candidate) {
-  final normalizedRoot = p.normalize(root);
-  final normalized = p.normalize(candidate);
-  if (p.equals(normalized, normalizedRoot)) {
+  final canonicalRoot = _canonicalizePathForMap(root);
+  final canonicalCandidate = _canonicalizePathForMap(candidate);
+  if (canonicalCandidate == canonicalRoot) {
     return true;
   }
-  if (Platform.isWindows) {
-    final lowerRoot = normalizedRoot.toLowerCase();
-    final lowerCandidate = normalized.toLowerCase();
-    if (lowerCandidate == lowerRoot) {
-      return true;
-    }
-    return p.isWithin(lowerRoot, lowerCandidate);
-  }
-  return p.isWithin(normalizedRoot, normalized);
+  final separator = Platform.isWindows ? '\\' : '/';
+  final prefix = canonicalRoot.endsWith(separator)
+      ? canonicalRoot
+      : '$canonicalRoot$separator';
+  return canonicalCandidate.startsWith(prefix);
 }
 
 bool _shouldIgnore(String root, String path) {
