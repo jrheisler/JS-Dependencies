@@ -289,6 +289,53 @@ String _relativePathWithinRoot(String root, String path) {
   return remainderCanonical.replaceAll('\\', '/');
 }
 
+void _registerExportGroups(
+  Map<String, Map<String, dynamic>> exportsByFile,
+  Map<String, Map<String, dynamic>> exportsByCanonical,
+  String root,
+  String path,
+  Map<String, dynamic> groups,
+) {
+  final seen = <String>{};
+
+  void store(String candidate) {
+    if (candidate.isEmpty) return;
+    final trimmed = candidate.trim();
+    if (trimmed.isEmpty || trimmed == '.') return;
+    if (!seen.add(trimmed)) return;
+    exportsByFile.putIfAbsent(trimmed, () => groups);
+    final canonical = _canonicalizePathForMap(trimmed);
+    if (canonical.isNotEmpty) {
+      exportsByCanonical[canonical] = groups;
+    }
+  }
+
+  void storeVariants(String candidate) {
+    if (candidate.isEmpty) return;
+    store(candidate);
+    final normalized = p.normalize(candidate);
+    store(normalized);
+    if (candidate.contains('\\') || candidate.contains('/')) {
+      final swapped = candidate.contains('\\')
+          ? candidate.replaceAll('\\', '/')
+          : candidate.replaceAll('/', '\\');
+      store(swapped);
+      final swappedNormalized = p.normalize(swapped);
+      store(swappedNormalized);
+    }
+  }
+
+  storeVariants(path);
+
+  if (!p.isAbsolute(path)) {
+    final absolute = p.normalize(p.join(root, path));
+    storeVariants(absolute);
+  } else if (_isWithinRoot(root, path)) {
+    final relative = _relativePathWithinRoot(root, path);
+    storeVariants(relative);
+  }
+}
+
 T? _tryGetter<T>(T? Function() getter) {
   try {
     return getter();
@@ -569,8 +616,13 @@ Future<void> main(List<String> args) async {
       }).toList();
     }
     if (groups.isNotEmpty) {
-      exportsByFile[libSummary.path] = groups;
-      exportsByCanonical[_canonicalizePathForMap(libSummary.path)] = groups;
+      _registerExportGroups(
+        exportsByFile,
+        exportsByCanonical,
+        cwd,
+        libSummary.path,
+        groups,
+      );
     }
   }
 
