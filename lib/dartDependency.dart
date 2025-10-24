@@ -1891,7 +1891,9 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
   }
 
   collectElements(_namespaceElements(lib.exportNamespace).values);
-  collectElements(lib.topLevelElements);
+  for (final unit in lib.units) {
+    collectElements(unit.topLevelElements);
+  }
 
   classes.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
   functions.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
