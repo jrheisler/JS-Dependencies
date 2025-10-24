@@ -182,6 +182,29 @@ test('exports survive repeated preprocessing on same payload', () => {
   assert.strictEqual(secondNode.exports.functions[0], 'beta');
 });
 
+test('exports attach when Windows-style ids differ by case and slashes', () => {
+  const rawGraph = {
+    nodes: [
+      { id: 'C:/repo/src/foo.dart' }
+    ],
+    exports: {
+      'c:\\repo\\src\\foo.dart': {
+        classes: [
+          { name: 'Widget', kind: 'class' }
+        ]
+      }
+    }
+  };
+
+  const result = preprocessGraph({ rawGraph });
+  const node = result.graph.nodes.find(n => n.id === 'C:/repo/src/foo.dart');
+  assert(node, 'expected node to be present');
+  assert(node.exports, 'expected exports on node');
+  assert(Array.isArray(node.exports.classes), 'classes export group should be array');
+  assert.strictEqual(node.exports.classes.length, 1, 'expected one class export');
+  assert.strictEqual(node.exports.classes[0].name, 'Widget');
+});
+
 test('normalizeEntrypoints understands entries field', () => {
   const rawGraph = {
     nodes: [

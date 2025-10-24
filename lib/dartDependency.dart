@@ -289,6 +289,38 @@ String _relativePathWithinRoot(String root, String path) {
   return remainderCanonical.replaceAll('\\', '/');
 }
 
+String _canonicalizePathForExports(String path) {
+  if (path.isEmpty) return path;
+  var value = path.trim();
+  if (value.isEmpty) return value;
+
+  const windowsExtendedPrefix = '\\?\\';
+  if (value.startsWith(windowsExtendedPrefix)) {
+    value = value.substring(windowsExtendedPrefix.length);
+  }
+
+  final hadUncPrefix =
+      value.startsWith(r'\\') || value.startsWith(r'\/') || value.startsWith('//');
+  value = value.replaceAll('\\', '/');
+  if (hadUncPrefix && !value.startsWith('//')) {
+    value = '//' + value.replaceFirst(RegExp(r'^/+'), '');
+  }
+
+  if (value.startsWith('//')) {
+    final body = value.substring(2).replaceAll(RegExp(r'/+'), '/');
+    value = '//' + body;
+  } else {
+    value = value.replaceAll(RegExp(r'/+'), '/');
+  }
+
+  final drive = RegExp(r'^([a-zA-Z]):/').firstMatch(value);
+  if (drive != null) {
+    value = '${drive.group(1)!.toUpperCase()}${value.substring(1)}';
+  }
+
+  return value;
+}
+
 void _registerExportGroups(
   Map<String, Map<String, dynamic>> exportsByFile,
   Map<String, Map<String, dynamic>> exportsByCanonical,
@@ -307,6 +339,10 @@ void _registerExportGroups(
     final canonical = _canonicalizePathForMap(trimmed);
     if (canonical.isNotEmpty) {
       exportsByCanonical[canonical] = groups;
+    }
+    final exportCanonical = _canonicalizePathForExports(trimmed);
+    if (exportCanonical.isNotEmpty) {
+      exportsByCanonical[exportCanonical] = groups;
     }
   }
 
@@ -630,6 +666,7 @@ Future<void> main(List<String> args) async {
     final nodeJson = n.toJson();
     Map<String, dynamic>? exports = exportsByFile[n.id];
     exports ??= exportsByCanonical[_canonicalizePathForMap(n.id)];
+    exports ??= exportsByCanonical[_canonicalizePathForExports(n.id)];
     if (exports != null && exports.isNotEmpty) {
       nodeJson['exports'] = _cloneJsonLike(exports);
     }
