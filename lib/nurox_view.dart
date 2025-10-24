@@ -433,37 +433,46 @@ String _securityFindingKey(Map<String, dynamic> finding) {
 }
 
 void _mergeExports(Graph graph, Map<String, dynamic> source) {
-  final container = source['exports'];
-  if (container is! Map) return;
-  container.forEach((rawId, rawGroups) {
+  void registerExportGroups(String? rawId, Map<String, dynamic>? groups) {
     if (rawId == null) return;
     final id = rawId.toString().trim();
     if (id.isEmpty) return;
+    final normalizedGroups = groups ?? const <String, dynamic>{};
+    if (normalizedGroups.isEmpty) return;
     final canonical = _canonicalizeSecurityKey(id);
     final key = canonical.isNotEmpty ? canonical : id;
-    final groups = _normalizeExportGroups(rawGroups);
-    if (groups == null || groups.isEmpty) return;
     graph.exports.update(
       key,
-      (existing) {
-        final merged = <String, dynamic>{};
-        existing.forEach((k, v) {
-          merged[k] = _cloneJsonLike(v);
-        });
-        for (final entry in groups.entries) {
-          merged[entry.key] = _cloneJsonLike(entry.value);
-        }
-        return merged;
-      },
-      ifAbsent: () {
-        final initial = <String, dynamic>{};
-        for (final entry in groups.entries) {
-          initial[entry.key] = _cloneJsonLike(entry.value);
-        }
-        return initial;
-      },
+      (existing) => _mergeExportGroupMaps(existing, normalizedGroups),
+      ifAbsent: () => _cloneExportGroups(normalizedGroups),
     );
-  });
+  }
+
+  final container = source['exports'];
+  if (container is Map) {
+    container.forEach((rawId, rawGroups) {
+      final groups = _normalizeExportGroups(rawGroups);
+      if (groups == null || groups.isEmpty) return;
+      registerExportGroups(rawId?.toString(), groups);
+    });
+  }
+
+  final nodes = source['nodes'];
+  if (nodes is List) {
+    for (final node in nodes) {
+      if (node is! Map<String, dynamic>) continue;
+      final groups = _normalizeExportGroups(node['exports']);
+      if (groups == null || groups.isEmpty) continue;
+      final candidates = _collectSecurityCandidates(node);
+      if (candidates.isEmpty) {
+        registerExportGroups(node['id']?.toString(), groups);
+        continue;
+      }
+      for (final candidate in candidates) {
+        registerExportGroups(candidate, groups);
+      }
+    }
+  }
 }
 
 Map<String, dynamic>? _normalizeExportGroups(dynamic raw) {
@@ -476,6 +485,73 @@ Map<String, dynamic>? _normalizeExportGroups(dynamic raw) {
     normalized[key] = _cloneJsonLike(rawValue);
   });
   return normalized;
+}
+
+Map<String, dynamic> _cloneExportGroups(Map<String, dynamic> groups) {
+  final result = <String, dynamic>{};
+  groups.forEach((key, value) {
+    result[key] = _cloneJsonLike(value);
+  });
+  return result;
+}
+
+Map<String, dynamic> _mergeExportGroupMaps(
+  Map<String, dynamic> existing,
+  Map<String, dynamic> incoming,
+) {
+  final merged = _cloneExportGroups(existing);
+  incoming.forEach((key, value) {
+    final normalized = _cloneJsonLike(value);
+    if (merged.containsKey(key)) {
+      merged[key] = _mergeExportGroupValue(merged[key], normalized);
+    } else {
+      merged[key] = normalized;
+    }
+  });
+  return merged;
+}
+
+dynamic _mergeExportGroupValue(dynamic existing, dynamic incoming) {
+  if (existing is List && incoming is List) {
+    final result = <dynamic>[];
+    final seen = <String>{};
+    void addItem(dynamic item) {
+      final cloned = _cloneJsonLike(item);
+      final signature = jsonEncode(cloned);
+      if (seen.add(signature)) {
+        result.add(cloned);
+      }
+    }
+
+    for (final item in existing) {
+      addItem(item);
+    }
+    for (final item in incoming) {
+      addItem(item);
+    }
+    return result;
+  }
+
+  if (existing is Map && incoming is Map) {
+    final result = <String, dynamic>{};
+    final keys = <String>{}
+      ..addAll(existing.keys.map((key) => key.toString()))
+      ..addAll(incoming.keys.map((key) => key.toString()));
+    for (final key in keys) {
+      final existingValue = existing[key];
+      final incomingValue = incoming[key];
+      if (existingValue != null && incomingValue != null) {
+        result[key] = _mergeExportGroupValue(existingValue, incomingValue);
+      } else if (incomingValue != null) {
+        result[key] = _cloneJsonLike(incomingValue);
+      } else {
+        result[key] = _cloneJsonLike(existingValue);
+      }
+    }
+    return result;
+  }
+
+  return incoming ?? existing;
 }
 
 dynamic _cloneJsonLike(dynamic value) {
