@@ -646,6 +646,12 @@ Future<void> main(List<String> args) async {
     depsJson['exports'] = exportsByFile;
   }
 
+  final exportsJson = <String, dynamic>{
+    'exports': exportsByFile.map(
+      (key, value) => MapEntry(key, _cloneJsonLike(value)),
+    ),
+  };
+
   final security = await _runSecurity(cwd, units);
   final findingsByFile = <String, List<Map<String, dynamic>>>{};
   final rawFindings = security['findings'];
@@ -675,6 +681,8 @@ Future<void> main(List<String> args) async {
   await _writeJson(depsPath, depsJson);
   final secPath = p.join(cwd, 'dartSecurity.json');
   await _writeJson(secPath, security);
+  final exportsPath = p.join(cwd, 'dartExports.json');
+  await _writeJson(exportsPath, exportsJson);
 
   final total = graph.nodes.length;
   final used = graph.nodes.where((n) => n.state == 'used').length;
@@ -716,6 +724,7 @@ Future<void> main(List<String> args) async {
 
   stderr.writeln('[info] Wrote: ${p.relative(depsPath, from: cwd)}');
   stderr.writeln('[info] Wrote: ${p.relative(secPath, from: cwd)}');
+  stderr.writeln('[info] Wrote: ${p.relative(exportsPath, from: cwd)}');
   stderr.writeln('[stats] nodes=$total edges=${graph.edges.length} used=$used unused=$unused externals=$externals maxDeg=$maxDeg findings=${(security['findings'] as List).length}');
 }
 
