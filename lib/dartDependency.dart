@@ -423,6 +423,35 @@ Iterable<dynamic> _libraryParts(LibraryElement lib) {
       const <dynamic>[];
 }
 
+Iterable<LibraryAugmentationElement> _libraryAugmentations(LibraryElement lib) {
+  final dynamic dyn = lib;
+  return _tryGetter(() =>
+              dyn.libraryAugmentations as Iterable<LibraryAugmentationElement>?) ??
+          _tryGetter(
+              () => dyn.augmentations as Iterable<LibraryAugmentationElement>?) ??
+          const <LibraryAugmentationElement>[];
+}
+
+Iterable<CompilationUnitElement> _libraryUnits(LibraryElement lib) sync* {
+  final dynamic dyn = lib;
+  final dynamicUnits = _tryGetter(
+          () => dyn.libraryUnits as Iterable<CompilationUnitElement>?) ??
+      _tryGetter(() => dyn.units as Iterable<CompilationUnitElement>?);
+  if (dynamicUnits != null) {
+    for (final unit in dynamicUnits) {
+      if (unit != null) yield unit;
+    }
+    return;
+  }
+
+  yield lib.definingCompilationUnit;
+  yield* lib.parts;
+  for (final augmentation in _libraryAugmentations(lib)) {
+    yield augmentation.definingCompilationUnit;
+    yield* augmentation.parts;
+  }
+}
+
 Source? _partElementSource(dynamic element) {
   return _tryGetter(() => (element as dynamic).source as Source?) ??
       _tryGetter(() => (element as dynamic).librarySource as Source?);
@@ -1891,7 +1920,7 @@ Map<String, dynamic> _collectPublicApi(LibraryElement lib) {
   }
 
   collectElements(_namespaceElements(lib.exportNamespace).values);
-  for (final unit in lib.units) {
+  for (final unit in _libraryUnits(lib)) {
     collectElements(unit.topLevelElements);
   }
 
