@@ -751,7 +751,7 @@ final Map<String, String> _defaultOutput = {
 };
 
 final Map<String, List<String>> _additionalOutputs = {
-  'dart': ['dartSecurity.json'],
+  'dart': ['dartSecurity.json', 'dartExports.json'],
 };
 
 // ----------------------------
@@ -936,6 +936,7 @@ Future<void> _route(HttpRequest req, int port) async {
       _lastGraph.addGraph(g);
     }
     _log('  merged graph now has ${_lastGraph.nodes.length} nodes / ${_lastGraph.edges.length} edges');
+    await _persistMergedGraphSnapshot(root, _lastGraph);
     _sendJson(req, 200, {'ok': true, 'nodes': _lastGraph.nodes.length, 'edges': _lastGraph.edges.length});
     return;
   }
@@ -1059,15 +1060,48 @@ Future<Map<String, dynamic>?> _readJsonFileIfExists(File file) async {
   return null;
 }
 
+Future<void> _writeJsonFile(String path, Map<String, dynamic> data) async {
+  final file = File(path);
+  await file.writeAsString(const JsonEncoder.withIndent('  ').convert(data));
+}
+
+Future<void> _persistMergedGraphSnapshot(String root, Graph graph) async {
+  final snapshotPath = _join(root, 'mergedGraph.json');
+  try {
+    await _writeJsonFile(snapshotPath, graph.toJson());
+    _log('  wrote merged graph snapshot: $snapshotPath');
+  } catch (e) {
+    _warn('Failed to write merged graph snapshot to $snapshotPath: $e');
+  }
+}
+
 Map<String, dynamic>? _graphFromAdditionalOutput(
   String lang,
   String fileName,
   Map<String, dynamic> data,
 ) {
-  if (lang == 'dart' && fileName.toLowerCase().contains('security')) {
-    return _securityGraphFragment(data);
+  if (lang == 'dart') {
+    final lower = fileName.toLowerCase();
+    if (lower.contains('security')) {
+      return _securityGraphFragment(data);
+    }
+    if (lower.contains('export')) {
+      return _exportsGraphFragment(data);
+    }
   }
   return null;
+}
+
+Map<String, dynamic>? _exportsGraphFragment(Map<String, dynamic> data) {
+  Map<String, dynamic>? groups;
+  final container = data['exports'];
+  if (container is Map) {
+    groups = _normalizeExportGroups(container);
+  } else {
+    groups = _normalizeExportGroups(data);
+  }
+  if (groups == null) return null;
+  return {'exports': groups};
 }
 
 Map<String, dynamic>? _securityGraphFragment(Map<String, dynamic> data) {
