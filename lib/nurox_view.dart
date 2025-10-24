@@ -143,6 +143,14 @@ String? _extractGraphNodeId(dynamic raw, [Set<Object?>? visited]) {
   return text.isEmpty ? null : text;
 }
 
+String? _canonicalGraphId(dynamic raw) {
+  if (raw == null) return null;
+  final value = raw.toString().trim();
+  if (value.isEmpty) return null;
+  final canonical = _canonicalizeSecurityKey(value);
+  return canonical.isNotEmpty ? canonical : value;
+}
+
 String _edgeString(dynamic value) {
   if (value == null) return '';
   final text = value.toString().trim();
@@ -167,8 +175,8 @@ dynamic _normalizeEdgeCertainty(dynamic value) {
 Map<String, dynamic> _normalizeEdgeRecord(Map<dynamic, dynamic> raw) {
   final sourceValue = _firstNonNullEdgeValue(raw, _edgeSourceKeys);
   final targetValue = _firstNonNullEdgeValue(raw, _edgeTargetKeys);
-  final sourceId = _extractGraphNodeId(sourceValue);
-  final targetId = _extractGraphNodeId(targetValue);
+  final sourceId = _canonicalGraphId(_extractGraphNodeId(sourceValue));
+  final targetId = _canonicalGraphId(_extractGraphNodeId(targetValue));
   if (sourceId == null || targetId == null) {
     return const <String, dynamic>{};
   }
@@ -212,27 +220,42 @@ class Graph {
   void addGraph(Map<String, dynamic> g) {
     final ns = (g['nodes'] as List?) ?? const [];
     final es = (g['edges'] as List?) ?? (g['links'] as List?) ?? const [];
-    for (final n in ns) {
-      final id = (n['id'] ?? '').toString();
-      if (id.isEmpty) continue;
-      if (!nodes.containsKey(id)) {
-        nodes[id] = Map<String, dynamic>.from(n);
-      } else {
-        // merge: prefer non-null, upgrade state to "used" if any used, keep larger sizeLOC
-        final dst = nodes[id]!;
-        for (final k in n.keys) {
-          final v = n[k];
-          if (k == 'state') {
-            final a = (dst[k] ?? '').toString();
-            final b = (v ?? '').toString();
-            if (a != 'used' && (b == 'used' || b == 'side_effect_only')) dst[k] = b;
-          } else if (k == 'sizeLOC') {
-            final ai = (dst[k] is int) ? dst[k] as int : 0;
-            final bi = (v is int) ? v : 0;
-            if (bi > ai) dst[k] = bi;
-          } else if (dst[k] == null && v != null) {
-            dst[k] = v;
+    for (final rawNode in ns) {
+      if (rawNode is! Map) continue;
+      final normalizedNode = <String, dynamic>{};
+      rawNode.forEach((key, value) {
+        if (key == null) return;
+        normalizedNode[key.toString()] = value;
+      });
+
+      final id = _canonicalGraphId(normalizedNode['id']);
+      if (id == null) continue;
+      normalizedNode['id'] = id;
+
+      final existing = nodes[id];
+      if (existing == null) {
+        nodes[id] = normalizedNode;
+        continue;
+      }
+
+      existing['id'] = id;
+
+      for (final entry in normalizedNode.entries) {
+        final k = entry.key;
+        if (k == 'id') continue;
+        final v = entry.value;
+        if (k == 'state') {
+          final a = (existing[k] ?? '').toString();
+          final b = (v ?? '').toString();
+          if (a != 'used' && (b == 'used' || b == 'side_effect_only')) {
+            existing[k] = b;
           }
+        } else if (k == 'sizeLOC') {
+          final ai = (existing[k] is int) ? existing[k] as int : 0;
+          final bi = (v is int) ? v : 0;
+          if (bi > ai) existing[k] = bi;
+        } else if (existing[k] == null && v != null) {
+          existing[k] = v;
         }
       }
     }
@@ -275,7 +298,8 @@ void _mergeEntrypoints(Graph graph, Map<String, dynamic> source) {
   void addEntrypoint(String? raw) {
     final value = raw?.trim();
     if (value == null || value.isEmpty) return;
-    graph.entrypoints.add(value);
+    final canonical = _canonicalizeSecurityKey(value);
+    graph.entrypoints.add(canonical.isNotEmpty ? canonical : value);
   }
 
   void ingest(dynamic data) {

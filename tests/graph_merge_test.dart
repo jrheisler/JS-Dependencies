@@ -74,6 +74,25 @@ void main() {
     ]
   });
 
+  graph.addGraph({
+    'nodes': [
+      {'id': r'lib\\foo.dart', 'state': 'used'},
+      {'id': 'lib/bar.dart', 'state': 'used'},
+    ],
+    'edges': [
+      {'source': r'lib\\foo.dart', 'target': 'lib/bar.dart', 'kind': 'import'},
+    ]
+  });
+
+  graph.addGraph({
+    'nodes': [
+      {'id': 'lib/foo.dart', 'state': 'unused'},
+    ],
+    'edges': [
+      {'source': 'lib/foo.dart', 'target': 'lib/bar.dart', 'kind': 'import'},
+    ]
+  });
+
   final merged = graph.toJson();
   final security = merged['securityFindings'] as Map<String, dynamic>?;
   assert(security != null && security!.isNotEmpty, 'security findings should be preserved');
@@ -99,4 +118,17 @@ void main() {
   assert(entrySet.contains('C:/repo/src/a.js'));
   assert(entrySet.contains('C:/repo/src/b.js'));
   assert(entrySet.contains('C:/repo/src/c.js'));
+
+  final mergedNodes = merged['nodes'] as List<dynamic>;
+  final fooNode = mergedNodes
+      .whereType<Map<String, dynamic>>()
+      .firstWhere((node) => node['id'] == 'lib/foo.dart', orElse: () => throw StateError('foo node missing'));
+  assert(fooNode['state'] == 'used');
+
+  final mergedEdges = merged['edges'] as List<dynamic>;
+  final fooEdges = mergedEdges
+      .whereType<Map<String, dynamic>>()
+      .where((edge) => edge['source'] == 'lib/foo.dart' && edge['target'] == 'lib/bar.dart')
+      .toList();
+  assert(fooEdges.length == 1, 'canonicalized edges should dedupe');
 }
