@@ -423,20 +423,19 @@ Iterable<dynamic> _libraryParts(LibraryElement lib) {
       const <dynamic>[];
 }
 
-Iterable<LibraryAugmentationElement> _libraryAugmentations(LibraryElement lib) {
+Iterable<dynamic> _libraryAugmentations(LibraryElement lib) {
   final dynamic dyn = lib;
   return _tryGetter(() =>
-              dyn.libraryAugmentations as Iterable<LibraryAugmentationElement>?) ??
-          _tryGetter(
-              () => dyn.augmentations as Iterable<LibraryAugmentationElement>?) ??
-          const <LibraryAugmentationElement>[];
+              dyn.libraryAugmentations as Iterable<dynamic>?) ??
+          _tryGetter(() => dyn.augmentations as Iterable<dynamic>?) ??
+          const <dynamic>[];
 }
 
-Iterable<CompilationUnitElement> _libraryUnits(LibraryElement lib) sync* {
+Iterable<dynamic> _libraryUnits(LibraryElement lib) sync* {
   final dynamic dyn = lib;
   final dynamicUnits = _tryGetter(
-          () => dyn.libraryUnits as Iterable<CompilationUnitElement>?) ??
-      _tryGetter(() => dyn.units as Iterable<CompilationUnitElement>?);
+          () => dyn.libraryUnits as Iterable<dynamic>?) ??
+      _tryGetter(() => dyn.units as Iterable<dynamic>?);
   if (dynamicUnits != null) {
     for (final unit in dynamicUnits) {
       if (unit != null) yield unit;
@@ -444,11 +443,35 @@ Iterable<CompilationUnitElement> _libraryUnits(LibraryElement lib) sync* {
     return;
   }
 
-  yield lib.definingCompilationUnit;
-  yield* lib.parts;
+  final defining = _tryGetter(() => dyn.definingCompilationUnit);
+  if (defining != null) {
+    yield defining;
+  }
+
+  final parts = _tryGetter(() => dyn.parts as Iterable<dynamic>?) ??
+      _tryGetter(() => dyn.libraryParts as Iterable<dynamic>?);
+  if (parts != null) {
+    for (final part in parts) {
+      if (part != null) yield part;
+    }
+  }
+
   for (final augmentation in _libraryAugmentations(lib)) {
-    yield augmentation.definingCompilationUnit;
-    yield* augmentation.parts;
+    final dynamic dynAug = augmentation;
+    final augmentationDefining =
+        _tryGetter(() => dynAug.definingCompilationUnit);
+    if (augmentationDefining != null) {
+      yield augmentationDefining;
+    }
+
+    final augmentationParts = _tryGetter(
+            () => dynAug.parts as Iterable<dynamic>?) ??
+        _tryGetter(() => dynAug.libraryParts as Iterable<dynamic>?);
+    if (augmentationParts != null) {
+      for (final part in augmentationParts) {
+        if (part != null) yield part;
+      }
+    }
   }
 }
 
