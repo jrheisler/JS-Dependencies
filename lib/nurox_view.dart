@@ -1253,9 +1253,22 @@ Future<String?> _findExecutable(List<String> names) async {
     if (dir.isEmpty) return null;
     final normalized = Directory(dir).absolute.path;
     if (!visited.add(normalized)) return null;
+
+    final directory = Directory(normalized);
+    if (!await directory.exists()) return null;
+
     for (final n in names) {
       final candidate = File(_join(normalized, n));
       if (await candidate.exists()) return candidate.path;
+    }
+
+    final lowercaseIndex = await _listFilesByLowercase(directory);
+    if (lowercaseIndex == null || lowercaseIndex.isEmpty) {
+      return null;
+    }
+    for (final n in names) {
+      final hit = lowercaseIndex[n.toLowerCase()];
+      if (hit != null) return hit;
     }
     return null;
   }
@@ -1300,6 +1313,21 @@ Future<String?> _findExecutable(List<String> names) async {
   }
 
   return null;
+}
+
+Future<Map<String, String>?> _listFilesByLowercase(Directory directory) async {
+  try {
+    final result = <String, String>{};
+    await for (final entity in directory.list(followLinks: false)) {
+      if (entity is! File) continue;
+      final name = _basename(entity.path);
+      if (name.isEmpty) continue;
+      result[name.toLowerCase()] = entity.path;
+    }
+    return result;
+  } catch (_) {
+    return null;
+  }
 }
 
 Future<int> _runCrawler(String exe, String root) async {
@@ -1371,6 +1399,17 @@ String _join(String a, String b) {
   final left = a.endsWith(sep) ? a.substring(0, a.length - 1) : a;
   final right = b.startsWith(sep) ? b.substring(1) : b;
   return '$left$sep$right';
+}
+
+String _basename(String path) {
+  if (path.isEmpty) return path;
+  var normalized = path;
+  if (normalized.contains('\\')) {
+    normalized = normalized.replaceAll('\\', '/');
+  }
+  final index = normalized.lastIndexOf('/');
+  if (index == -1) return normalized;
+  return normalized.substring(index + 1);
 }
 
 // ----------------------------
